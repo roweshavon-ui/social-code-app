@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 const BASE_URL = "https://social-code-app.vercel.app";
 
 const FRAMEWORKS: Record<string, { label: string; file: string; color: string }> = {
@@ -23,17 +33,17 @@ export async function POST(req: NextRequest) {
   const framework = body.framework as string;
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+    return NextResponse.json({ error: "Valid email is required" }, { status: 400, headers: CORS });
   }
 
   const fw = FRAMEWORKS[framework];
   if (!fw) {
-    return NextResponse.json({ error: "Unknown framework" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown framework" }, { status: 400, headers: CORS });
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: "Email not configured" }, { status: 500 });
+    return NextResponse.json({ error: "Email not configured" }, { status: 500, headers: CORS });
   }
 
   const downloadUrl = `${BASE_URL}/${encodeURIComponent(fw.file)}`;
@@ -90,7 +100,7 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     console.error("Resend error:", JSON.stringify(error));
-    return NextResponse.json({ error: "Failed to send email", detail: error }, { status: 500 });
+    return NextResponse.json({ error: "Failed to send email", detail: error }, { status: 500, headers: CORS });
   }
 
   // Save lead to Supabase (non-blocking — don't fail the request if this errors)
@@ -104,5 +114,5 @@ export async function POST(req: NextRequest) {
     console.error("Lead save failed:", e);
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true }, { headers: CORS });
 }
