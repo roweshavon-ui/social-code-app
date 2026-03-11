@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   const resend = new Resend(apiKey);
 
   const { error } = await resend.emails.send({
-    from: "Shavi @ Social Code <onboarding@resend.dev>",
+    from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
     to: email,
     subject: `Your ${fw.label} — Social Code`,
     attachments: [

@@ -8,7 +8,7 @@ function getResend() {
 
 export async function sendResourceEmail(to: string, resourceName: string, fileUrl: string) {
   const { error } = await getResend().emails.send({
-    from: "Shavi @ Social Code <onboarding@resend.dev>",
+    from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
     to,
     subject: `Here's your ${resourceName} — Crack the Code`,
     html: `
