@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 
 const BASE_URL = "https://social-code-app.vercel.app";
 
@@ -91,6 +92,13 @@ export async function POST(req: NextRequest) {
     console.error("Resend error:", JSON.stringify(error));
     return NextResponse.json({ error: "Failed to send email", detail: error }, { status: 500 });
   }
+
+  // Save lead to Supabase
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  await supabase.from("leads").insert({ email, framework });
 
   return NextResponse.json({ success: true });
 }

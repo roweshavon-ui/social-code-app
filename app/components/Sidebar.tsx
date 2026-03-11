@@ -11,11 +11,13 @@ import {
   ClipboardList,
   Zap,
   Inbox,
+  Mail,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/submissions", label: "Submissions", icon: Inbox },
+  { href: "/leads", label: "Leads", icon: Mail },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/questionnaire", label: "Assessment", icon: ClipboardList },
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
