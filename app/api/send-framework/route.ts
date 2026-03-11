@@ -1,9 +1,7 @@
-export const runtime = "nodejs";
-
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import fs from "fs";
-import path from "path";
+
+const BASE_URL = "https://social-code-app.vercel.app";
 
 const FRAMEWORKS: Record<string, { label: string; file: string; color: string }> = {
   "talk-check": {
@@ -17,8 +15,6 @@ const FRAMEWORKS: Record<string, { label: string; file: string; color: string }>
     color: "#4DE8D4",
   },
 };
-
-const PDF_DIR = path.join(process.cwd(), "public");
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -39,26 +35,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email not configured" }, { status: 500 });
   }
 
-  const filePath = path.join(PDF_DIR, fw.file);
-  if (!fs.existsSync(filePath)) {
-    return NextResponse.json({ error: "File not found" }, { status: 500 });
-  }
-
-  const fileBuffer = fs.readFileSync(filePath);
-  const fileBase64 = fileBuffer.toString("base64");
-
+  const downloadUrl = `${BASE_URL}/${encodeURIComponent(fw.file)}`;
   const resend = new Resend(apiKey);
 
   const { error } = await resend.emails.send({
     from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
     to: email,
     subject: `Your ${fw.label} — Social Code`,
-    attachments: [
-      {
-        filename: fw.file,
-        content: fileBase64,
-      },
-    ],
     html: `
 <!DOCTYPE html>
 <html>
@@ -76,9 +59,16 @@ export async function POST(req: NextRequest) {
         <tr><td style="padding:32px 40px;">
           <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;line-height:1.6;">You asked for it. Here it is.</p>
           <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#F7F9FC;line-height:1.2;">${fw.label}</h1>
-          <p style="margin:0 0 32px;font-size:14px;color:#64748b;line-height:1.6;">
-            No fluff. No "just be confident." This is the actual system — built for introverts, grounded in Jungian psychology, tested through thousands of real conversations. The PDF is attached to this email.
+          <p style="margin:0 0 24px;font-size:14px;color:#64748b;line-height:1.6;">
+            No fluff. No "just be confident." This is the actual system — built for introverts, grounded in Jungian psychology, tested through thousands of real conversations.
           </p>
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
+            <tr><td style="background:#FF6B6B;border-radius:10px;">
+              <a href="${downloadUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;letter-spacing:0.5px;">
+                DOWNLOAD YOUR PDF →
+              </a>
+            </td></tr>
+          </table>
           <hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0 0 24px;"/>
           <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">
             Still awkward. Still weird. Just competent.<br/>
