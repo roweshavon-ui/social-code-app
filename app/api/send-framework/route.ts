@@ -18,7 +18,7 @@ const FRAMEWORKS: Record<string, { label: string; file: string; color: string }>
   },
 };
 
-const PDF_DIR = "/Users/shavi/Downloads/Everything Social Code";
+const PDF_DIR = path.join(process.cwd(), "public");
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
