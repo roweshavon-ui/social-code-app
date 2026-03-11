@@ -93,12 +93,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to send email", detail: error }, { status: 500 });
   }
 
-  // Save lead to Supabase
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-  await supabase.from("leads").insert({ email, framework });
+  // Save lead to Supabase (non-blocking — don't fail the request if this errors)
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    await supabase.from("leads").insert({ email, framework });
+  } catch (e) {
+    console.error("Lead save failed:", e);
+  }
 
   return NextResponse.json({ success: true });
 }
