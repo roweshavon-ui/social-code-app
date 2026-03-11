@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         </td></tr>
 
         <tr><td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.05);">
-          <p style="margin:0;font-size:11px;color:#334155;text-align:center;">Social Code · getsocialcode.com</p>
+          <p style="margin:0;font-size:11px;color:#334155;text-align:center;">Social Code · joinsocialcode.com</p>
         </td></tr>
 
       </table>
