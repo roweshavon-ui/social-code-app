@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       `<li style="font-size:13px;color:#94a3b8;padding:5px 0;line-height:1.5;"><span style="color:#4DE8D4;margin-right:8px;">·</span>${c}</li>`
     ).join("");
 
-    await resend.emails.send({
+    const { error: emailError } = await resend.emails.send({
       from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
       to: email,
       subject: `Your Social Type Results — You're an ${type}`,
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
           <!-- Type badge -->
           <div style="background:rgba(0,217,192,0.08);border:1px solid rgba(0,217,192,0.2);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
             <p style="margin:0 0 4px;font-size:42px;font-weight:900;color:#00D9C0;letter-spacing:4px;">${type}</p>
-            ${description ? `<p style="margin:8px 0 0;font-size:13px;color:#64748b;line-height:1.6;">${description}</p>` : ""}
+            <p style="margin:8px 0 0;font-size:13px;color:#64748b;line-height:1.6;">${description}</p>
           </div>
 
           <!-- What the letters mean -->
@@ -130,8 +130,9 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`,
     });
+    if (emailError) console.error("Resend error:", JSON.stringify(emailError));
   } catch (e) {
-    console.error("Results email failed:", e);
+    console.error("Results email failed:", JSON.stringify(e));
   }
 
   return NextResponse.json(data, { status: 201 });
