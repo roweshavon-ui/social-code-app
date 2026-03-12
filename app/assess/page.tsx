@@ -379,6 +379,16 @@ export default function PublicAssessPage() {
               Book Your Free Call →
             </a>
             <p className="text-xs text-slate-600 mt-3">30 minutes · Free · No pressure</p>
+            <div className="mt-5 pt-5 border-t border-white/5">
+              <p className="text-xs text-slate-500 mb-3">Want to practice first?</p>
+              <a
+                href="/practice"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90 w-full sm:w-auto border border-white/10"
+                style={{ background: "transparent", color: BRAND.teal }}
+              >
+                Try the Social Simulator →
+              </a>
+            </div>
           </div>
         </div>
       </Page>
