@@ -53,9 +53,9 @@ export default function PublicAssessPage() {
           goal: info.goal,
           type: res.type,
           scores: res.scores,
+          description: res.description,
           strengths: res.socialStrengths,
           challenges: res.socialChallenges,
-          frameworks: res.recommendedFrameworks,
         }),
       });
       setSubmitted(true);
