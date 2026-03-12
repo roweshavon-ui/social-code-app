@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Blog — Social Code",
   description: "Practical social skills for introverts. Jungian frameworks, conversation guides, and real strategies for connecting with people.",
