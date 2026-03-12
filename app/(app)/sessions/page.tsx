@@ -3,18 +3,25 @@
 import { useState } from "react";
 import { Plus, CalendarDays, X } from "lucide-react";
 import { useSessions } from "../../hooks/useSessions";
+import { useClients } from "../../hooks/useClients";
 
 export default function SessionsPage() {
   const { sessions, loaded, addSession, removeSession } = useSessions();
+  const { clients } = useClients();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    clientName: "", date: "", duration: "60", notes: "", actionItems: "", rating: 5,
+    clientId: "", clientName: "", date: "", duration: "60", notes: "", actionItems: "", rating: 5,
   });
+
+  function handleClientSelect(clientId: string) {
+    const client = clients.find((c) => c.id === clientId);
+    setForm((f) => ({ ...f, clientId, clientName: client?.name ?? "" }));
+  }
 
   async function handleAdd() {
     if (!form.clientName.trim() || !form.date) return;
     await addSession(form);
-    setForm({ clientName: "", date: "", duration: "60", notes: "", actionItems: "", rating: 5 });
+    setForm({ clientId: "", clientName: "", date: "", duration: "60", notes: "", actionItems: "", rating: 5 });
     setShowForm(false);
   }
 
@@ -47,16 +54,30 @@ export default function SessionsPage() {
             </button>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Client Name *</label>
-              <input
-                type="text"
-                value={form.clientName}
-                onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
-                placeholder="Client name"
-                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/5 outline-none transition-colors"
-                style={{ background: "#1A2332" }}
-              />
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Client *</label>
+              {clients.length > 0 ? (
+                <select
+                  value={form.clientId}
+                  onChange={(e) => handleClientSelect(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none transition-colors"
+                  style={{ background: "#1A2332" }}
+                >
+                  <option value="">Select a client…</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={form.clientName}
+                  onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
+                  placeholder="Client name"
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/5 outline-none transition-colors"
+                  style={{ background: "#1A2332" }}
+                />
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Date *</label>
@@ -158,7 +179,7 @@ export default function SessionsPage() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => removeSession(s.id)} className="text-slate-700 hover:text-coral ml-4 transition-colors">
+                <button onClick={() => removeSession(s.id)} className="text-slate-700 hover:text-red-400 ml-4 transition-colors">
                   <X size={14} />
                 </button>
               </div>

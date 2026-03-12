@@ -3,11 +3,20 @@ import { getSupabase } from "@/app/lib/supabase";
 
 export async function GET(req: NextRequest) {
   const clientId = req.nextUrl.searchParams.get("clientId");
+  const today = req.nextUrl.searchParams.get("today");
 
-  let query = getSupabase().from("sessions").select("*").order("date", { ascending: false });
+  let query = getSupabase()
+    .from("tasks")
+    .select("*")
+    .order("due_date", { ascending: true, nullsFirst: false });
 
   if (clientId) {
     query = query.eq("client_id", clientId);
+  }
+
+  if (today) {
+    const todayDate = new Date().toISOString().split("T")[0];
+    query = query.lte("due_date", todayDate).eq("completed", false);
   }
 
   const { data, error } = await query;
@@ -18,23 +27,15 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { clientId, clientName, date, duration, notes, actionItems, rating } = body;
+  const { clientId, title, dueDate } = body;
 
-  if (!clientName?.trim() || !date) {
-    return NextResponse.json({ error: "Client name and date are required" }, { status: 400 });
+  if (!clientId || !title?.trim()) {
+    return NextResponse.json({ error: "clientId and title are required" }, { status: 400 });
   }
 
   const { data, error } = await getSupabase()
-    .from("sessions")
-    .insert({
-      client_id: clientId ?? null,
-      client_name: clientName,
-      date,
-      duration: duration ?? "60",
-      notes,
-      action_items: actionItems,
-      rating: rating ?? 5,
-    })
+    .from("tasks")
+    .insert({ client_id: clientId, title, due_date: dueDate ?? null })
     .select()
     .single();
 

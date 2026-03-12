@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 
 export type Session = {
   id: string;
+  clientId: string | null;
   clientName: string;
   date: string;
   duration: string;
@@ -14,6 +15,7 @@ export type Session = {
 
 type RawSession = {
   id: string;
+  client_id: string | null;
   client_name: string;
   date: string;
   duration: string;
@@ -25,6 +27,7 @@ type RawSession = {
 function toSession(raw: RawSession): Session {
   return {
     id: raw.id,
+    clientId: raw.client_id ?? null,
     clientName: raw.client_name,
     date: raw.date,
     duration: raw.duration,
@@ -34,17 +37,18 @@ function toSession(raw: RawSession): Session {
   };
 }
 
-export function useSessions() {
+export function useSessions(clientId?: string) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   const fetchSessions = useCallback(async () => {
-    const res = await fetch("/api/sessions");
+    const url = clientId ? `/api/sessions?clientId=${clientId}` : "/api/sessions";
+    const res = await fetch(url);
     if (!res.ok) return;
     const data: RawSession[] = await res.json();
     setSessions(data.map(toSession));
     setLoaded(true);
-  }, []);
+  }, [clientId]);
 
   useEffect(() => {
     fetchSessions();
@@ -68,5 +72,5 @@ export function useSessions() {
     setSessions((prev) => prev.filter((s) => s.id !== id));
   }
 
-  return { sessions, loaded, addSession, removeSession };
+  return { sessions, loaded, fetchSessions, addSession, removeSession };
 }

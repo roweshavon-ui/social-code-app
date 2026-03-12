@@ -48,6 +48,7 @@ export default function QuestionnairePage() {
       notes: `Auto-typed via questionnaire. Scores: E${result.scores.E}/I${result.scores.I} S${result.scores.S}/N${result.scores.N} T${result.scores.T}/F${result.scores.F} J${result.scores.J}/P${result.scores.P}`,
       observations: "",
       socialPatterns: "",
+      pipelineStage: "lead",
     });
     setSaved(true);
   }

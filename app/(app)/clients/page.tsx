@@ -5,6 +5,9 @@ import { Plus, Search, User, X, ClipboardList, ChevronRight } from "lucide-react
 import Link from "next/link";
 import { useClients, type Client } from "../../hooks/useClients";
 import { TYPE_ACRONYMS, TYPE_PROFILES } from "../../lib/mbtiData";
+import ClientMessagesTab from "../../components/client-panel/ClientMessagesTab";
+import ClientTasksTab from "../../components/client-panel/ClientTasksTab";
+import ClientSessionsTab from "../../components/client-panel/ClientSessionsTab";
 
 const JUNGIAN_TYPES = [
   "INTJ","INTP","ENTJ","ENTP",
@@ -53,12 +56,16 @@ type FormState = {
   observations: string;
   socialPatterns: string;
   status: "active" | "inactive";
+  pipelineStage: "lead" | "prospect" | "active" | "completed";
 };
 
 const EMPTY_FORM: FormState = {
   name: "", email: "", jungianType: "INFP", goal: "",
   notes: "", observations: "", socialPatterns: "", status: "active",
+  pipelineStage: "lead",
 };
+
+type PanelTab = "profile" | "messages" | "tasks" | "sessions";
 
 function ClientPanel({
   client,
@@ -73,6 +80,7 @@ function ClientPanel({
   const acronym = TYPE_ACRONYMS[client.jungianType];
   const color = typeColor(client.jungianType);
 
+  const [tab, setTab] = useState<PanelTab>("profile");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({
     goal: client.goal ?? "",
@@ -85,6 +93,13 @@ function ClientPanel({
     onSave(draft);
     setEditing(false);
   }
+
+  const tabs: { key: PanelTab; label: string }[] = [
+    { key: "profile", label: "Profile" },
+    { key: "messages", label: "Messages" },
+    { key: "tasks", label: "Tasks" },
+    { key: "sessions", label: "Sessions" },
+  ];
 
   return (
     <>
@@ -100,170 +115,173 @@ function ClientPanel({
         style={{ background: "#0D1825", borderLeft: "1px solid rgba(0,217,192,0.1)" }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4" style={{ background: "#0D1825", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: `${color}20`, color }}
-            >
-              {client.name.charAt(0).toUpperCase()}
+        <div className="sticky top-0 z-10" style={{ background: "#0D1825", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                style={{ background: `${color}20`, color }}
+              >
+                {client.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">{client.name}</p>
+                <p className="text-xs" style={{ color }}>{client.jungianType} · {profile?.nickname}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold text-white">{client.name}</p>
-              <p className="text-xs" style={{ color }}>{client.jungianType} · {profile?.nickname}</p>
-            </div>
+            <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors p-1">
+              <X size={18} />
+            </button>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors p-1">
-            <X size={18} />
-          </button>
+
+          {/* Tab bar */}
+          <div className="flex px-6 gap-1">
+            {tabs.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className="px-3 py-2 text-xs font-semibold transition-colors border-b-2"
+                style={{
+                  color: tab === key ? "#00D9C0" : "#64748b",
+                  borderColor: tab === key ? "#00D9C0" : "transparent",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="px-6 py-6 space-y-6">
+        <div className="px-6 py-6">
 
-          {/* Type breakdown */}
-          <div className="rounded-xl p-5 border" style={{ background: "#131E2B", borderColor: `${color}25` }}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl font-black" style={{ color }}>{client.jungianType}</span>
-              <span className="text-xs text-slate-500 font-medium">{profile?.nickname}</span>
-            </div>
-            {acronym && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {acronym.map((word) => (
-                  <span key={word} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: `${color}15`, color }}>
-                    {word}
-                  </span>
-                ))}
+          {/* Profile tab */}
+          {tab === "profile" && (
+            <div className="space-y-6">
+              {/* Type breakdown */}
+              <div className="rounded-xl p-5 border" style={{ background: "#131E2B", borderColor: `${color}25` }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl font-black" style={{ color }}>{client.jungianType}</span>
+                  <span className="text-xs text-slate-500 font-medium">{profile?.nickname}</span>
+                </div>
+                {acronym && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {acronym.map((word) => (
+                      <span key={word} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: `${color}15`, color }}>
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {profile && (
+                  <p className="text-sm text-slate-400 leading-relaxed">{profile.tagline}</p>
+                )}
               </div>
-            )}
-            {profile && (
-              <p className="text-sm text-slate-400 leading-relaxed">{profile.tagline}</p>
-            )}
-          </div>
 
-          {/* Type profile */}
-          {profile && (
-            <div className="space-y-4">
-              <Section title="Career Paths" color={color}>
-                <ul className="space-y-1">
-                  {profile.careers.map((c) => (
-                    <li key={c} className="flex items-center gap-2 text-sm text-slate-300">
-                      <span style={{ color }} className="text-xs">▸</span> {c}
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+              {/* Type profile sections */}
+              {profile && (
+                <div className="space-y-4">
+                  <Section title="Career Paths" color={color}>
+                    <ul className="space-y-1">
+                      {profile.careers.map((c) => (
+                        <li key={c} className="flex items-center gap-2 text-sm text-slate-300">
+                          <span style={{ color }} className="text-xs">▸</span> {c}
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
 
-              <Section title="Strengths" color="#00D9C0">
-                <ul className="space-y-1">
-                  {profile.strengths.map((s) => (
-                    <li key={s} className="flex items-start gap-2 text-sm text-slate-300">
-                      <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: "#00D9C0" }}>✓</span> {s}
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+                  <Section title="Strengths" color="#00D9C0">
+                    <ul className="space-y-1">
+                      {profile.strengths.map((s) => (
+                        <li key={s} className="flex items-start gap-2 text-sm text-slate-300">
+                          <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: "#00D9C0" }}>✓</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
 
-              <Section title="Blind Spots" color="#FF6B6B">
-                <ul className="space-y-1">
-                  {profile.blindSpots.map((b) => (
-                    <li key={b} className="flex items-start gap-2 text-sm text-slate-300">
-                      <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: "#FF6B6B" }}>✗</span> {b}
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+                  <Section title="Blind Spots" color="#FF6B6B">
+                    <ul className="space-y-1">
+                      {profile.blindSpots.map((b) => (
+                        <li key={b} className="flex items-start gap-2 text-sm text-slate-300">
+                          <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: "#FF6B6B" }}>✗</span> {b}
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
 
-              <Section title="Energy Pattern" color={color}>
-                <p className="text-sm text-slate-300 leading-relaxed">{profile.energyPattern}</p>
-              </Section>
+                  <Section title="Energy Pattern" color={color}>
+                    <p className="text-sm text-slate-300 leading-relaxed">{profile.energyPattern}</p>
+                  </Section>
 
-              <Section title="Social Style" color={color}>
-                <p className="text-sm text-slate-300 leading-relaxed">{profile.socialStyle}</p>
-              </Section>
+                  <Section title="Social Style" color={color}>
+                    <p className="text-sm text-slate-300 leading-relaxed">{profile.socialStyle}</p>
+                  </Section>
 
-              <Section title="Communication Tip" color="#4DE8D4">
-                <p className="text-sm text-slate-300 leading-relaxed">{profile.communicationTip}</p>
-              </Section>
+                  <Section title="Communication Tip" color="#4DE8D4">
+                    <p className="text-sm text-slate-300 leading-relaxed">{profile.communicationTip}</p>
+                  </Section>
 
-              <Section title="Recommended Simulator Scenarios" color="#FF6B6B">
-                <p className="text-xs text-slate-500 mb-3">Run these in the Simulator — targeted to this type&apos;s specific gaps.</p>
-                <ul className="space-y-2">
-                  {profile.practiceScenarios.map((s, i) => (
-                    <li key={s} className="flex items-center gap-2.5">
-                      <span className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,107,107,0.15)", color: "#FF6B6B" }}>{i + 1}</span>
-                      <span className="text-sm text-slate-300">{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+                  <Section title="Recommended Simulator Scenarios" color="#FF6B6B">
+                    <p className="text-xs text-slate-500 mb-3">Run these in the Simulator — targeted to this type&apos;s specific gaps.</p>
+                    <ul className="space-y-2">
+                      {profile.practiceScenarios.map((s, i) => (
+                        <li key={s} className="flex items-center gap-2.5">
+                          <span className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,107,107,0.15)", color: "#FF6B6B" }}>{i + 1}</span>
+                          <span className="text-sm text-slate-300">{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
+                </div>
+              )}
+
+              {/* Divider */}
+              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(0,217,192,0.12), transparent)" }} />
+
+              {/* Client notes */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-white">Client Notes</h3>
+                  {!editing ? (
+                    <button
+                      onClick={() => setEditing(true)}
+                      className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                      style={{ color: "#00D9C0", background: "rgba(0,217,192,0.08)" }}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditing(false)} className="text-xs font-medium text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">Cancel</button>
+                      <button onClick={handleSave} className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" style={{ background: "#00D9C0", color: "#080F18" }}>Save</button>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <NoteField label="Goal" value={editing ? draft.goal : client.goal} placeholder="What does this client want to achieve?" editing={editing} onChange={(v) => setDraft((d) => ({ ...d, goal: v }))} />
+                  <NoteField label="Session Observations" value={editing ? draft.observations : client.observations} placeholder="What have you noticed about how they show up socially?" editing={editing} onChange={(v) => setDraft((d) => ({ ...d, observations: v }))} />
+                  <NoteField label="Social Patterns" value={editing ? draft.socialPatterns : client.socialPatterns} placeholder="Recurring patterns, triggers, or tendencies you've identified..." editing={editing} onChange={(v) => setDraft((d) => ({ ...d, socialPatterns: v }))} />
+                  <NoteField label="Additional Notes" value={editing ? draft.notes : client.notes} placeholder="Anything else worth remembering..." editing={editing} onChange={(v) => setDraft((d) => ({ ...d, notes: v }))} />
+                </div>
+              </div>
+
+              {/* Meta */}
+              <div className="flex items-center gap-3 pt-2">
+                {client.email && <p className="text-xs text-slate-600">{client.email}</p>}
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: client.status === "active" ? "rgba(0,217,192,0.1)" : "rgba(100,116,139,0.1)", color: client.status === "active" ? "#00D9C0" : "#64748b" }}
+                >
+                  {client.status}
+                </span>
+              </div>
             </div>
           )}
 
-          {/* Divider */}
-          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(0,217,192,0.12), transparent)" }} />
-
-          {/* Client-specific notes */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-white">Client Notes</h3>
-              {!editing ? (
-                <button
-                  onClick={() => setEditing(true)}
-                  className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                  style={{ color: "#00D9C0", background: "rgba(0,217,192,0.08)" }}
-                >
-                  Edit
-                </button>
-              ) : (
-                <div className="flex gap-2">
-                  <button onClick={() => setEditing(false)} className="text-xs font-medium text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">Cancel</button>
-                  <button onClick={handleSave} className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" style={{ background: "#00D9C0", color: "#080F18" }}>Save</button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <NoteField
-                label="Goal"
-                value={editing ? draft.goal : client.goal}
-                placeholder="What does this client want to achieve?"
-                editing={editing}
-                onChange={(v) => setDraft((d) => ({ ...d, goal: v }))}
-              />
-              <NoteField
-                label="Session Observations"
-                value={editing ? draft.observations : client.observations}
-                placeholder="What have you noticed about how they show up socially?"
-                editing={editing}
-                onChange={(v) => setDraft((d) => ({ ...d, observations: v }))}
-              />
-              <NoteField
-                label="Social Patterns"
-                value={editing ? draft.socialPatterns : client.socialPatterns}
-                placeholder="Recurring patterns, triggers, or tendencies you've identified..."
-                editing={editing}
-                onChange={(v) => setDraft((d) => ({ ...d, socialPatterns: v }))}
-              />
-              <NoteField
-                label="Additional Notes"
-                value={editing ? draft.notes : client.notes}
-                placeholder="Anything else worth remembering..."
-                editing={editing}
-                onChange={(v) => setDraft((d) => ({ ...d, notes: v }))}
-              />
-            </div>
-          </div>
-
-          {/* Meta */}
-          <div className="flex items-center gap-3 pt-2">
-            {client.email && <p className="text-xs text-slate-600">{client.email}</p>}
-            <span
-              className="text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ background: client.status === "active" ? "rgba(0,217,192,0.1)" : "rgba(100,116,139,0.1)", color: client.status === "active" ? "#00D9C0" : "#64748b" }}
-            >
-              {client.status}
-            </span>
-          </div>
+          {tab === "messages" && <ClientMessagesTab clientId={client.id} />}
+          {tab === "tasks" && <ClientTasksTab clientId={client.id} />}
+          {tab === "sessions" && <ClientSessionsTab clientId={client.id} />}
         </div>
       </aside>
     </>

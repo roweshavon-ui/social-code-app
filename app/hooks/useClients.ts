@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+export type PipelineStage = "lead" | "prospect" | "active" | "completed";
+
 export type Client = {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export type Client = {
   observations: string;
   socialPatterns: string;
   createdAt: string;
+  pipelineStage: PipelineStage;
 };
 
 type RawClient = {
@@ -26,6 +29,7 @@ type RawClient = {
   observations: string;
   social_patterns: string;
   created_at: string;
+  pipeline_stage: PipelineStage;
 };
 
 function toClient(raw: RawClient): Client {
@@ -40,6 +44,7 @@ function toClient(raw: RawClient): Client {
     observations: raw.observations ?? "",
     socialPatterns: raw.social_patterns ?? "",
     createdAt: raw.created_at,
+    pipelineStage: raw.pipeline_stage ?? "lead",
   };
 }
 

@@ -12,6 +12,7 @@ import {
   Zap,
   Inbox,
   Mail,
+  Kanban,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/submissions", label: "Submissions", icon: Inbox },
   { href: "/leads", label: "Leads", icon: Mail },
   { href: "/clients", label: "Clients", icon: Users },
+  { href: "/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/questionnaire", label: "Assessment", icon: ClipboardList },
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
   { href: "/library", label: "Library", icon: BookOpen },
