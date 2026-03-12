@@ -12,7 +12,7 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
-const BASE_URL = "https://social-code-app.vercel.app";
+const BASE_URL = "https://app.joinsocialcode.com";
 
 const FRAMEWORKS: Record<string, { label: string; file: string; color: string }> = {
   "talk-check": {
@@ -24,6 +24,11 @@ const FRAMEWORKS: Record<string, { label: string; file: string; color: string }>
     label: "Fearless Approach System",
     file: "Fearless Approach System full.pdf",
     color: "#4DE8D4",
+  },
+  "stop-replaying": {
+    label: "Stop Replaying",
+    file: "Stop Replaying E-Book.pdf",
+    color: "#FF6B6B",
   },
 };
 

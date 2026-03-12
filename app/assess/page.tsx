@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, ChevronLeft, CheckCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, CheckCircle, BookOpen } from "lucide-react";
 import { QUESTIONS, calculateType } from "../(app)/questionnaire/questions";
 
 type Step = "info" | "quiz" | "result" | "done";
@@ -23,6 +23,8 @@ export default function PublicAssessPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ebookSent, setEbookSent] = useState(false);
+  const [ebookSending, setEbookSending] = useState(false);
 
   const question = QUESTIONS[current];
   const progress = (Object.keys(answers).length / QUESTIONS.length) * 100;
@@ -358,6 +360,42 @@ export default function PublicAssessPage() {
                 </span>
               ))}
             </div>
+          </div>
+
+          {/* Free ebook */}
+          <div className="rounded-2xl p-6 border border-white/5 mb-4" style={{ background: "#131E2B" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,107,107,0.1)" }}>
+                <BookOpen size={16} style={{ color: BRAND.coral }} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white leading-tight">Stop Replaying — Free E-Book</p>
+                <p className="text-xs text-slate-500 mt-0.5">End the 2 AM overthink loop. Yours free.</p>
+              </div>
+            </div>
+            {ebookSent ? (
+              <div className="flex items-center gap-2 text-xs font-medium mt-3" style={{ color: BRAND.teal }}>
+                <CheckCircle size={14} /> Sent to {info.email} — check your inbox.
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  setEbookSending(true);
+                  await fetch("/api/send-framework", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: info.email, framework: "stop-replaying" }),
+                  });
+                  setEbookSending(false);
+                  setEbookSent(true);
+                }}
+                disabled={ebookSending}
+                className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-40"
+                style={{ background: BRAND.coral, color: "white" }}
+              >
+                {ebookSending ? "Sending…" : "Send Me the Free E-Book →"}
+              </button>
+            )}
           </div>
 
           {/* CTA */}
