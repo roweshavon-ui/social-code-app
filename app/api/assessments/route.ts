@@ -113,6 +113,16 @@ export async function POST(req: NextRequest) {
           <p style="margin:0 0 10px;font-size:13px;color:#64748b;">These are your development areas — the things that, if you improve them, will have the biggest impact on your social life:</p>
           <ul style="margin:0 0 24px;padding:0;list-style:none;">${workOnRows}</ul>
 
+          <!-- Book a call -->
+          <div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:15px;font-weight:800;color:#F7F9FC;">Know your type. Now do something with it.</p>
+            <p style="margin:0 0 16px;font-size:13px;color:#94a3b8;line-height:1.6;">Book a free 30-minute call with Shavi. You'll get a personalized plan based on your ${type} type — specific frameworks, specific gaps, specific next steps.</p>
+            <a href="https://calendly.com/roweshavon/30min" target="_blank" style="display:inline-block;background:#FF6B6B;color:#fff;text-decoration:none;font-size:13px;font-weight:700;padding:12px 28px;border-radius:10px;letter-spacing:0.3px;">
+              Book Your Free Call →
+            </a>
+            <p style="margin:10px 0 0;font-size:11px;color:#475569;">30 minutes · Free · No pressure</p>
+          </div>
+
           <hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0 0 24px;"/>
           <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">
             Still awkward. Still weird. Just competent.<br/>
