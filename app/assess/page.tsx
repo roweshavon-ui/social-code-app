@@ -362,22 +362,23 @@ export default function PublicAssessPage() {
             {submitted ? (
               <div className="flex items-center justify-center gap-2 text-sm font-medium mb-4" style={{ color: BRAND.teal }}>
                 <CheckCircle size={16} />
-                Results saved — Shavi will be in touch.
+                Results sent to your email.
               </div>
             ) : submitting ? (
               <p className="text-sm text-slate-500 mb-4">Saving your results...</p>
             ) : null}
-            <p className="text-sm text-white font-bold mb-1">Want to go deeper?</p>
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-              Book a free intro call with Shavi and get a personalized coaching plan based on your type.
+            <p className="text-sm text-white font-bold mb-1">Know your type. Now do something with it.</p>
+            <p className="text-xs text-slate-400 mb-5 leading-relaxed">
+              Book a free 30-minute call with Shavi. You&apos;ll get a personalized plan based on your {result.type} type — specific frameworks, specific gaps, specific next steps.
             </p>
             <a
-              href="https://socialcode.co"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90"
+              href="/book"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 w-full sm:w-auto"
               style={{ background: BRAND.coral, color: "white" }}
             >
-              Learn More → Social Code
+              Book Your Free Call →
             </a>
+            <p className="text-xs text-slate-600 mt-3">30 minutes · Free · No pressure</p>
           </div>
         </div>
       </Page>
