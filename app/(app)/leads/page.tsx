@@ -24,8 +24,9 @@ export default function Leads() {
       .then((r) => r.json())
       .then((data) => {
         setLeads(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
+      })
+      .catch(() => setLeads([]))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
