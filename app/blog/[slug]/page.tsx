@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import CommentSection from "@/app/components/CommentSection";
 
 type Post = {
   id: string;
@@ -27,11 +28,24 @@ async function getPost(slug: string): Promise<Post | null> {
   return data ?? null;
 }
 
+async function getComments(postId: string) {
+  const db = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { data } = await db
+    .from("comments")
+    .select("id, name, body, created_at")
+    .eq("post_id", postId)
+    .eq("approved", true)
+    .order("created_at", { ascending: true });
+  return data ?? [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) return { title: "Post not found" };
-
   return {
     title: `${post.title} — Social Code`,
     description: post.excerpt,
@@ -64,17 +78,20 @@ function renderMarkdown(md: string): string {
     .join("\n");
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();
+
+  const comments = await getComments(post.id);
 
   return (
     <div
       className="min-h-screen"
       style={{ background: "#0D1825", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
     >
-      {/* Header */}
       <header className="border-b border-white/5 px-6 py-5 flex items-center justify-between max-w-4xl mx-auto">
         <Link href="https://joinsocialcode.com" className="text-sm font-black text-white tracking-tight">
           Social Code
@@ -89,7 +106,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-16">
-        {/* Back */}
         <Link
           href="/blog"
           className="inline-flex items-center gap-1.5 text-xs font-medium mb-10 transition-colors"
@@ -98,7 +114,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           ← All posts
         </Link>
 
-        {/* Meta */}
         <p className="text-xs text-slate-600 mb-4">
           {new Date(post.published_at).toLocaleDateString("en-US", {
             month: "long", day: "numeric", year: "numeric",
@@ -113,7 +128,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {post.excerpt}
         </p>
 
-        {/* Content */}
         <div
           className="blog-content text-slate-300 leading-relaxed"
           style={{ fontFamily: "'Work Sans', sans-serif" }}
@@ -138,6 +152,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             Take the Free Assessment →
           </Link>
         </div>
+
+        {/* Comments */}
+        <CommentSection postId={post.id} initialComments={comments} />
       </main>
 
       <style>{`

@@ -14,6 +14,18 @@ create table if not exists posts (
 );
 create index if not exists posts_slug_idx on posts(slug);
 create index if not exists posts_published_idx on posts(published, published_at desc);
+
+-- Comments
+create table if not exists comments (
+  id         uuid primary key default gen_random_uuid(),
+  post_id    uuid not null references posts(id) on delete cascade,
+  name       text not null,
+  body       text not null,
+  approved   boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists comments_post_id_idx on comments(post_id);
+create index if not exists comments_approved_idx on comments(approved, created_at desc);
 -- Run this in your Supabase project: SQL Editor > New Query > paste & run
 
 -- Clients

@@ -28,6 +28,7 @@ const navItems = [
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
   { href: "/posts", label: "Blog", icon: Newspaper },
+  { href: "/comments", label: "Comments", icon: MessageSquare },
 ];
 
 export default function Sidebar() {

@@ -11,6 +11,7 @@ const ADMIN_ROUTES = [
   "/submissions",
   "/leads",
   "/posts",
+  "/comments",
 ];
 
 export function middleware(req: NextRequest) {
@@ -46,5 +47,6 @@ export const config = {
     "/submissions/:path*",
     "/leads/:path*",
     "/posts/:path*",
+    "/comments/:path*",
   ],
 };
