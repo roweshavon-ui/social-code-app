@@ -137,8 +137,11 @@ export default function PracticePage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const assessed = localStorage.getItem("sc_assessed");
-    if (!assessed) {
+    const expiry = localStorage.getItem("sc_assessed");
+    const valid = expiry && Date.now() < parseInt(expiry);
+    if (!valid) {
+      localStorage.removeItem("sc_assessed");
+      localStorage.removeItem("sc_type");
       router.replace("/assess?next=/practice");
     } else {
       const savedType = localStorage.getItem("sc_type");

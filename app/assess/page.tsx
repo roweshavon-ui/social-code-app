@@ -40,7 +40,8 @@ export default function PublicAssessPage() {
     const res = calculateType(answers);
     setResult(res);
     setStep("result");
-    localStorage.setItem("sc_assessed", "1");
+    const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    localStorage.setItem("sc_assessed", String(expiry));
     localStorage.setItem("sc_type", res.type);
 
     // Save to DB in background
