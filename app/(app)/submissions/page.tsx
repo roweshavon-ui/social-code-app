@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, ChevronRight, X } from "lucide-react";
+import { User, ChevronRight, X, Trash2 } from "lucide-react";
 
 type Submission = {
   id: string;
@@ -40,20 +40,28 @@ function ScoreBar({ a, b, labelA, labelB }: { a: number; b: number; labelA: stri
   );
 }
 
-function SubmissionPanel({ sub, onClose, onAddToClients }: {
+function SubmissionPanel({ sub, onClose, onAddToClients, onDelete }: {
   sub: Submission;
   onClose: () => void;
   onAddToClients: (sub: Submission) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }) {
   const color = typeColor(sub.jungian_type);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleAdd() {
     setAdding(true);
     await onAddToClients(sub);
     setAdded(true);
     setAdding(false);
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    await onDelete(sub.id);
+    onClose();
   }
 
   return (
@@ -126,6 +134,15 @@ function SubmissionPanel({ sub, onClose, onAddToClients }: {
               ✓ Added to Clients
             </div>
           )}
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50"
+            style={{ background: "rgba(255,107,107,0.08)", color: "#FF6B6B", border: "1px solid rgba(255,107,107,0.15)" }}
+          >
+            <Trash2 size={14} />
+            {deleting ? "Deleting..." : "Delete Submission"}
+          </button>
         </div>
       </aside>
     </>
@@ -148,6 +165,11 @@ export default function SubmissionsPage() {
       .catch(() => setError("Could not load submissions — Supabase may not be connected yet."))
       .finally(() => setLoaded(true));
   }, []);
+
+  async function handleDelete(id: string) {
+    await fetch(`/api/assessments/${id}`, { method: "DELETE" });
+    setSubmissions((prev) => prev.filter((s) => s.id !== id));
+  }
 
   async function handleAddToClients(sub: Submission) {
     await fetch("/api/clients", {
@@ -237,6 +259,7 @@ export default function SubmissionsPage() {
           sub={selected}
           onClose={() => setSelectedId(null)}
           onAddToClients={handleAddToClients}
+          onDelete={handleDelete}
         />
       )}
     </div>

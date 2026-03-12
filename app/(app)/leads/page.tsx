@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, Download } from "lucide-react";
+import { Mail, Download, Trash2 } from "lucide-react";
 
 interface Lead {
   id: string;
@@ -18,16 +18,22 @@ const FRAMEWORK_LABELS: Record<string, string> = {
 export default function Leads() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/leads")
       .then((r) => r.json())
-      .then((data) => {
-        setLeads(Array.isArray(data) ? data : []);
-      })
+      .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => setLeads([]))
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleDelete(id: string) {
+    setDeleting(id);
+    await fetch(`/api/leads/${id}`, { method: "DELETE" });
+    setLeads((prev) => prev.filter((l) => l.id !== id));
+    setDeleting(null);
+  }
 
   return (
     <div className="p-8 max-w-4xl">
@@ -54,6 +60,7 @@ export default function Leads() {
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Email</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Framework</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Date</th>
+                <th className="px-6 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -68,6 +75,15 @@ export default function Leads() {
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-500">
                     {new Date(lead.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => handleDelete(lead.id)}
+                      disabled={deleting === lead.id}
+                      className="text-slate-600 hover:text-red-400 transition-colors disabled:opacity-30"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </td>
                 </tr>
               ))}
