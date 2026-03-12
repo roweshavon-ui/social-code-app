@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   // Save lead to Supabase (non-blocking — don't fail the request if this errors)
   try {
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     await supabase.from("leads").insert({ email, framework });
