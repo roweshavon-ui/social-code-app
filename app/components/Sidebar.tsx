@@ -14,6 +14,7 @@ import {
   Mail,
   Kanban,
   LogOut,
+  Newspaper,
 } from "lucide-react";
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
+  { href: "/posts", label: "Blog", icon: Newspaper },
 ];
 
 export default function Sidebar() {
