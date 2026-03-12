@@ -40,6 +40,8 @@ export default function PublicAssessPage() {
     const res = calculateType(answers);
     setResult(res);
     setStep("result");
+    localStorage.setItem("sc_assessed", "1");
+    localStorage.setItem("sc_type", res.type);
 
     // Save to DB in background
     setSubmitting(true);

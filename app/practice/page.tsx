@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, MessageSquare, RefreshCw, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const BRAND = {
   teal: "#00D9C0",
@@ -123,6 +124,7 @@ After your response, on a new line add a brief coaching note starting with "💡
 }
 
 export default function PracticePage() {
+  const router = useRouter();
   const [categoryIndex, setCategoryIndex] = useState(0);
   const [scenario, setScenario] = useState(SCENARIO_CATEGORIES[0].scenarios[0]);
   const [jungianType, setJungianType] = useState("INFP");
@@ -131,11 +133,25 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [error, setError] = useState("");
+  const [gated, setGated] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const assessed = localStorage.getItem("sc_assessed");
+    if (!assessed) {
+      router.replace("/assess?next=/practice");
+    } else {
+      const savedType = localStorage.getItem("sc_type");
+      if (savedType) setJungianType(savedType);
+      setGated(false);
+    }
+  }, [router]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (gated) return null;
 
   function handleCategoryChange(index: number) {
     setCategoryIndex(index);

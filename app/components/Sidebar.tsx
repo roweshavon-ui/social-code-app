@@ -13,6 +13,7 @@ import {
   Inbox,
   Mail,
   Kanban,
+  LogOut,
 } from "lucide-react";
 
 const navItems = [
@@ -72,11 +73,23 @@ export default function Sidebar() {
       </nav>
 
       {/* Tip */}
-      <div className="px-4 py-4 mx-3 mb-4 rounded-xl" style={{ background: "rgba(0,217,192,0.06)", border: "1px solid rgba(0,217,192,0.1)" }}>
+      <div className="px-4 py-4 mx-3 mb-3 rounded-xl" style={{ background: "rgba(0,217,192,0.06)", border: "1px solid rgba(0,217,192,0.1)" }}>
         <p className="text-xs text-slate-500 leading-relaxed">
           Run the <span style={{ color: "#00D9C0" }}>Assessment</span> with a new client — their type auto-saves to the CRM.
         </p>
       </div>
+
+      {/* Logout */}
+      <button
+        onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST" });
+          window.location.href = "/login";
+        }}
+        className="flex items-center gap-2.5 mx-3 mb-4 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-400 transition-colors w-[calc(100%-24px)]"
+      >
+        <LogOut size={14} strokeWidth={2} />
+        Sign out
+      </button>
     </aside>
   );
 }
