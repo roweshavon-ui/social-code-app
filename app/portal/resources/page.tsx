@@ -8,14 +8,14 @@ const FREE_RESOURCES = [
   {
     title: "Fearless Approach System",
     description: "The step-by-step system for approaching anyone without freezing up. Includes SPARK and the 3-Second Social Scan.",
-    url: "https://app.joinsocialcode.com/pdfs/Fearless%20Approach%20System%20full.pdf",
+    url: "https://app.joinsocialcode.com/Fearless%20Approach%20System%20full.pdf",
     tag: "Free",
     tagColor: "#00D9C0",
   },
   {
     title: "TALK Check",
     description: "Tone · Attention · Language · Kinetics. The delivery layer — how you say it matters as much as what you say.",
-    url: "https://app.joinsocialcode.com/pdfs/TALK%20Check%20full.pdf",
+    url: "https://app.joinsocialcode.com/TALK%20Check%20full.pdf",
     tag: "Free",
     tagColor: "#00D9C0",
   },
@@ -25,9 +25,9 @@ const PAID_RESOURCES = [
   {
     title: "Stop Replaying — E-Book + 30-Day Workbook",
     description: "End the 2 AM overthink loop. The full system for breaking the replay pattern for good.",
-    url: "https://8864150412757.gumroad.com/l/obzgfd",
-    tag: "$17",
-    tagColor: "#FF6B6B",
+    url: "https://app.joinsocialcode.com/Stop%20Replaying%20E-Book.pdf",
+    tag: "Included",
+    tagColor: "#00D9C0",
   },
 ];
 
@@ -118,7 +118,7 @@ export default function PortalResourcesPage() {
 
           <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
-              Products
+              Included with Coaching
             </p>
             <div className="space-y-2">
               {PAID_RESOURCES.map((r) => (
