@@ -145,18 +145,23 @@ export async function POST(req: NextRequest) {
   try {
     const kitKey = process.env.KIT_API_KEY;
     if (kitKey) {
-      await fetch("https://api.kit.com/v4/subscribers", {
+      // Create/update subscriber
+      const subRes = await fetch("https://api.kit.com/v4/subscribers", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Kit-Api-Key": kitKey,
-        },
-        body: JSON.stringify({
-          email_address: email,
-          first_name: name || undefined,
-          tag_ids: [17469031],
-        }),
+        headers: { "Content-Type": "application/json", "X-Kit-Api-Key": kitKey },
+        body: JSON.stringify({ email_address: email, first_name: name || undefined }),
       });
+      const subData = await subRes.json();
+      const subscriberId = subData?.subscriber?.id;
+
+      // Tag the subscriber
+      if (subscriberId) {
+        await fetch(`https://api.kit.com/v4/tags/17469031/subscribers`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Kit-Api-Key": kitKey },
+          body: JSON.stringify({ subscriber_id: subscriberId }),
+        });
+      }
     }
   } catch (e) {
     console.error("Kit subscribe failed:", e);
