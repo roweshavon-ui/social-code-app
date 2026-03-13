@@ -139,5 +139,25 @@ export async function POST(req: NextRequest) {
     console.error("Lead save failed:", e);
   }
 
+  // Add to Kit with free-bundle tag (non-blocking)
+  try {
+    const kitKey = process.env.KIT_API_KEY;
+    if (kitKey) {
+      await fetch("https://api.kit.com/v4/subscribers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Kit-Api-Key": kitKey,
+        },
+        body: JSON.stringify({
+          email_address: email,
+          tags: ["free-bundle"],
+        }),
+      });
+    }
+  } catch (e) {
+    console.error("Kit subscribe failed:", e);
+  }
+
   return NextResponse.json({ success: true }, { headers: CORS });
 }
