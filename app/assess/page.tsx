@@ -354,18 +354,40 @@ export default function PublicAssessPage() {
             ) : submitting ? (
               <p className="text-sm text-slate-500 mb-4">Saving your results...</p>
             ) : null}
-            <p className="text-sm text-white font-bold mb-1">Know your type. Now do something with it.</p>
+
+            {/* Stop Replaying upsell */}
+            <div className="mb-6 pb-6 border-b border-white/5">
+              <p className="text-xs font-bold mb-1" style={{ color: BRAND.teal }}>NEXT STEP</p>
+              <p className="text-sm text-white font-bold mb-1">Still replaying this after you close the tab?</p>
+              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                Stop Replaying is the system for that. Turn 3 days of rumination into 10 minutes of processing. E-Book + 30-Day Workbook.
+              </p>
+              <a
+                href="https://8864150412757.gumroad.com/l/obzgfd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 w-full sm:w-auto"
+                style={{ background: BRAND.coral, color: "white" }}
+              >
+                Get Stop Replaying — $17 →
+              </a>
+              <p className="text-xs text-slate-600 mt-2">E-Book + Workbook · Instant download</p>
+            </div>
+
+            {/* Book a call */}
+            <p className="text-sm text-white font-bold mb-1">Want personalized help?</p>
             <p className="text-xs text-slate-400 mb-5 leading-relaxed">
-              Book a free 30-minute call with Shavi. You&apos;ll get a personalized plan based on your {result.type} type — specific frameworks, specific gaps, specific next steps.
+              Book a free call with Shavi. We&apos;ll build a plan around your {result.type} type — your specific gaps, your specific situations.
             </p>
             <a
               href="/book"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 w-full sm:w-auto"
-              style={{ background: BRAND.coral, color: "white" }}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 w-full sm:w-auto border border-white/10"
+              style={{ background: "transparent", color: "white" }}
             >
               Book Your Free Call →
             </a>
             <p className="text-xs text-slate-600 mt-3">30 minutes · Free · No pressure</p>
+
             <div className="mt-5 pt-5 border-t border-white/5">
               <p className="text-xs text-slate-500 mb-3">Want to practice first?</p>
               <a
