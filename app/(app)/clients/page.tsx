@@ -235,6 +235,40 @@ function ClientPanel({
                       ))}
                     </ul>
                   </Section>
+
+                  {/* Coaching-only sections */}
+                  <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,107,107,0.15), transparent)" }} />
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#FF6B6B" }}>Coaching Intelligence</p>
+
+                  <Section title="How They Process Failure" color="#FF6B6B">
+                    <p className="text-sm text-slate-300 leading-relaxed">{profile.failureResponse}</p>
+                  </Section>
+
+                  <Section title="Red Flags to Watch in Session" color="#FF6B6B">
+                    <ul className="space-y-2">
+                      {profile.redFlags.map((flag) => (
+                        <li key={flag} className="flex items-start gap-2 text-sm text-slate-300">
+                          <span className="text-xs mt-0.5 flex-shrink-0" style={{ color: "#FF6B6B" }}>⚑</span> {flag}
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
+
+                  <Section title="Questions to Ask This Type" color="#4DE8D4">
+                    <p className="text-xs text-slate-500 mb-3">Ready-made prompts — use these when the session stalls or needs to go deeper.</p>
+                    <ul className="space-y-2.5">
+                      {profile.sessionQuestions.map((q, i) => (
+                        <li key={q} className="flex items-start gap-2.5">
+                          <span className="text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(77,232,212,0.12)", color: "#4DE8D4" }}>{i + 1}</span>
+                          <span className="text-sm text-slate-300 leading-snug">&ldquo;{q}&rdquo;</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
+
+                  <Section title="Quick Win — Assign This First" color="#00D9C0">
+                    <p className="text-sm text-slate-300 leading-relaxed">{profile.quickWins}</p>
+                  </Section>
                 </div>
               )}
 

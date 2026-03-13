@@ -27,6 +27,11 @@ export type TypeProfile = {
   socialStyle: string;
   communicationTip: string;
   practiceScenarios: string[];
+  // Coaching-only fields (admin panel only)
+  failureResponse: string;
+  redFlags: string[];
+  sessionQuestions: string[];
+  quickWins: string;
 };
 
 export const TYPE_PROFILES: Record<string, TypeProfile> = {
@@ -40,6 +45,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Selective and intentional. Prefers 1-on-1 or small groups with substance. Quality over quantity. Will not sustain surface-level interactions for long.",
     communicationTip: "Lead with the why and the long-term logic. Skip pleasantries and get to substance quickly — they respect directness. Avoid vague or purely emotional appeals.",
     practiceScenarios: ["Networking at an industry conference", "Making small talk at a work social event", "Starting a conversation at a party where you know nobody", "One-on-one meeting with your manager", "Making small talk with the person next to you on a flight"],
+    failureResponse: "Internalizes failure as a systems or logic problem — replays what went wrong analytically, not emotionally. May become cold, withdrawn, and sharply self-critical. Rarely shows it externally but it lingers much longer than they admit.",
+    redFlags: [
+      "Intellectualizing everything — emotions never surface in session",
+      "Performing progress rather than making it",
+      "Dismissing an exercise as 'too simple' before trying it",
+      "Sessions feel like debates, not coaching",
+      "No assignments completed but always has a logical reason why",
+    ],
+    sessionQuestions: [
+      "What does success look like in 6 months — specifically?",
+      "What's the real cost of staying exactly where you are?",
+      "Where are you holding back because you already know the answer?",
+      "What would you do socially if you knew you couldn't fail?",
+      "When did you last let someone see you struggle?",
+    ],
+    quickWins: "Assign the SPARK framework as an experiment — approach 3 strangers this week and report back with data. They'll treat it like research, not performance. Low emotional risk, high engagement. Debriefs extremely well.",
   },
   INTP: {
     nickname: "The Thinker",
@@ -51,6 +72,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Awkward in small talk but fully engaged in intellectual discussion. Often misread as aloof or arrogant. Needs others to go beneath the surface to unlock them.",
     communicationTip: "Ask them about ideas, not feelings. Give them space to think before responding — they dislike being rushed. Theoretical and conceptual discussions engage them immediately.",
     practiceScenarios: ["Starting a conversation at a party where you know nobody", "Asking someone out on a first date", "Networking at an industry conference", "Joining a group conversation already in progress", "Reaching out to an old friend after a long gap"],
+    failureResponse: "Runs an exhaustive mental post-mortem — replays the event hundreds of times. Externally dismissive ('it didn't matter anyway') but internally has been processing it for days. Shame spiral is real but almost never visible.",
+    redFlags: [
+      "Theorizing as avoidance — keeps analyzing the problem instead of taking any action",
+      "Frames every assignment as 'interesting' but doesn't execute",
+      "Cancels or reschedules sessions repeatedly",
+      "Has a sophisticated explanation for why the framework doesn't apply to them",
+      "Zero follow-through between sessions despite full engagement during them",
+    ],
+    sessionQuestions: [
+      "What's the actual cost of never finding out?",
+      "If you had to test one theory this week, what would it be?",
+      "What are you over-thinking that you already know the answer to?",
+      "When do you feel most natural socially — what's different about those moments?",
+      "What's the minimum viable version of this experiment?",
+    ],
+    quickWins: "Frame every exercise as an experiment, not a feeling exercise. Give them data-gathering tasks: 'Start 3 conversations this week and note what happened.' They show up when it feels like research. Remove the emotional stakes — make it a test.",
   },
   ENTJ: {
     nickname: "The Commander",
@@ -62,6 +99,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Takes charge in social settings automatically. Reads power dynamics immediately. Prefers conversations with purpose. Not naturally warm but deeply loyal once trust is built.",
     communicationTip: "Be direct, competent, and prepared. They lose respect for vagueness fast. Frame ideas in terms of outcomes and efficiency. Don't take their bluntness personally.",
     practiceScenarios: ["Listening without offering solutions — a friend needs to vent", "Having a difficult conversation without steamrolling", "Setting a boundary with someone without being harsh", "Recovering after saying something too blunt", "Being vulnerable with a friend about something personal"],
+    failureResponse: "Treats it as an efficiency problem, not an identity problem. Outwardly dismisses and resets strategy fast. Rarely — if ever — processes the emotional side. The real impact shows up later as increased control or irritability in relationships.",
+    redFlags: [
+      "Dominating the coaching session itself — turning it into a strategy meeting",
+      "Using control to avoid any genuine vulnerability",
+      "Framing every social problem as a tactical optimization challenge",
+      "Never once admitting something felt hard emotionally",
+      "Applying frameworks perfectly but still has zero depth in their relationships",
+    ],
+    sessionQuestions: [
+      "When was the last time you were genuinely vulnerable with someone — not as a strategy, just honest?",
+      "Who in your life do you trust enough to be wrong around?",
+      "What would the people who know you best say is your biggest blindspot?",
+      "What's the one conversation you've been avoiding — and what's it actually costing you?",
+      "What does 'enough' look like for you?",
+    ],
+    quickWins: "Assign a listening-only challenge — one full conversation where they ask questions only and offer zero solutions. Debrief it hard. ENTJs find this almost physically uncomfortable and it creates real insight about their relationship patterns immediately.",
   },
   ENTP: {
     nickname: "The Debater",
@@ -73,6 +126,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Socially fluid and charismatic. Enjoys playing devil's advocate. Can connect with almost anyone but rarely goes deep unless intellectually challenged. Loves banter.",
     communicationTip: "Match their energy and push back on their ideas — they enjoy the sparring. Don't be offended if they argue against their own position. They respect intellectual confidence.",
     practiceScenarios: ["Going deeper in a conversation beyond surface banter", "Resolving a conflict with a close friend", "Following up on an unanswered message without seeming needy", "Listening without offering solutions — a friend needs to vent", "Saying no to a request without over-explaining"],
+    failureResponse: "Rationalizes and reframes failure at lightning speed — often turns it into a badge of honor or a learning story. Jokes about it. Rarely sits with the real weight. May secretly be more affected than they ever let on.",
+    redFlags: [
+      "Using intellectual sparring to avoid doing the actual assigned work",
+      "Constantly reframes the exercise instead of just doing it",
+      "Shows up to every session with a new idea about how coaching should work",
+      "Nothing from the previous session was completed but they have three new theories about why",
+      "Every conversation stays at the surface level despite obvious intelligence",
+    ],
+    sessionQuestions: [
+      "What's the thing you keep starting but never finish — what's actually stopping you?",
+      "Who do you actually go deep with? What makes them different?",
+      "When was the last time you stayed present in a hard conversation instead of lightening the mood?",
+      "What commitment are you most afraid to make?",
+      "Where in your life are you using humor to avoid something real?",
+    ],
+    quickWins: "Assign a conversation where they cannot argue, debate, or pivot — only listen and ask questions for the full interaction. ENTPs find this surprisingly hard. Debrief what came up. The discomfort reveals the actual gap fast.",
   },
   INFJ: {
     nickname: "The Advocate",
@@ -84,6 +153,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Warm, attentive, and deeply perceptive one-on-one. Struggles in large groups. Builds deep connections slowly. Will disappear if a relationship stops feeling authentic.",
     communicationTip: "Connect on values and meaning before moving to logic. They read people instinctively — don't try to perform. Ask about their inner world and they'll open up fully.",
     practiceScenarios: ["Approaching a stranger at a coffee shop", "Networking at an industry conference", "Making small talk with the person next to you on a flight", "Telling a friend something difficult but necessary", "Starting a conversation at a party where you know nobody"],
+    failureResponse: "Absorbs failure deeply and ties it to their identity and sense of purpose. Needs to understand the 'why' completely before they can move forward. May become withdrawn and stop sharing openly in sessions.",
+    redFlags: [
+      "So insightful about themselves that they never actually change anything",
+      "Over-processing, under-acting — deep self-awareness used as a substitute for movement",
+      "Chronic avoidance dressed up as self-reflection",
+      "Weeks pass between sessions with nothing attempted",
+      "Still protecting the feelings of the person who hurt them",
+    ],
+    sessionQuestions: [
+      "What are you waiting for permission to do?",
+      "Who are you performing peace for right now?",
+      "What do you actually need that you haven't asked anyone for?",
+      "If your best friend was in your exact situation — what would you tell them to do?",
+      "What's the gap between what you're saying and what you're actually feeling?",
+    ],
+    quickWins: "Assign one single direct action — approach one person this week with no agenda, just genuine curiosity. INFJs overthink impact and get paralyzed by it. A small, contained action assignment cuts through the paralysis fast.",
   },
   INFP: {
     nickname: "The Mediator",
@@ -95,6 +180,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Quiet in large groups but fully engaged one-on-one. Connects through shared values and emotional honesty. Deeply loyal to those they trust. Withdraws when feeling misunderstood.",
     communicationTip: "Approach with warmth and authenticity. Don't push — let them open at their own pace. Connect through feelings and shared values. Harsh directness shuts them down entirely.",
     practiceScenarios: ["Approaching someone you find attractive at a bar or event", "Asking someone out on a first date", "Speaking up with your idea in a team meeting", "Setting a boundary with someone who pushes back", "Saying no to a friend's invitation without damaging the friendship"],
+    failureResponse: "Takes failure extremely personally — sees it as confirmation of their deepest fears about themselves. Can spiral fast. Needs genuine compassionate acknowledgment before any forward movement is possible.",
+    redFlags: [
+      "Using emotional processing as a substitute for action",
+      "Sessions feel like therapy but no behavior changes between them",
+      "Client feels understood but nothing in their life is different",
+      "Assigns deep meaning to avoidance — 'I'm not ready yet'",
+      "Self-criticism so heavy it functions as paralysis",
+    ],
+    sessionQuestions: [
+      "What story are you telling yourself about what that interaction meant?",
+      "What would you do if you weren't afraid of being misunderstood?",
+      "Where are you being kind to everyone else but brutal to yourself?",
+      "What would you need to feel safe enough to actually try?",
+      "If this were a character in a story you were writing — what would you tell them to do next?",
+    ],
+    quickWins: "Frame every assignment through values — 'Do this because it aligns with who you want to be, not because it's easy.' INFPs move for meaning, not strategy. Give the action a deeper why and they follow through.",
   },
   ENFJ: {
     nickname: "The Protagonist",
@@ -106,6 +207,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Highly attuned to group dynamics. Focuses on others in conversation — asks questions, listens deeply. Makes people feel genuinely seen. Draws others naturally.",
     communicationTip: "Engage their heart and their vision together. Ask what they want for themselves, not just for others. Acknowledge their contributions directly — they often feel unseen despite giving everything.",
     practiceScenarios: ["Saying no to a request without over-explaining", "Confronting someone who crossed a line", "Setting a boundary with someone who pushes back", "Being honest with a friend about something that hurt you", "Receiving a compliment without deflecting it"],
+    failureResponse: "Feels responsible for the failure even when it isn't their fault. Over-apologizes. Quick to absorb blame that isn't theirs. Needs to be explicitly told that not everything is their responsibility to fix — and will not believe it easily.",
+    redFlags: [
+      "Focusing on everyone else's social dynamics instead of their own",
+      "Same boundary they agreed to set two sessions ago still hasn't been set",
+      "Chronic overcommitment used as avoidance of personal work",
+      "Making progress for others in their life but none for themselves",
+      "Agreeing with everything you say but not changing anything",
+    ],
+    sessionQuestions: [
+      "When did you last do something only for yourself — not for how it would affect someone else?",
+      "Who in your life is actually reciprocating what you give?",
+      "What are you afraid will happen if you say no?",
+      "Where are you taking responsibility for someone else's feelings right now?",
+      "What do you actually want — not what you think you should want?",
+    ],
+    quickWins: "Assign one 'no' to practice this week — low-stakes, specific, defined. ENFJs are often stunned by how hard this is and how much guilt comes up. That guilt is the work. Debrief it thoroughly.",
   },
   ENFP: {
     nickname: "The Campaigner",
@@ -117,6 +234,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Warm, expressive, and fully engaging. Connects through enthusiasm and storytelling. Can make anyone feel special. Tends to go wide rather than deep by default.",
     communicationTip: "Match their energy and let conversations be playful. Connect emotionally before going logical. Give them room to explore ideas without forcing an immediate conclusion.",
     practiceScenarios: ["Going deeper in a conversation beyond surface banter", "Being vulnerable with a friend about something personal", "Following up on an unanswered message without seeming needy", "Setting a boundary with a family member", "Reaching out to an old friend after a long gap"],
+    failureResponse: "Bounces back on the surface quickly — jokes about it, reframes it, pivots to something new. Internally spirals in private. Needs to feel emotionally witnessed before they can actually move on. Will avoid re-engaging with the situation entirely if left unprocessed.",
+    redFlags: [
+      "Over-enthusiasm in sessions — excited about growth but no follow-through between them",
+      "Started three new things since last session, completed none of the assignment",
+      "Uses the session energy to fuel optimism but doesn't translate it to action",
+      "Breadth of connections but no depth in any of them",
+      "Has a great insight every session but nothing has changed in weeks",
+    ],
+    sessionQuestions: [
+      "What's one thing you started in the last month that you actually finished?",
+      "Where are you creating depth in your relationships versus just breadth?",
+      "What are you avoiding by staying busy, excited, and moving?",
+      "When do you feel most grounded — what does that actually look like?",
+      "What's the one commitment you keep breaking with yourself?",
+    ],
+    quickWins: "Assign one thing — only one. ENFPs get overwhelmed by choice and scatter. Constraint creates completion. One specific action, one specific person, one week. Follow-through on one thing builds identity momentum faster than 10 half-finished attempts.",
   },
   ISTJ: {
     nickname: "The Logistician",
@@ -128,6 +261,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Reserved and somewhat formal at first. Warms up slowly through consistent, repeated interactions. Loyal and deeply dependable once trust is established.",
     communicationTip: "Be clear, specific, and always follow through on what you say. They trust actions over words completely. Don't push emotional expression — respect their reserved nature.",
     practiceScenarios: ["Starting a conversation at a party where you know nobody", "Networking at an industry conference", "Making small talk at a work social event", "First date conversation — keeping it natural", "Introducing yourself to a new neighbor"],
+    failureResponse: "Internalizes it quietly and holds themselves to a high personal standard. Reviews what went wrong systematically. May become even more rigid and controlled as a way to prevent it happening again. Emotional processing rarely happens consciously.",
+    redFlags: [
+      "Only willing to try approaches that fit exactly within their existing framework",
+      "Uses 'that's not realistic' or 'that's just not me' to shut down exercises before attempting them",
+      "Progress is too predictable and safe — nothing is actually uncomfortable",
+      "Follows the letter of every assignment but avoids the spirit of it",
+      "No genuine surprise or discomfort has occurred in multiple sessions",
+    ],
+    sessionQuestions: [
+      "What would you do socially if you didn't have to stay consistent with who you've always been?",
+      "When was the last time you genuinely surprised yourself in a social situation?",
+      "What rule about how social interactions should work is actually limiting you?",
+      "Who would you be socially if no one from your past was watching?",
+      "What's the most uncomfortable thing that would also move the needle the most?",
+    ],
+    quickWins: "Give them a structured challenge with clear parameters — 'This week, initiate one conversation you normally wouldn't.' ISTJs execute clean when given clear expectations. Framing it as a task, not a feelings exercise, removes the resistance entirely.",
   },
   ISFJ: {
     nickname: "The Defender",
@@ -139,6 +288,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Warm and attentive one-on-one. Remembers specific details about people they care for. Doesn't seek the spotlight. Shows love and care through action rather than words.",
     communicationTip: "Show genuine appreciation for what they do specifically. Ask how they are — they rarely volunteer it. Give them time to process before responding to large requests.",
     practiceScenarios: ["Initiating plans with someone you'd like to know better", "Telling a friend something difficult but necessary", "Setting a boundary with someone who pushes back", "Speaking up with your idea in a team meeting", "Asking for what you need without apologizing"],
+    failureResponse: "Absorbs failure quietly and immediately blames themselves — even when it isn't their fault. Keeps a detailed internal ledger of what went wrong. Needs explicit reassurance that they're on track. Won't ask for that reassurance on their own.",
+    redFlags: [
+      "Accommodating everyone around them — including you in the session",
+      "Agrees with everything but doesn't act on anything",
+      "Says 'I'll try' and means 'I probably won't but I don't want to disappoint you'",
+      "Has been meaning to set a particular boundary for multiple sessions and still hasn't",
+      "Their needs never come up — every session circles around others",
+    ],
+    sessionQuestions: [
+      "What do you actually need right now that you haven't said out loud?",
+      "When did you last put your own needs before someone else's — and how did it feel?",
+      "Who in your life would you want to say something to but haven't?",
+      "What are you tolerating that you've convinced yourself is fine?",
+      "What would change in your relationships if you started saying no more?",
+    ],
+    quickWins: "Assign one act of self-advocacy this week — asking for something specific from someone specific. Small, concrete, defined. ISFJs need to build evidence that their needs are valid and that the world doesn't fall apart when they state them.",
   },
   ESTJ: {
     nickname: "The Executive",
@@ -150,6 +315,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Confident and direct in social settings. Takes charge naturally and often immediately. Respects hierarchy and expects others to also. Prefers practical, results-oriented conversations.",
     communicationTip: "Be direct and concrete. Have your facts prepared. Don't challenge them emotionally — reframe disagreements around logic, outcomes, and results.",
     practiceScenarios: ["Listening without offering solutions — a friend needs to vent", "Having a difficult conversation without steamrolling", "Being vulnerable with a friend about something personal", "Recovering after saying something too blunt", "Receiving a compliment without deflecting it"],
+    failureResponse: "Processes it fast externally — blames external factors or immediately resets the plan. Rarely does any real emotional post-processing. The real impact shows up later as increased rigidity, heightened control, or irritability in relationships.",
+    redFlags: [
+      "Using competence as armor — frames all social situations as performance problems to be optimized",
+      "Never discusses how they feel in interactions, only how they performed",
+      "Sessions feel like a strategy review, not coaching",
+      "Has not once admitted something felt hard emotionally",
+      "Relationships are transactional and they can't figure out why people keep their distance",
+    ],
+    sessionQuestions: [
+      "When was the last time you let someone see you genuinely struggle with something?",
+      "What would happen to your relationships if you were wrong more often?",
+      "Who in your life actually challenges you — and do you listen when they do?",
+      "What do people close to you say they wish you did differently?",
+      "Where are you confusing being right with being respected?",
+    ],
+    quickWins: "Assign a vulnerability challenge — share one genuine uncertainty with someone they trust this week. ESTJs are frequently surprised by how much this changes the depth of their relationships. Debrief what happened to their dynamic after.",
   },
   ESFJ: {
     nickname: "The Consul",
@@ -161,6 +342,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Warm, hospitable, and highly attentive. Remembers personal details. Creates belonging easily and quickly. Can be hurt deeply when social harmony breaks down.",
     communicationTip: "Lead with warmth and appreciation before anything else. They respond to emotional acknowledgment. Give feedback gently — they take criticism personally even when it's professional.",
     practiceScenarios: ["Saying no to a friend's invitation without damaging the friendship", "Disagreeing with a group when you're the only dissenting voice", "Being honest with a friend about something that hurt you", "Setting a boundary without over-apologizing", "Confronting someone who crossed a line"],
+    failureResponse: "Very affected by social failure — ties approval from others directly to self-worth. Will replay the event obsessively and likely over-apologize to everyone involved. Needs to feel the relationship is still intact before they can reflect clearly.",
+    redFlags: [
+      "Seeking your approval in the session itself — looking for reassurance before taking any action",
+      "Talks about what others want rather than what they actually want",
+      "Every assignment is framed around making things better for someone else",
+      "Still hasn't had the honest conversation they committed to weeks ago",
+      "Softens every opinion so much that they have no real position on anything",
+    ],
+    sessionQuestions: [
+      "What do you actually think — not what you think they want to hear?",
+      "When was the last time you disagreed with someone you respect?",
+      "What are you doing in your relationships that you resent but can't stop?",
+      "If no one's opinion of you changed — what would you do differently?",
+      "What would it cost you to be completely honest in that situation?",
+    ],
+    quickWins: "Assign one honest disagreement this week — stating their actual opinion without softening it into nothing. ESFJs are often stunned by how freeing this is when it lands well. It builds evidence that honesty doesn't destroy connection.",
   },
   ISTP: {
     nickname: "The Virtuoso",
@@ -172,6 +369,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Quiet and observant. Opens up around shared activities rather than pure conversation. Not naturally expressive but deeply loyal in their actions.",
     communicationTip: "Skip the small talk — go straight to the practical point. Do things together rather than just talking. Respect their need for space. Don't push for emotional expression.",
     practiceScenarios: ["Starting a conversation at a party where you know nobody", "First date conversation — keeping it natural", "Asking someone out on a first date", "Initiating plans with someone you'd like to know better", "Reaching out to an old friend after a long gap"],
+    failureResponse: "Shrugs it off externally — 'it is what it is.' Internally runs a cold, thorough analysis. Rarely processes emotionally. Most likely response is to disengage entirely from the situation or person rather than re-engaging and working through it.",
+    redFlags: [
+      "Not connecting any framework to anything that personally matters to them",
+      "Technically executing the steps of SPARK but making zero genuine connection",
+      "Using technical precision as a substitute for actual presence",
+      "Has not shared anything genuinely personal in multiple sessions",
+      "Can't answer why they want connection at all — the 'why' hasn't been established",
+    ],
+    sessionQuestions: [
+      "What does someone have to do to actually earn your trust?",
+      "When was the last time you told someone something real about yourself?",
+      "What do you actually get out of connection — what's the point for you?",
+      "Who do you actually let in? What made them different from everyone else?",
+      "What would you lose if you stayed exactly as connected as you are right now?",
+    ],
+    quickWins: "Frame assignments as skill tests, not feelings exercises. 'This week, have one conversation where you share something real — treat it as a technical test.' ISTPs engage more with competence framing than emotional framing. Make connection a skill to master.",
   },
   ISFP: {
     nickname: "The Adventurer",
@@ -183,6 +396,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Warm but reserved. Opens up gradually through shared experiences. Shows care through small thoughtful gestures. Detects fakeness quickly and withdraws from it.",
     communicationTip: "Create a calm and relaxed environment. Let them set the pace. Connect through shared sensory experiences — food, music, art, nature. They communicate more through action than words.",
     practiceScenarios: ["Approaching someone you find attractive at a bar or event", "Speaking up with your idea in a team meeting", "Saying no to a request without over-explaining", "Confronting someone who crossed a line", "Disagreeing with a colleague professionally"],
+    failureResponse: "Takes it personally and internalizes it completely — holds it quietly without showing it. Most likely response is to withdraw from the situation or the person entirely rather than working through it. Avoidance is their default exit.",
+    redFlags: [
+      "Too agreeable in sessions — says yes to everything, executes nothing",
+      "Sessions feel consistently pleasant but zero real progress is happening",
+      "Hasn't raised any genuine difficulty or resistance across multiple sessions",
+      "Disappears between sessions without explanation",
+      "Has never asserted a single preference or disagreement in the room",
+    ],
+    sessionQuestions: [
+      "What's something you've wanted to say to someone that you haven't said?",
+      "Where are you disappearing instead of staying present in a hard situation?",
+      "What do you actually want from your social life — not what seems realistic?",
+      "When do you feel most genuinely yourself around other people?",
+      "What would it take to fully trust this process?",
+    ],
+    quickWins: "Assign a small act of assertion — expressing one genuine preference this week (where to eat, what to do, how to spend time together). ISFPs are used to disappearing into others' preferences. Tiny assertion reps build the muscle without overwhelming them.",
   },
   ESTP: {
     nickname: "The Entrepreneur",
@@ -194,6 +423,22 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "Bold, charismatic, and reads the room immediately. Thrives in larger social settings. Connects through humor, challenge, and shared experiences rather than conversation.",
     communicationTip: "Keep it fast-paced and practical. Skip the theory — ground everything in real-world action and tangible outcomes. Match their directness without hesitation.",
     practiceScenarios: ["Going deeper in a conversation beyond surface banter", "Listening without offering solutions — a friend needs to vent", "Resolving a conflict with a close friend", "Being vulnerable with a friend about something personal", "Following up on an unanswered message without seeming needy"],
+    failureResponse: "Bounces back fast in action but almost never reflects. May double down on the same approach rather than adjusting. Overconfidence can mask a repeated pattern that isn't working.",
+    redFlags: [
+      "Treats every coaching conversation like a win — no genuine struggle has ever been reported",
+      "Everything is framed as a success story, even when it clearly wasn't",
+      "Zero real vulnerability has happened across multiple sessions",
+      "Moves so fast through topics that nothing lands deeply",
+      "Wide social network, genuinely shallow connections — hasn't identified this as the problem yet",
+    ],
+    sessionQuestions: [
+      "When was the last time you slowed down in a conversation and it actually worked better?",
+      "Who in your life do you actually go deep with?",
+      "What's a pattern in your relationships that keeps showing up no matter who you're with?",
+      "What would you lose by being honest in that situation instead of strategic?",
+      "When do you feel genuinely seen — not just liked or entertained?",
+    ],
+    quickWins: "Assign a 'slow conversation' challenge — one interaction this week where they deliberately hold back their first instinct to move, joke, or redirect. ESTPs find this almost physically uncomfortable. That discomfort is exactly the point. Debrief it in detail.",
   },
   ESFP: {
     nickname: "The Entertainer",
@@ -205,5 +450,21 @@ export const TYPE_PROFILES: Record<string, TypeProfile> = {
     socialStyle: "The life of the room. Connects through humor, energy, and storytelling. Everyone feels noticed around them. Connections tend to stay at a surface level without deliberate effort to go deeper.",
     communicationTip: "Keep things light and fun to start — they open up when they feel safe and unjudged. Use humor as an entry point. Push gently to go deeper once rapport is built.",
     practiceScenarios: ["Having a difficult conversation you've been avoiding", "Setting a boundary with someone who pushes back", "Resolving a conflict with a close friend", "Being vulnerable with a friend about something personal", "Telling a friend something difficult but necessary"],
+    failureResponse: "Avoids sitting with it entirely — jumps to the next experience or deflects with humor. Almost never processes failure deeply, which is why patterns repeat. Needs gentle but direct challenge to actually engage with what went wrong.",
+    redFlags: [
+      "Uses entertainment and high energy to fill the session — never goes below the surface",
+      "Zero assignments completed but has great stories to tell",
+      "Genuine emotion or difficulty never surfaces — it's all performance even in private",
+      "Can't name a single relationship where they've been fully honest",
+      "Everyone loves them but no one knows them",
+    ],
+    sessionQuestions: [
+      "What's the conversation you've been laughing off that actually hurt?",
+      "Who in your life knows the real version of you — not just the fun version?",
+      "What would happen if you stopped being the entertaining one for a week?",
+      "What are you afraid people would think if they actually saw you struggle?",
+      "What do you want from your relationships that you're not getting?",
+    ],
+    quickWins: "Assign one 'no performance' interaction this week — a conversation where they show up quiet, present, and not 'on.' ESFPs are often genuinely shocked by how much people respond to their unperformed self. It's a revelation when it works.",
   },
 };
