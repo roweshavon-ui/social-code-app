@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Users,
@@ -9,7 +10,6 @@ import {
   BookOpen,
   MessageSquare,
   ClipboardList,
-  Zap,
   Inbox,
   Mail,
   Kanban,
@@ -41,11 +41,8 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-white/5">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #00D9C0, #00A896)" }}
-        >
-          <Zap size={14} className="text-white" strokeWidth={2.5} />
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+          <Image src="/logo.svg" alt="Social Code" width={32} height={32} />
         </div>
         <div>
           <div className="text-sm font-bold text-white tracking-tight">Social Code</div>
