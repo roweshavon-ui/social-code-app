@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           email_address: email,
           first_name: name || undefined,
-          tags: ["free-bundle"],
+          tag_ids: [17469031],
         }),
       });
     }
