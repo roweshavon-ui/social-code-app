@@ -155,13 +155,11 @@ export async function POST(req: NextRequest) {
       const subscriberId = subData?.subscriber?.id;
 
       // Tag the subscriber
-      if (subscriberId) {
-        await fetch(`https://api.kit.com/v4/tags/17469031/subscribers`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Kit-Api-Key": kitKey },
-          body: JSON.stringify({ subscriber_id: subscriberId }),
-        });
-      }
+      await fetch(`https://api.kit.com/v4/tags/17469031/subscribers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Kit-Api-Key": kitKey },
+        body: JSON.stringify({ email_address: email }),
+      });
     }
   } catch (e) {
     console.error("Kit subscribe failed:", e);
