@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePortalClient } from "../../hooks/usePortalClient";
-import PortalNav from "../../components/portal/PortalNav";
+import PortalShell from "../../components/portal/PortalShell";
 import Link from "next/link";
 import { CheckSquare, Calendar, BookOpen, PhoneCall } from "lucide-react";
 import { TYPE_PROFILES, TYPE_ACRONYMS } from "../../lib/mbtiData";
@@ -59,10 +59,8 @@ export default function PortalHome() {
   ];
 
   return (
-    <div className="flex min-h-screen" style={{ background: "#0D1825" }}>
-      <PortalNav clientName={client.name} />
-
-      <main className="flex-1 ml-56 p-8 max-w-3xl">
+    <PortalShell clientName={client.name}>
+      <div className="p-8 max-w-3xl">
         {/* Greeting */}
         <div className="mb-8">
           <h1 className="text-2xl font-black text-white tracking-tight mb-1">
@@ -243,7 +241,7 @@ export default function PortalHome() {
             </ProfileSection>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </PortalShell>
   );
 }

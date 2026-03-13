@@ -84,7 +84,13 @@ function ClientPanel({
 
   const [tab, setTab] = useState<PanelTab>("profile");
   const [editing, setEditing] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
   const [draft, setDraft] = useState({
+    name: client.name ?? "",
+    email: client.email ?? "",
+    jungianType: client.jungianType ?? "INFP",
+    status: client.status ?? "active",
     goal: client.goal ?? "",
     notes: client.notes ?? "",
     observations: client.observations ?? "",
@@ -94,6 +100,19 @@ function ClientPanel({
   function handleSave() {
     onSave(draft);
     setEditing(false);
+  }
+
+  async function handleResend() {
+    setResending(true);
+    setResendMsg(null);
+    const res = await fetch("/api/send-framework", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: client.email, framework: "bundle" }),
+    });
+    setResending(false);
+    setResendMsg(res.ok ? "Sent!" : "Failed to send.");
+    setTimeout(() => setResendMsg(null), 3000);
   }
 
   const tabs: { key: PanelTab; label: string }[] = [
@@ -277,10 +296,10 @@ function ClientPanel({
               {/* Divider */}
               <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(0,217,192,0.12), transparent)" }} />
 
-              {/* Client notes */}
+              {/* Client info + notes */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-white">Client Notes</h3>
+                  <h3 className="text-sm font-bold text-white">Client Info</h3>
                   {!editing ? (
                     <button
                       onClick={() => setEditing(true)}
@@ -297,6 +316,63 @@ function ClientPanel({
                   )}
                 </div>
                 <div className="space-y-4">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Name</label>
+                    {editing ? (
+                      <input
+                        value={draft.name}
+                        onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none"
+                        style={{ background: "#1A2332" }}
+                      />
+                    ) : (
+                      <p className="text-sm text-slate-300">{client.name}</p>
+                    )}
+                  </div>
+                  {/* Email */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Email</label>
+                    {editing ? (
+                      <input
+                        type="email"
+                        value={draft.email}
+                        onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none"
+                        style={{ background: "#1A2332" }}
+                      />
+                    ) : (
+                      <p className="text-sm text-slate-300">{client.email}</p>
+                    )}
+                  </div>
+                  {/* Type + Status */}
+                  {editing && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 mb-1.5">Type</label>
+                        <select
+                          value={draft.jungianType}
+                          onChange={(e) => setDraft((d) => ({ ...d, jungianType: e.target.value }))}
+                          className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none"
+                          style={{ background: "#1A2332" }}
+                        >
+                          {JUNGIAN_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-500 mb-1.5">Status</label>
+                        <select
+                          value={draft.status}
+                          onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value as "active" | "inactive" }))}
+                          className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none"
+                          style={{ background: "#1A2332" }}
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                   <NoteField label="Goal" value={editing ? draft.goal : client.goal} placeholder="What does this client want to achieve?" editing={editing} onChange={(v) => setDraft((d) => ({ ...d, goal: v }))} />
                   <NoteField label="Session Observations" value={editing ? draft.observations : client.observations} placeholder="What have you noticed about how they show up socially?" editing={editing} onChange={(v) => setDraft((d) => ({ ...d, observations: v }))} />
                   <NoteField label="Social Patterns" value={editing ? draft.socialPatterns : client.socialPatterns} placeholder="Recurring patterns, triggers, or tendencies you've identified..." editing={editing} onChange={(v) => setDraft((d) => ({ ...d, socialPatterns: v }))} />
@@ -304,9 +380,25 @@ function ClientPanel({
                 </div>
               </div>
 
+              {/* Resend documents */}
+              <div className="rounded-xl p-4 border border-white/5" style={{ background: "#131E2B" }}>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Resend Documents</p>
+                <p className="text-xs text-slate-600 mb-3">Resend the free bundle (FAS + TALK Check) to {client.email}</p>
+                <button
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="text-xs font-semibold px-4 py-2 rounded-lg transition-opacity disabled:opacity-50"
+                  style={{ background: "rgba(0,217,192,0.1)", color: "#00D9C0" }}
+                >
+                  {resending ? "Sending…" : "Resend Bundle →"}
+                </button>
+                {resendMsg && (
+                  <p className="text-xs mt-2" style={{ color: resendMsg === "Sent!" ? "#00D9C0" : "#FF6B6B" }}>{resendMsg}</p>
+                )}
+              </div>
+
               {/* Meta */}
               <div className="flex items-center gap-3 pt-2">
-                {client.email && <p className="text-xs text-slate-600">{client.email}</p>}
                 <span
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
                   style={{ background: client.status === "active" ? "rgba(0,217,192,0.1)" : "rgba(100,116,139,0.1)", color: client.status === "active" ? "#00D9C0" : "#64748b" }}

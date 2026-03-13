@@ -65,7 +65,7 @@ export async function sendResourceEmail(to: string, resourceName: string, fileUr
         <!-- Footer -->
         <tr><td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.05);">
           <p style="margin:0;font-size:11px;color:#334155;text-align:center;">
-            You signed up at joinsocialcode.com · <a href="#" style="color:#475569;">Unsubscribe</a>
+            You signed up at joinsocialcode.com · <a href="https://app.joinsocialcode.com/unsubscribe?email=${to}" style="color:#475569;">Unsubscribe</a>
           </p>
         </td></tr>
 

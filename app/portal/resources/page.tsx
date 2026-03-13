@@ -1,7 +1,7 @@
 "use client";
 
 import { usePortalClient } from "../../hooks/usePortalClient";
-import PortalNav from "../../components/portal/PortalNav";
+import PortalShell from "../../components/portal/PortalShell";
 import { ExternalLink } from "lucide-react";
 
 const FREE_RESOURCES = [
@@ -95,10 +95,8 @@ export default function PortalResourcesPage() {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: "#0D1825" }}>
-      <PortalNav clientName={client.name} />
-
-      <main className="flex-1 ml-56 p-8 max-w-2xl">
+    <PortalShell clientName={client.name}>
+      <div className="p-8 max-w-3xl">
         <div className="mb-8">
           <h1 className="text-2xl font-black text-white tracking-tight mb-1">Resources</h1>
           <p className="text-sm text-slate-500">Your frameworks, tools, and reading.</p>
@@ -138,7 +136,7 @@ export default function PortalResourcesPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </PortalShell>
   );
 }
