@@ -14,23 +14,12 @@ export async function OPTIONS() {
 
 const BASE_URL = "https://app.joinsocialcode.com";
 
-const FRAMEWORKS: Record<string, { label: string; file: string; color: string }> = {
-  "talk-check": {
-    label: "TALK Check",
-    file: "TALK Check full.pdf",
-    color: "#00D9C0",
-  },
-  "fearless-approach": {
-    label: "Fearless Approach System",
-    file: "Fearless Approach System full.pdf",
-    color: "#4DE8D4",
-  },
-  "stop-replaying": {
-    label: "Stop Replaying",
-    file: "Stop Replaying E-Book.pdf",
-    color: "#FF6B6B",
-  },
-};
+const FAS_URL = `${BASE_URL}/${encodeURIComponent("Fearless Approach System full.pdf")}`;
+const TALK_URL = `${BASE_URL}/${encodeURIComponent("TALK Check full.pdf")}`;
+
+// Both FAS and TALK Check are delivered together as a free bundle.
+// "stop-replaying" is no longer free — it redirects to Gumroad.
+const BUNDLE_KEYS = new Set(["fearless-approach", "talk-check", "bundle"]);
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -41,8 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400, headers: CORS });
   }
 
-  const fw = FRAMEWORKS[framework];
-  if (!fw) {
+  if (!BUNDLE_KEYS.has(framework)) {
     return NextResponse.json({ error: "Unknown framework" }, { status: 400, headers: CORS });
   }
 
@@ -51,13 +39,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email not configured" }, { status: 500, headers: CORS });
   }
 
-  const downloadUrl = `${BASE_URL}/${encodeURIComponent(fw.file)}`;
   const resend = new Resend(apiKey);
 
   const { error } = await resend.emails.send({
     from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
     to: email,
-    subject: `Your ${fw.label} — Social Code`,
+    subject: "Your Free Social Code Bundle — FAS + TALK Check",
     html: `
 <!DOCTYPE html>
 <html>
@@ -69,23 +56,56 @@ export async function POST(req: NextRequest) {
 
         <tr><td style="padding:32px 40px 24px;border-bottom:1px solid rgba(255,255,255,0.05);">
           <p style="margin:0;font-size:22px;font-weight:900;color:#F7F9FC;letter-spacing:-0.5px;">Social Code</p>
-          <p style="margin:4px 0 0;font-size:12px;color:${fw.color};font-weight:600;text-transform:uppercase;letter-spacing:1px;">Crack the Code</p>
+          <p style="margin:4px 0 0;font-size:12px;color:#00D9C0;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your Free Bundle</p>
         </td></tr>
 
         <tr><td style="padding:32px 40px;">
           <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;line-height:1.6;">You asked for it. Here it is.</p>
-          <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#F7F9FC;line-height:1.2;">${fw.label}</h1>
-          <p style="margin:0 0 24px;font-size:14px;color:#64748b;line-height:1.6;">
-            No fluff. No "just be confident." This is the actual system — built for introverts, grounded in Jungian psychology, tested through thousands of real conversations.
+          <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#F7F9FC;line-height:1.2;">Two frameworks. Start with TALK Check.</h1>
+          <p style="margin:0 0 28px;font-size:14px;color:#64748b;line-height:1.6;">
+            No fluff. No "just be confident." These are actual systems — built for introverts, grounded in Jungian psychology, tested through real conversations.<br/><br/>
+            <strong style="color:#F7F9FC;">Start with TALK Check</strong> — it's the fastest to use in the real world. Then move to the Fearless Approach System for deeper work.
           </p>
-          <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
-            <tr><td style="background:#FF6B6B;border-radius:10px;">
-              <a href="${downloadUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;letter-spacing:0.5px;">
-                DOWNLOAD YOUR PDF →
+
+          <!-- TALK Check button -->
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#00D9C0;text-transform:uppercase;letter-spacing:1px;">Start here</p>
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 12px;">
+            <tr><td style="background:#00D9C0;border-radius:10px;">
+              <a href="${TALK_URL}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#0D1825;text-decoration:none;letter-spacing:0.5px;">
+                DOWNLOAD: TALK Check →
               </a>
             </td></tr>
           </table>
+
+          <!-- FAS button -->
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#4DE8D4;text-transform:uppercase;letter-spacing:1px;">Then this</p>
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
+            <tr><td style="background:rgba(77,232,212,0.12);border:1px solid rgba(77,232,212,0.3);border-radius:10px;">
+              <a href="${FAS_URL}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:700;color:#4DE8D4;text-decoration:none;letter-spacing:0.5px;">
+                DOWNLOAD: Fearless Approach System →
+              </a>
+            </td></tr>
+          </table>
+
           <hr style="border:none;border-top:1px solid rgba(255,255,255,0.05);margin:0 0 24px;"/>
+
+          <!-- Stop Replaying upsell -->
+          <div style="background:#1A2332;border:1px solid rgba(255,107,107,0.2);border-radius:12px;padding:20px;margin-bottom:24px;">
+            <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#FF6B6B;text-transform:uppercase;letter-spacing:1px;">Next step</p>
+            <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#F7F9FC;">Still replaying conversations after you close these?</p>
+            <p style="margin:0 0 16px;font-size:13px;color:#64748b;line-height:1.6;">
+              Stop Replaying is the system for that. Turn 3 days of rumination into 10 minutes of processing.<br/>
+              E-Book + 30-Day Implementation Workbook — $17.
+            </p>
+            <table cellpadding="0" cellspacing="0">
+              <tr><td style="background:#FF6B6B;border-radius:8px;">
+                <a href="https://8864150412757.gumroad.com/l/obzgfd" target="_blank" style="display:inline-block;padding:12px 24px;font-size:13px;font-weight:700;color:#fff;text-decoration:none;">
+                  Get Stop Replaying — $17 →
+                </a>
+              </td></tr>
+            </table>
+          </div>
+
           <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">
             Still awkward. Still weird. Just competent.<br/>
             Shavi, @GetSocialCode
@@ -108,13 +128,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to send email", detail: error }, { status: 500, headers: CORS });
   }
 
-  // Save lead to Supabase (non-blocking — don't fail the request if this errors)
+  // Save lead to Supabase (non-blocking)
   try {
     const supabase = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    await supabase.from("leads").insert({ email, framework });
+    await supabase.from("leads").insert({ email, framework: "bundle" });
   } catch (e) {
     console.error("Lead save failed:", e);
   }
