@@ -8,6 +8,7 @@ import { TYPE_ACRONYMS, TYPE_PROFILES } from "../../lib/mbtiData";
 import ClientMessagesTab from "../../components/client-panel/ClientMessagesTab";
 import ClientTasksTab from "../../components/client-panel/ClientTasksTab";
 import ClientSessionsTab from "../../components/client-panel/ClientSessionsTab";
+import ClientPortalTab from "../../components/client-panel/ClientPortalTab";
 
 const JUNGIAN_TYPES = [
   "INTJ","INTP","ENTJ","ENTP",
@@ -65,7 +66,7 @@ const EMPTY_FORM: FormState = {
   pipelineStage: "lead",
 };
 
-type PanelTab = "profile" | "messages" | "tasks" | "sessions";
+type PanelTab = "profile" | "messages" | "tasks" | "sessions" | "portal";
 
 function ClientPanel({
   client,
@@ -99,6 +100,7 @@ function ClientPanel({
     { key: "messages", label: "Messages" },
     { key: "tasks", label: "Tasks" },
     { key: "sessions", label: "Sessions" },
+    { key: "portal", label: "Portal" },
   ];
 
   return (
@@ -282,6 +284,7 @@ function ClientPanel({
           {tab === "messages" && <ClientMessagesTab clientId={client.id} />}
           {tab === "tasks" && <ClientTasksTab clientId={client.id} />}
           {tab === "sessions" && <ClientSessionsTab clientId={client.id} />}
+          {tab === "portal" && <ClientPortalTab clientId={client.id} clientEmail={client.email} />}
         </div>
       </aside>
     </>
