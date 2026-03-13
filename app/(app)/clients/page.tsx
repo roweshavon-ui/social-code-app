@@ -9,6 +9,7 @@ import ClientMessagesTab from "../../components/client-panel/ClientMessagesTab";
 import ClientTasksTab from "../../components/client-panel/ClientTasksTab";
 import ClientSessionsTab from "../../components/client-panel/ClientSessionsTab";
 import ClientPortalTab from "../../components/client-panel/ClientPortalTab";
+import ClientKitTab from "../../components/client-panel/ClientKitTab";
 
 const JUNGIAN_TYPES = [
   "INTJ","INTP","ENTJ","ENTP",
@@ -66,7 +67,7 @@ const EMPTY_FORM: FormState = {
   pipelineStage: "lead",
 };
 
-type PanelTab = "profile" | "messages" | "tasks" | "sessions" | "portal";
+type PanelTab = "profile" | "messages" | "tasks" | "sessions" | "portal" | "email";
 
 function ClientPanel({
   client,
@@ -101,6 +102,7 @@ function ClientPanel({
     { key: "tasks", label: "Tasks" },
     { key: "sessions", label: "Sessions" },
     { key: "portal", label: "Portal" },
+    { key: "email", label: "Email" },
   ];
 
   return (
@@ -319,6 +321,7 @@ function ClientPanel({
           {tab === "tasks" && <ClientTasksTab clientId={client.id} />}
           {tab === "sessions" && <ClientSessionsTab clientId={client.id} />}
           {tab === "portal" && <ClientPortalTab clientId={client.id} clientEmail={client.email} />}
+          {tab === "email" && <ClientKitTab clientEmail={client.email} />}
         </div>
       </aside>
     </>
