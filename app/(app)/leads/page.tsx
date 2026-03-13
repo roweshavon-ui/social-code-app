@@ -5,6 +5,7 @@ import { Mail, Download, Trash2 } from "lucide-react";
 
 interface Lead {
   id: string;
+  name: string | null;
   email: string;
   framework: string;
   created_at: string;
@@ -13,6 +14,7 @@ interface Lead {
 const FRAMEWORK_LABELS: Record<string, string> = {
   "talk-check": "TALK Check",
   "fearless-approach": "Fearless Approach System",
+  "bundle": "Free Bundle",
 };
 
 export default function Leads() {
@@ -57,6 +59,7 @@ export default function Leads() {
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Name</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Email</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Framework</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-widest">Date</th>
@@ -66,7 +69,8 @@ export default function Leads() {
             <tbody>
               {leads.map((lead, i) => (
                 <tr key={lead.id} style={{ borderTop: i === 0 ? "none" : "1px solid rgba(255,255,255,0.04)" }}>
-                  <td className="px-6 py-4 text-sm text-white">{lead.email}</td>
+                  <td className="px-6 py-4 text-sm text-white">{lead.name ?? <span className="text-slate-600">—</span>}</td>
+                  <td className="px-6 py-4 text-sm text-slate-400">{lead.email}</td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: "rgba(0,217,192,0.1)", color: "#00D9C0" }}>
                       <Download size={10} />

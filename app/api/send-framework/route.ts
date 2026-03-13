@@ -24,6 +24,7 @@ const BUNDLE_KEYS = new Set(["fearless-approach", "talk-check", "bundle"]);
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const email = body.email?.trim().toLowerCase();
+  const name = body.name?.trim() ?? "";
   const framework = body.framework as string;
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
   const { error } = await resend.emails.send({
     from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
     to: email,
+    replyTo: "shavi@joinsocialcode.com",
     subject: "Your Free Social Code Bundle — FAS + TALK Check",
     html: `
 <!DOCTYPE html>
@@ -60,7 +62,7 @@ export async function POST(req: NextRequest) {
         </td></tr>
 
         <tr><td style="padding:32px 40px;">
-          <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;line-height:1.6;">You asked for it. Here it is.</p>
+          <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;line-height:1.6;">${name ? `Hey ${name} —` : "You asked for it."} Here it is.</p>
           <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:#F7F9FC;line-height:1.2;">Two frameworks. Start with TALK Check.</h1>
           <p style="margin:0 0 28px;font-size:14px;color:#64748b;line-height:1.6;">
             No fluff. No "just be confident." These are actual systems — built for introverts, grounded in Jungian psychology, tested through real conversations.<br/><br/>
@@ -134,7 +136,7 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    await supabase.from("leads").insert({ email, framework: "bundle" });
+    await supabase.from("leads").insert({ email, name: name || null, framework: "bundle" });
   } catch (e) {
     console.error("Lead save failed:", e);
   }
@@ -151,6 +153,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           email_address: email,
+          first_name: name || undefined,
           tags: ["free-bundle"],
         }),
       });
