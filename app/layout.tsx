@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Work_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning className={`${outfit.variable} ${workSans.variable} ${outfit.className}`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
