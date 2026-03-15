@@ -171,24 +171,28 @@ ${typeExtra}`;
 
   const base = `You are a coaching strategist using Chase Hughes' frameworks. Be specific and tactical — coach's private use only.\n\n${context}\n\nReturn ONLY this JSON (no markdown):\n`;
 
+  // Prefill forces model to start with { immediately — no wasted tokens on preamble
   async function callHaiku(prompt: string, max_tokens: number) {
     const msg = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens,
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "user", content: prompt },
+        { role: "assistant", content: "{" },
+      ],
     });
     const c = msg.content[0];
     if (c.type !== "text") throw new Error("Unexpected response type");
-    const start = c.text.indexOf("{");
-    const end = c.text.lastIndexOf("}");
-    if (start === -1 || end === -1) throw new Error(`No JSON found — model returned: "${c.text.slice(0, 300)}"`);
-    return JSON.parse(c.text.slice(start, end + 1));
+    const text = "{" + c.text;
+    const end = text.lastIndexOf("}");
+    if (end === -1) throw new Error(`JSON truncated — got: "${text.slice(0, 300)}"`);
+    return JSON.parse(text.slice(0, end + 1));
   }
 
-  // 3 parallel calls — each small, all finish well within 10s
+  // 3 parallel calls — each capped small, run simultaneously (~3-5s wall time)
   const [salesResult, sessionResult, tacticsResult] = await Promise.all([
     callHaiku(base + SALES_SCHEMA, 700),
-    callHaiku(base + SESSION_ACTIONS_SCHEMA, 700),
+    callHaiku(base + SESSION_ACTIONS_SCHEMA, 1000),
     callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
   ]);
 
