@@ -1,30 +1,11 @@
+import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabase } from "@/app/lib/supabase";
-import { BEHAVIORAL_QUESTIONS } from "@/app/(app)/questionnaire/questions";
 import { TYPE_PROFILES } from "@/app/lib/mbtiData";
 
+export const maxDuration = 30;
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
-
-function buildBehavioralSignals(answerMap: Record<string, "a" | "b">): string {
-  const signals: string[] = [];
-  for (const q of BEHAVIORAL_QUESTIONS) {
-    const answer = answerMap[String(q.id)];
-    if (!answer) continue;
-    const signal = answer === "a" ? q.a.signal : q.b.signal;
-    signals.push(`Q${q.id}: ${signal} ("${answer === "a" ? q.a.label : q.b.label}")`);
-  }
-  return signals.join("\n");
-}
-
-function buildScorePercentages(scores: Record<string, number>): string {
-  const pct = (a: number, b: number) => (a + b > 0 ? Math.round((a / (a + b)) * 100) : 50);
-  return [
-    `E ${pct(scores.E, scores.I)}% / I ${pct(scores.I, scores.E)}%`,
-    `S ${pct(scores.S, scores.N)}% / N ${pct(scores.N, scores.S)}%`,
-    `T ${pct(scores.T, scores.F)}% / F ${pct(scores.F, scores.T)}%`,
-    `J ${pct(scores.J, scores.P)}% / P ${pct(scores.P, scores.J)}%`,
-  ].join("\n");
-}
 
 function buildTypeContext(jungianType: string): string {
   const tp = TYPE_PROFILES[jungianType];
@@ -108,67 +89,64 @@ const PROFILE_SCHEMA = `{
   }
 }`;
 
-export async function generateBehavioralProfile(assessmentId: string): Promise<void> {
-  const { data: assessment, error } = await getSupabase()
-    .from("assessments")
+export async function POST(req: NextRequest) {
+  const { client_id } = await req.json();
+  if (!client_id) return NextResponse.json({ error: "client_id required" }, { status: 400 });
+
+  const { data: c, error } = await getSupabase()
+    .from("clients")
     .select("*")
-    .eq("id", assessmentId)
+    .eq("id", client_id)
     .single();
 
-  if (error || !assessment) {
-    throw new Error(`Assessment not found: id=${assessmentId} error=${JSON.stringify(error)}`);
-  }
+  if (error || !c) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
-  const scorePercentages = buildScorePercentages(assessment.scores ?? {});
-  const behavioralSignals = buildBehavioralSignals(assessment.answer_map ?? {});
-  const hasBehavioralSignals = behavioralSignals.trim().length > 0;
-  const typeContext = buildTypeContext(assessment.jungian_type);
+  const typeContext = buildTypeContext(c.jungian_type);
 
   const prompt = `You are an expert behavioral profiler and coaching strategist with deep knowledge of Chase Hughes' frameworks including the Six-Minute X-Ray, Human Needs Map, Six-Axis Model, and influence/persuasion methodology.
 
-Analyze this person's assessment data and generate a comprehensive behavioral profile AND coaching playbook for their coach's private use. This is NEVER shown to the client.
+Generate a comprehensive behavioral profile AND coaching playbook for this coaching client. This is NEVER shown to the client — it is the coach's private intelligence.
 
 PERSON DATA:
-Name: ${assessment.name}
-Jungian Type: ${assessment.jungian_type}
-Goal they stated: ${assessment.goal ?? "Not specified"}
+Name: ${c.name}
+Jungian Type: ${c.jungian_type ?? "Unknown"}
+Goal they stated: ${c.goal ?? "Not specified"}
+Notes: ${c.notes ?? "None"}
 
-SCORE PERCENTAGES (calibration matters — 55% vs 92% are very different):
-${scorePercentages}
-
-${hasBehavioralSignals
-  ? `BEHAVIORAL SIGNALS FROM ANSWERS:\n${behavioralSignals}`
-  : `BEHAVIORAL SIGNALS: Not available (older submission — infer from Jungian scores and stated goal only)`
-}
+Note: No assessment score data available — infer from Jungian type, stated goal, and notes.
 
 ${typeContext ? `${typeContext}\n` : ""}
-Generate a JSON object with EXACTLY this structure. Every field must be written specifically for THIS person — not generic type descriptions. The coaching_playbook section especially must be actionable enough to use live in a session.
+Generate a JSON object with EXACTLY this structure. Every field must be written specifically for THIS person. The coaching_playbook section must be actionable enough to use live in a session.
 
 ${PROFILE_SCHEMA}
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 8000,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const content = message.content[0];
-  if (content.type !== "text") throw new Error("Unexpected response type");
-
-  const text = content.text;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error(`No JSON object found. Response was: ${text.slice(0, 300)}`);
-  const raw = text.slice(start, end + 1);
   try {
-    const profile = JSON.parse(raw);
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 8000,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const content = message.content[0];
+    if (content.type !== "text") throw new Error("Unexpected response type");
+
+    const text = content.text;
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1) throw new Error("No JSON found in response");
+
+    const profile = JSON.parse(text.slice(start, end + 1));
+
     await getSupabase()
-      .from("assessments")
+      .from("clients")
       .update({ behavioral_profile: profile })
-      .eq("id", assessmentId);
+      .eq("id", client_id);
+
+    return NextResponse.json({ success: true });
   } catch (e) {
-    throw new Error(`JSON parse failed. Raw (first 500): ${raw.slice(0, 500)}`);
+    console.error("Client profile generation failed:", e);
+    return NextResponse.json({ error: "Profile generation failed" }, { status: 500 });
   }
 }

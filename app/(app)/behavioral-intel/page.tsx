@@ -14,6 +14,7 @@ import {
   Zap,
   BookOpen,
   Trash2,
+  ClipboardList,
 } from "lucide-react";
 
 const BRAND = {
@@ -60,6 +61,19 @@ type BehavioralProfile = {
     what_gets_them_off_fence: string;
     coaching_close_script: string;
     anchor_moment: string;
+  };
+  coaching_playbook?: {
+    session_1_blueprint: string;
+    how_to_open_sessions: string;
+    unlock_questions: string[];
+    when_stuck_intervention: string;
+    when_spiraling_intervention: string;
+    feedback_delivery: string;
+    homework_style: string;
+    push_vs_pull: string;
+    progress_markers: string;
+    red_flags: string[];
+    coaching_arc: string;
   };
 };
 
@@ -455,7 +469,64 @@ function AssessmentRow({
             </div>
           </Section>
 
-          {/* Section 4: Sales Closing Handbook */}
+          {/* Section 4: Coaching Playbook */}
+          {p.coaching_playbook && (
+            <Section icon={<ClipboardList size={14} />} title="Coaching Playbook" color="#a78bfa">
+              <div className="space-y-4">
+                <div className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#a78bfa" }}>Session 1 Blueprint</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{p.coaching_playbook.session_1_blueprint}</p>
+                </div>
+
+                <Field label="How to Open Every Session" value={p.coaching_playbook.how_to_open_sessions} />
+
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Unlock Questions</p>
+                  <ul className="space-y-2">
+                    {p.coaching_playbook.unlock_questions.map((q, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                        <span className="mt-0.5 flex-shrink-0 font-bold" style={{ color: "#a78bfa" }}>{i + 1}.</span>{q}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="rounded-lg p-3 border border-white/5" style={{ background: "#0D1825" }}>
+                    <p className="text-xs font-bold text-slate-400 mb-1.5">When They Go Quiet / Resist</p>
+                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_stuck_intervention}"</p>
+                  </div>
+                  <div className="rounded-lg p-3 border border-white/5" style={{ background: "#0D1825" }}>
+                    <p className="text-xs font-bold text-slate-400 mb-1.5">When They're Spiraling</p>
+                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_spiraling_intervention}"</p>
+                  </div>
+                </div>
+
+                <Field label="How to Deliver Feedback" value={p.coaching_playbook.feedback_delivery} />
+                <Field label="Homework Style" value={p.coaching_playbook.homework_style} />
+                <Field label="Push vs. Pull — When to Use Each" value={p.coaching_playbook.push_vs_pull} />
+                <Field label="Signs of Real Progress" value={p.coaching_playbook.progress_markers} highlight />
+
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Red Flags — About to Disengage</p>
+                  <ul className="space-y-1.5">
+                    {p.coaching_playbook.red_flags.map((flag, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                        <span style={{ color: BRAND.coral }} className="mt-0.5 flex-shrink-0">⚠</span>{flag}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-lg p-4 border" style={{ background: "rgba(167,139,250,0.04)", borderColor: "rgba(167,139,250,0.2)" }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#a78bfa" }}>Full Coaching Arc</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{p.coaching_playbook.coaching_arc}</p>
+                </div>
+              </div>
+            </Section>
+          )}
+
+          {/* Section 5: Sales Closing Handbook */}
           <Section icon={<BookOpen size={14} />} title="Sales Closing Handbook" color={BRAND.coral}>
             <div className="space-y-4">
               <Field label="Buyer Profile" value={p.sales_handbook.buyer_profile} />
