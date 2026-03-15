@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/app/lib/supabase";
 import { Resend } from "resend";
+import { generateBehavioralProfile } from "@/app/lib/generate-profile";
 
 export async function GET() {
   const { data, error } = await getSupabase()
@@ -28,15 +29,10 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Generate behavioral profile synchronously — Vercel kills fire-and-forget after response
+  // Generate behavioral profile directly — no HTTP self-call, works reliably on Vercel
   if (data?.id && answer_map) {
     try {
-      const baseUrl = req.nextUrl.origin;
-      await fetch(`${baseUrl}/api/generate-profile`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assessment_id: data.id }),
-      });
+      await generateBehavioralProfile(data.id);
     } catch (e) {
       console.error("Profile generation failed silently:", e);
     }
