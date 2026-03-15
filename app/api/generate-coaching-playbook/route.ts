@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     await generateCoachingPlaybook(assessment_id);
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error("Coaching playbook generation failed:", e);
-    return NextResponse.json({ error: "Coaching playbook generation failed" }, { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Coaching playbook generation failed:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
