@@ -7,6 +7,7 @@ import Image from "next/image";
 import {
   LayoutDashboard,
   Users,
+  Users2,
   CalendarDays,
   BookOpen,
   MessageSquare,
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/questionnaire", label: "Assessment", icon: ClipboardList },
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
+  { href: "/group-sessions", label: "Group Sessions", icon: Users2 },
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
   { href: "/posts", label: "Blog", icon: Newspaper },

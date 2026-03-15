@@ -332,7 +332,11 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
   const [customTopic, setCustomTopic] = useState("");
   const [generating, setGenerating] = useState(false);
   const [plan, setPlan] = useState<SessionPlan | null>(null);
+  const [isIntake, setIsIntake] = useState(false);
+  const [lastSessionBrief, setLastSessionBrief] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const clientId = entry.source === "client" ? entry.id : null;
 
   async function generate() {
     setGenerating(true);
@@ -345,6 +349,7 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
           profile: entry.behavioral_profile,
           name: entry.name,
           jungian_type: entry.jungian_type,
+          client_id: clientId,
           session_number: sessionNumber,
           coach_note: coachNote,
           mode,
@@ -355,6 +360,8 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
       setPlan(data.plan);
+      setIsIntake(data.isIntake ?? false);
+      setLastSessionBrief(data.lastSessionBrief ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -475,10 +482,25 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
           <div className="px-6 py-5 space-y-5 overflow-y-auto">
             {/* Plan header */}
             <div className="rounded-xl p-4 border" style={{ background: "rgba(167,139,250,0.06)", borderColor: "rgba(167,139,250,0.2)" }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#a78bfa" }}>Session {sessionNumber}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#a78bfa" }}>Session {sessionNumber}</p>
+                {isIntake && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,217,192,0.1)", color: "#00D9C0" }}>
+                    Intake
+                  </span>
+                )}
+              </div>
               <p className="text-lg font-black text-white">{plan.session_title}</p>
               <p className="text-xs text-slate-400 mt-1">{plan.todays_focus}</p>
             </div>
+
+            {/* Since last session brief */}
+            {lastSessionBrief && (
+              <div className="rounded-lg p-3 border border-white/5" style={{ background: "#131E2B" }}>
+                <p className="text-xs font-bold text-slate-400 mb-1.5">Context: Since Last Session</p>
+                <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line">{lastSessionBrief}</p>
+              </div>
+            )}
 
             {/* Agenda */}
             <div>

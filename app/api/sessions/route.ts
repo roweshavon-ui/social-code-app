@@ -18,7 +18,23 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { clientId, clientName, date, duration, notes, actionItems, rating } = body;
+  const {
+    clientId,
+    clientName,
+    date,
+    duration,
+    notes,
+    actionItems,
+    rating,
+    sessionNumber,
+    sessionType,
+    clientEngagement,
+    homeworkCompletion,
+    homeworkAssigned,
+    breakthroughMoment,
+    coachObservations,
+    frameworksUsed,
+  } = body;
 
   if (!clientName?.trim() || !date) {
     return NextResponse.json({ error: "Client name and date are required" }, { status: 400 });
@@ -34,6 +50,14 @@ export async function POST(req: NextRequest) {
       notes,
       action_items: actionItems,
       rating: rating ?? 5,
+      session_number: sessionNumber ?? 1,
+      session_type: sessionType ?? "ongoing",
+      client_engagement: clientEngagement ?? "open",
+      homework_completion: homeworkCompletion ?? "none",
+      homework_assigned: homeworkAssigned ?? null,
+      breakthrough_moment: breakthroughMoment ?? null,
+      coach_observations: coachObservations ?? null,
+      frameworks_used: frameworksUsed ?? [],
     })
     .select()
     .single();
