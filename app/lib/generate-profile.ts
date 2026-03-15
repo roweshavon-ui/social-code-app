@@ -32,7 +32,9 @@ export async function generateBehavioralProfile(assessmentId: string): Promise<v
     .eq("id", assessmentId)
     .single();
 
-  if (error || !assessment) throw new Error("Assessment not found");
+  if (error || !assessment) {
+    throw new Error(`Assessment not found: id=${assessmentId} error=${JSON.stringify(error)}`);
+  }
 
   const scorePercentages = buildScorePercentages(assessment.scores ?? {});
   const behavioralSignals = buildBehavioralSignals(assessment.answer_map ?? {});
