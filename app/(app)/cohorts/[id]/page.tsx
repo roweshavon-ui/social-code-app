@@ -119,10 +119,14 @@ export default function CohortDetailPage() {
 
   async function buildSessionPlan(session: CohortSession) {
     if (!cohort) return;
+    const cohortClients = clients.filter((c) => cohort.client_ids.includes(c.id));
+    if (cohortClients.length < 2) {
+      setError("Need at least 2 clients in this cohort to build a group plan. Make sure clients are added.");
+      return;
+    }
     setBuildingPlan(session.id);
     setError(null);
     try {
-      const cohortClients = clients.filter((c) => cohort.client_ids.includes(c.id));
       const res = await fetch("/api/generate-group-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,9 +138,16 @@ export default function CohortDetailPage() {
           session_goal: session.objectives ?? cohort.description,
         }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { plan?: GroupSessionPlan; error?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Server error — try again in a moment");
+      }
       if (!res.ok) throw new Error(data.error ?? "Failed");
 
+      if (!data.plan) throw new Error("No plan returned from AI");
       // Save plan to session
       const updateRes = await fetch(`/api/cohort-sessions/${session.id}`, {
         method: "PUT",
