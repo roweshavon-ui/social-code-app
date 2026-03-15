@@ -568,26 +568,7 @@ function SessionCard({
         <div className="border-t border-white/5 px-5 py-4 space-y-3">
           {/* Saved plan view */}
           {session.plan && session.sessionType === "planned" && (
-            <>
-              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#a78bfa" }}>
-                Session Plan
-              </p>
-              {(session.plan.todays_focus as string) && (
-                <DetailField label="Focus" value={session.plan.todays_focus as string} />
-              )}
-              {(session.plan.opening as string) && (
-                <DetailField label="How to Open" value={session.plan.opening as string} />
-              )}
-              {(session.plan.check_in as string) && (
-                <DetailField label="Check-In Question" value={session.plan.check_in as string} highlight />
-              )}
-              {(session.plan.exercise as string) && (
-                <DetailField label="Exercise" value={session.plan.exercise as string} />
-              )}
-              {(session.plan.homework as string) && (
-                <DetailField label="Homework to Assign" value={session.plan.homework as string} />
-              )}
-            </>
+            <FullPlanView plan={session.plan} />
           )}
           {/* Logged session view */}
           {session.sessionType !== "planned" && (
@@ -649,6 +630,103 @@ function DetailField({
       <p className={`text-xs leading-relaxed ${highlight ? "text-white font-semibold" : "text-slate-400"}`}>
         {value}
       </p>
+    </div>
+  );
+}
+
+function FullPlanView({ plan }: { plan: Record<string, unknown> }) {
+  const agenda = plan.agenda as { time: string; block: string; notes: string }[] | undefined;
+  const questions = plan.session_questions as string[] | undefined;
+  const watchFor = plan.what_to_watch as string[] | undefined;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#a78bfa" }}>
+        Full Session Plan
+      </p>
+
+      {(plan.todays_focus as string) && (
+        <DetailField label="Today's Focus" value={plan.todays_focus as string} />
+      )}
+      {(plan.opening as string) && (
+        <DetailField label="How to Open" value={plan.opening as string} />
+      )}
+      {(plan.check_in as string) && (
+        <DetailField label="Check-In Question" value={plan.check_in as string} highlight />
+      )}
+
+      {agenda && agenda.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Agenda</p>
+          <div className="space-y-1.5">
+            {agenda.map((a, i) => (
+              <div key={i} className="flex gap-3 text-xs">
+                <span className="text-slate-600 flex-shrink-0 w-16">{a.time}</span>
+                <div>
+                  <span className="font-semibold text-slate-300">{a.block}</span>
+                  {a.notes && <span className="text-slate-500 ml-2">{a.notes}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(plan.framework_or_topic_approach as string) && (
+        <DetailField label="Framework Approach" value={plan.framework_or_topic_approach as string} />
+      )}
+
+      {questions && questions.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Questions — In Order</p>
+          <ol className="space-y-1.5">
+            {questions.map((q, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
+                <span className="font-bold flex-shrink-0" style={{ color: "#a78bfa" }}>{i + 1}.</span>{q}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {(plan.exercise as string) && (
+        <DetailField label="Exercise / Drill" value={plan.exercise as string} />
+      )}
+
+      {watchFor && watchFor.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">What to Watch For</p>
+          <ul className="space-y-1">
+            {watchFor.map((w, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-400">
+                <span className="flex-shrink-0" style={{ color: "#00D9C0" }}>→</span>{w}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {(plan.if_they_resist as string) && (
+        <div className="rounded-lg p-3 border border-white/5" style={{ background: "#0D1825" }}>
+          <p className="text-xs font-bold text-slate-400 mb-1">If They Resist</p>
+          <p className="text-xs text-slate-300 italic">&quot;{plan.if_they_resist as string}&quot;</p>
+        </div>
+      )}
+
+      {(plan.session_close as string) && (
+        <DetailField label="How to Close" value={plan.session_close as string} />
+      )}
+
+      {(plan.homework as string) && (
+        <div className="rounded-lg p-3 border" style={{ background: "rgba(0,217,192,0.04)", borderColor: "rgba(0,217,192,0.15)" }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: "#00D9C0" }}>Homework</p>
+          <p className="text-xs text-slate-300 leading-relaxed">{plan.homework as string}</p>
+        </div>
+      )}
+
+      {(plan.next_session_seed as string) && (
+        <DetailField label="Plant This for Next Session" value={plan.next_session_seed as string} />
+      )}
     </div>
   );
 }
