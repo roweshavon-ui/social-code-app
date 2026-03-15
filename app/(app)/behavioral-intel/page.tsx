@@ -111,18 +111,28 @@ export default function BehavioralIntelPage() {
   async function runBackfill() {
     setBackfilling(true);
     setBackfillResult(null);
-    try {
-      const res = await fetch("/api/assessments/backfill", { method: "POST" });
-      const data = await res.json();
-      if (data.count === 0 || data.message) {
-        setBackfillResult("All assessments already have profiles.");
-      } else {
-        setBackfillResult(`Backfill complete: ${data.success} generated, ${data.failed} failed.`);
-      }
-      await load();
-    } finally {
+    const missing = assessments.filter((a) => !a.behavioral_profile);
+    if (!missing.length) {
+      setBackfillResult("All assessments already have profiles.");
       setBackfilling(false);
+      return;
     }
+    let success = 0;
+    // Process one at a time — each gets its own serverless call to avoid timeout
+    for (const a of missing) {
+      try {
+        const res = await fetch("/api/generate-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assessment_id: a.id }),
+        });
+        if (res.ok) success++;
+      } catch { /* continue */ }
+      setBackfillResult(`Generating... ${success}/${missing.length}`);
+    }
+    setBackfillResult(`Done — ${success}/${missing.length} profiles generated.`);
+    await load();
+    setBackfilling(false);
   }
 
   const withProfile = assessments.filter((a) => a.behavioral_profile);
