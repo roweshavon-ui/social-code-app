@@ -56,32 +56,34 @@ const CORE_SCHEMA = `{
   }
 }`;
 
-// ── Part 2: Sales + coaching playbook (fast, ~1400 tokens max) ──────────────
+// ── Part 2: Sales + coaching playbook (fast, ~1600 tokens max) ──────────────
 const PLAYBOOK_SCHEMA = `{
   "sales_handbook": {
-    "buyer_profile": "1-2 sentences on what kind of buyer this person is",
+    "buyer_profile": "1 sentence on what kind of buyer this person is",
     "likely_objections": [
-      {"objection": "most likely objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact response"},
-      {"objection": "second objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact response"}
+      {"objection": "objection","what_it_really_means": "real reason (short)","reframe": "how to handle (short)","language": "exact 1-sentence response"},
+      {"objection": "objection","what_it_really_means": "real reason (short)","reframe": "how to handle (short)","language": "exact 1-sentence response"}
     ],
-    "close_style": "closing approach for this profile",
-    "what_kills_the_sale": "the specific thing NOT to do",
-    "what_gets_them_off_fence": "the single most powerful move",
-    "coaching_close_script": "3-4 sentence close script — speak to their need and fear",
-    "anchor_moment": "emotional anchor to plant in first 10 minutes"
+    "close_style": "1 sentence closing approach",
+    "what_kills_the_sale": "1 sentence",
+    "what_gets_them_off_fence": "1 sentence",
+    "coaching_close_script": "2-sentence close script",
+    "anchor_moment": "1 sentence"
   },
   "coaching_playbook": {
-    "session_1_blueprint": "what to do in session 1 — what to establish, probe, avoid",
-    "how_to_open_sessions": "best way to open every session with this person",
-    "unlock_questions": ["4 exact questions that open this specific person up"],
-    "when_stuck_intervention": "word-for-word language when they go quiet or resist",
-    "when_spiraling_intervention": "what to say when they are overwhelmed or in their head",
-    "feedback_delivery": "how to challenge this person so it lands without triggering their fear",
-    "homework_style": "what assignments work for this profile and how to frame them",
-    "push_vs_pull": "when to push and when to ease off — the signals to watch for",
-    "progress_markers": "what real growth looks like for this person",
-    "red_flags": ["3 warning signs this person is about to stall or disengage"],
-    "coaching_arc": "the full arc — early sessions, mid-point, endgame for this profile"
+    "how_to_open_sessions": "exact opening question (1 sentence)",
+    "unlock_questions": ["question 1","question 2","question 3","question 4"],
+    "session_actions": [
+      {"session": "Session 1", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
+      {"session": "Sessions 2-3", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
+      {"session": "Sessions 4-6", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
+      {"session": "Sessions 7+", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"}
+    ],
+    "when_stuck": "exact 1-2 sentence script",
+    "when_spiraling": "exact 1-2 sentence script",
+    "feedback_delivery": "1 sentence",
+    "homework_style": "1 sentence",
+    "red_flags": ["flag + action (1 sentence each) x3"]
   }
 }`;
 
@@ -167,7 +169,7 @@ ${PLAYBOOK_SCHEMA}`;
 
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 1400,
+    max_tokens: 1600,
     messages: [{ role: "user", content: playbookPrompt }],
   });
 

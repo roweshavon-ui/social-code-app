@@ -92,17 +92,14 @@ type BehavioralProfile = {
     anchor_moment: string;
   };
   coaching_playbook?: {
-    session_1_blueprint: string;
     how_to_open_sessions: string;
     unlock_questions: string[];
-    when_stuck_intervention: string;
-    when_spiraling_intervention: string;
+    session_actions?: { session: string; goal: string; do_this: string; avoid: string }[];
+    when_stuck: string;
+    when_spiraling: string;
     feedback_delivery: string;
     homework_style: string;
-    push_vs_pull: string;
-    progress_markers: string;
     red_flags: string[];
-    coaching_arc: string;
   };
 };
 
@@ -139,7 +136,6 @@ export default function BehavioralIntelPage() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
   const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
-  const [generatingPlaybook, setGeneratingPlaybook] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -193,45 +189,36 @@ export default function BehavioralIntelPage() {
   async function generateProfile(entry: ClientEntry) {
     setGenerating(entry.id);
     try {
-      if (entry.source === "assessment") {
-        await fetch("/api/generate-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ assessment_id: entry.id }),
-        });
-      } else {
-        await fetch("/api/generate-client-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ client_id: entry.id }),
-        });
-      }
-      await load();
-    } finally {
-      setGenerating(null);
-    }
-  }
-
-  async function generatePlaybook(entry: ClientEntry) {
-    setGeneratingPlaybook(entry.id);
-    try {
-      const res = await fetch("/api/generate-coaching-playbook", {
+      // Step 1: core profile
+      const coreEndpoint = entry.source === "assessment" ? "/api/generate-profile" : "/api/generate-client-profile";
+      const coreBody = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
+      const r1 = await fetch(coreEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assessment_id: entry.id }),
+        body: JSON.stringify(coreBody),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        console.error("Playbook generation failed:", data);
-        alert("Playbook generation failed — " + (data.error ?? "try again"));
-        return;
+      if (!r1.ok) {
+        const d = await r1.json().catch(() => ({}));
+        throw new Error(d.error ?? "Core profile generation failed");
       }
+
+      // Step 2: playbook — auto-chains right after, no extra button needed
+      const playbookBody = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
+      const r2 = await fetch("/api/generate-coaching-playbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(playbookBody),
+      });
+      if (!r2.ok) {
+        const d = await r2.json().catch(() => ({}));
+        throw new Error(d.error ?? "Playbook generation failed");
+      }
+
       await load();
     } catch (e) {
-      console.error("Playbook error:", e);
-      alert("Something went wrong — check console");
+      alert(e instanceof Error ? e.message : "Generation failed — try again");
     } finally {
-      setGeneratingPlaybook(null);
+      setGenerating(null);
     }
   }
 
@@ -335,8 +322,6 @@ export default function BehavioralIntelPage() {
               onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
               onGenerate={() => generateProfile(entry)}
               generating={generating === entry.id}
-              onGeneratePlaybook={() => generatePlaybook(entry)}
-              generatingPlaybook={generatingPlaybook === entry.id}
               onRemove={() => removeEntry(entry)}
               removing={removing === entry.id}
               confirmingRemove={confirmRemove === entry.id}
@@ -691,8 +676,6 @@ function AssessmentRow({
   onToggle,
   onGenerate,
   generating,
-  onGeneratePlaybook,
-  generatingPlaybook,
   onRemove,
   removing,
   confirmingRemove,
@@ -705,8 +688,6 @@ function AssessmentRow({
   onToggle: () => void;
   onGenerate: () => void;
   generating: boolean;
-  onGeneratePlaybook: () => void;
-  generatingPlaybook: boolean;
   onRemove: () => void;
   removing: boolean;
   confirmingRemove: boolean;
@@ -764,18 +745,7 @@ function AssessmentRow({
               style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
             >
               {generating ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
-              {generating ? "Generating..." : "Generate Profile"}
-            </button>
-          )}
-          {p && entry.source === "assessment" && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onGeneratePlaybook(); }}
-              disabled={generatingPlaybook}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
-            >
-              {generatingPlaybook ? <Loader2 size={11} className="animate-spin" /> : <Zap size={11} />}
-              {generatingPlaybook ? "Building..." : p.coaching_playbook ? "Refresh Playbook" : "Add Playbook"}
+              {generating ? "Generating full profile..." : "Generate Profile"}
             </button>
           )}
           {p && (
@@ -891,13 +861,8 @@ function AssessmentRow({
 
           {/* Section 4: Coaching Playbook */}
           {p.coaching_playbook && (
-            <Section icon={<ClipboardList size={14} />} title="Coaching Playbook" color="#a78bfa">
+            <Section icon={<ClipboardList size={14} />} title="Coaching Playbook — What to Do" color="#a78bfa">
               <div className="space-y-4">
-                <div className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#a78bfa" }}>Session 1 Blueprint</p>
-                  <p className="text-xs text-slate-300 leading-relaxed">{p.coaching_playbook.session_1_blueprint}</p>
-                </div>
-
                 <Field label="How to Open Every Session" value={p.coaching_playbook.how_to_open_sessions} />
 
                 <div>
@@ -911,21 +876,36 @@ function AssessmentRow({
                   </ul>
                 </div>
 
+                {/* Session-by-session actions */}
+                {(p.coaching_playbook.session_actions ?? []).length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Per-Session Action Plan</p>
+                    <div className="space-y-3">
+                      {(p.coaching_playbook.session_actions ?? []).map((sa, i) => (
+                        <div key={i} className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
+                          <p className="text-xs font-bold mb-2" style={{ color: "#a78bfa" }}>{sa.session}</p>
+                          <p className="text-xs text-slate-400 mb-1"><span className="font-semibold text-slate-300">Goal:</span> {sa.goal}</p>
+                          <p className="text-xs text-slate-400 mb-1"><span className="font-semibold" style={{ color: BRAND.teal }}>Do this:</span> {sa.do_this}</p>
+                          <p className="text-xs text-slate-400"><span className="font-semibold" style={{ color: BRAND.coral }}>Avoid:</span> {sa.avoid}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="rounded-lg p-3 border border-white/5" style={{ background: "#0D1825" }}>
                     <p className="text-xs font-bold text-slate-400 mb-1.5">When They Go Quiet / Resist</p>
-                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_stuck_intervention}"</p>
+                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_stuck}"</p>
                   </div>
                   <div className="rounded-lg p-3 border border-white/5" style={{ background: "#0D1825" }}>
                     <p className="text-xs font-bold text-slate-400 mb-1.5">When They're Spiraling</p>
-                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_spiraling_intervention}"</p>
+                    <p className="text-xs text-slate-300 leading-relaxed italic">"{p.coaching_playbook.when_spiraling}"</p>
                   </div>
                 </div>
 
                 <Field label="How to Deliver Feedback" value={p.coaching_playbook.feedback_delivery} />
                 <Field label="Homework Style" value={p.coaching_playbook.homework_style} />
-                <Field label="Push vs. Pull — When to Use Each" value={p.coaching_playbook.push_vs_pull} />
-                <Field label="Signs of Real Progress" value={p.coaching_playbook.progress_markers} highlight />
 
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Red Flags — About to Disengage</p>
@@ -936,11 +916,6 @@ function AssessmentRow({
                       </li>
                     ))}
                   </ul>
-                </div>
-
-                <div className="rounded-lg p-4 border" style={{ background: "rgba(167,139,250,0.04)", borderColor: "rgba(167,139,250,0.2)" }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#a78bfa" }}>Full Coaching Arc</p>
-                  <p className="text-xs text-slate-300 leading-relaxed">{p.coaching_playbook.coaching_arc}</p>
                 </div>
               </div>
             </Section>
