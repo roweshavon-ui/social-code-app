@@ -56,37 +56,44 @@ const CORE_SCHEMA = `{
   }
 }`;
 
-// ── Part 2a: Sales handbook (~800 tokens max) ────────────────────────────────
+// ── Part 2a: Sales handbook (~700 tokens max) ────────────────────────────────
 const SALES_SCHEMA = `{
   "sales_handbook": {
-    "buyer_profile": "1 sentence",
+    "buyer_profile": "1-2 sentences on what kind of buyer this person is",
     "likely_objections": [
-      {"objection": "objection","what_it_really_means": "short reason","reframe": "short reframe","language": "1-sentence script"},
-      {"objection": "objection","what_it_really_means": "short reason","reframe": "short reframe","language": "1-sentence script"}
+      {"objection": "most likely objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact 1-sentence response"},
+      {"objection": "second objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact 1-sentence response"}
     ],
-    "close_style": "1 sentence",
-    "what_kills_the_sale": "1 sentence",
-    "what_gets_them_off_fence": "1 sentence",
-    "coaching_close_script": "2-sentence script",
-    "anchor_moment": "1 sentence"
+    "close_style": "closing approach for this profile",
+    "what_kills_the_sale": "the specific thing NOT to do",
+    "what_gets_them_off_fence": "the single most powerful move",
+    "coaching_close_script": "2-sentence close script",
+    "anchor_moment": "emotional anchor to plant in first 10 minutes"
   }
 }`;
 
-// ── Part 2b: Coaching playbook (~700 tokens max) ──────────────────────────────
-const COACHING_SCHEMA = `{
+// ── Part 2b: Per-session action plan (~700 tokens max) ───────────────────────
+const SESSION_ACTIONS_SCHEMA = `{
   "coaching_playbook": {
-    "how_to_open_sessions": "1-sentence question",
-    "unlock_questions": ["q1","q2","q3"],
+    "how_to_open_sessions": "exact opening question to use at the start of every session",
+    "unlock_questions": ["exact question 1","exact question 2","exact question 3","exact question 4"],
     "session_actions": [
-      {"session": "Session 1", "goal": "short", "do_this": "1 sentence", "avoid": "short"},
-      {"session": "Sessions 2-4", "goal": "short", "do_this": "1 sentence", "avoid": "short"},
-      {"session": "Sessions 5+", "goal": "short", "do_this": "1 sentence", "avoid": "short"}
-    ],
-    "when_stuck": "1-sentence script",
-    "when_spiraling": "1-sentence script",
-    "feedback_delivery": "short",
-    "homework_style": "short",
-    "red_flags": ["flag 1","flag 2","flag 3"]
+      {"session": "Session 1", "goal": "what to establish", "do_this": "exact things to do and say", "avoid": "what not to do"},
+      {"session": "Sessions 2-3", "goal": "what to build", "do_this": "exact things to do and say", "avoid": "what not to do"},
+      {"session": "Sessions 4-6", "goal": "what to push on", "do_this": "exact things to do and say", "avoid": "what not to do"},
+      {"session": "Sessions 7+", "goal": "endgame", "do_this": "exact things to do and say", "avoid": "what not to do"}
+    ]
+  }
+}`;
+
+// ── Part 2c: Coaching tactics (~500 tokens max) ───────────────────────────────
+const COACHING_TACTICS_SCHEMA = `{
+  "coaching_playbook_tactics": {
+    "when_stuck": "word-for-word script when they go quiet, deflect, or resist",
+    "when_spiraling": "exact script when they are overwhelmed or in their head",
+    "feedback_delivery": "how to challenge this person so it lands without triggering their fear",
+    "homework_style": "what assignments work and how to frame them for this profile",
+    "red_flags": ["warning sign 1 + what to do","warning sign 2 + what to do","warning sign 3 + what to do"]
   }
 }`;
 
@@ -178,13 +185,19 @@ ${typeExtra}`;
     return JSON.parse(c.text.slice(start, end + 1));
   }
 
-  // Two small parallel calls — each fits well within token + time limits
-  const [salesResult, coachingResult] = await Promise.all([
-    callHaiku(base + SALES_SCHEMA, 800),
-    callHaiku(base + COACHING_SCHEMA, 750),
+  // 3 parallel calls — each small, all finish well within 10s
+  const [salesResult, sessionResult, tacticsResult] = await Promise.all([
+    callHaiku(base + SALES_SCHEMA, 700),
+    callHaiku(base + SESSION_ACTIONS_SCHEMA, 700),
+    callHaiku(base + COACHING_TACTICS_SCHEMA, 500),
   ]);
 
-  const merged = { ...(assessment.behavioral_profile ?? {}), ...salesResult, ...coachingResult };
+  const coaching_playbook = {
+    ...sessionResult.coaching_playbook,
+    ...tacticsResult.coaching_playbook_tactics,
+  };
+
+  const merged = { ...(assessment.behavioral_profile ?? {}), ...salesResult, coaching_playbook };
 
   await getSupabase()
     .from("assessments")
