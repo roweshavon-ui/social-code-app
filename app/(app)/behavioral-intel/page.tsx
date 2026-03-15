@@ -851,12 +851,13 @@ function AssessmentRow({
           </Section>
 
           {/* Section 3: Influence Map */}
+          {p.influence_map && (
           <Section icon={<Zap size={14} />} title="Influence & Persuasion Map" color="#fbbf24">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">What Works</p>
                 <ul className="space-y-1.5">
-                  {p.influence_map.what_works.map((w, i) => (
+                  {(p.influence_map.what_works ?? []).map((w, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
                       <span style={{ color: BRAND.teal }} className="mt-0.5 flex-shrink-0">✓</span>{w}
                     </li>
@@ -866,7 +867,7 @@ function AssessmentRow({
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">What Shuts Them Down</p>
                 <ul className="space-y-1.5">
-                  {p.influence_map.what_doesnt_work.map((w, i) => (
+                  {(p.influence_map.what_doesnt_work ?? []).map((w, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
                       <span style={{ color: BRAND.coral }} className="mt-0.5 flex-shrink-0">✗</span>{w}
                     </li>
@@ -877,6 +878,7 @@ function AssessmentRow({
               <div className="sm:col-span-2"><Field label="What Actually Moves Them" value={p.influence_map.motivation_triggers} /></div>
             </div>
           </Section>
+          )}
 
           {/* Section 4: Coaching Playbook */}
           {p.coaching_playbook && (
@@ -892,7 +894,7 @@ function AssessmentRow({
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Unlock Questions</p>
                   <ul className="space-y-2">
-                    {p.coaching_playbook.unlock_questions.map((q, i) => (
+                    {(p.coaching_playbook.unlock_questions ?? []).map((q, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
                         <span className="mt-0.5 flex-shrink-0 font-bold" style={{ color: "#a78bfa" }}>{i + 1}.</span>{q}
                       </li>
@@ -919,7 +921,7 @@ function AssessmentRow({
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Red Flags — About to Disengage</p>
                   <ul className="space-y-1.5">
-                    {p.coaching_playbook.red_flags.map((flag, i) => (
+                    {(p.coaching_playbook.red_flags ?? []).map((flag, i) => (
                       <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
                         <span style={{ color: BRAND.coral }} className="mt-0.5 flex-shrink-0">⚠</span>{flag}
                       </li>
@@ -936,6 +938,7 @@ function AssessmentRow({
           )}
 
           {/* Section 5: Sales Closing Handbook */}
+          {p.sales_handbook && (
           <Section icon={<BookOpen size={14} />} title="Sales Closing Handbook" color={BRAND.coral}>
             <div className="space-y-4">
               <Field label="Buyer Profile" value={p.sales_handbook.buyer_profile} />
@@ -944,7 +947,7 @@ function AssessmentRow({
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Likely Objections + How to Handle</p>
                 <div className="space-y-3">
-                  {p.sales_handbook.likely_objections.map((obj, i) => (
+                  {(p.sales_handbook.likely_objections ?? []).map((obj, i) => (
                     <div key={i} className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
                       <p className="text-xs font-bold text-white mb-1">"{obj.objection}"</p>
                       <p className="text-xs text-slate-500 mb-2"><span className="text-slate-400 font-medium">Real meaning:</span> {obj.what_it_really_means}</p>
@@ -974,6 +977,7 @@ function AssessmentRow({
               </div>
             </div>
           </Section>
+          )}
         </div>
       )}
     </div>
