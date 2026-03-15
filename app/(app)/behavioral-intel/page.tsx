@@ -15,7 +15,36 @@ import {
   BookOpen,
   Trash2,
   ClipboardList,
+  CalendarPlus,
+  X,
+  Clock,
 } from "lucide-react";
+
+const FRAMEWORKS = [
+  "SPARK",
+  "3-Second Social Scan",
+  "Fearless Approach System",
+  "TALK Check",
+  "BRAVE",
+  "SHIELD",
+  "Stop Replaying",
+] as const;
+
+type SessionPlan = {
+  session_title: string;
+  opening: string;
+  check_in: string;
+  todays_focus: string;
+  agenda: { time: string; block: string; notes: string }[];
+  framework_or_topic_approach: string;
+  session_questions: string[];
+  exercise: string;
+  what_to_watch: string[];
+  if_they_resist: string;
+  session_close: string;
+  homework: string;
+  next_session_seed: string;
+};
 
 const BRAND = {
   teal: "#00D9C0",
@@ -108,6 +137,7 @@ export default function BehavioralIntelPage() {
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
+  const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
 
   useEffect(() => {
     load();
@@ -277,10 +307,264 @@ export default function BehavioralIntelPage() {
               confirmingRemove={confirmRemove === entry.id}
               onConfirmRemove={() => setConfirmRemove(entry.id)}
               onCancelRemove={() => setConfirmRemove(null)}
+              onBuildSession={() => setSessionBuilderEntry(entry)}
             />
           ))}
         </div>
       )}
+
+      {/* Session Builder Modal */}
+      {sessionBuilderEntry && (
+        <SessionBuilderModal
+          entry={sessionBuilderEntry}
+          onClose={() => setSessionBuilderEntry(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: () => void }) {
+  const [sessionNumber, setSessionNumber] = useState(1);
+  const [coachNote, setCoachNote] = useState("");
+  const [mode, setMode] = useState<"framework" | "custom" | "none">("none");
+  const [framework, setFramework] = useState(FRAMEWORKS[0]);
+  const [customTopic, setCustomTopic] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [plan, setPlan] = useState<SessionPlan | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function generate() {
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/generate-session-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile: entry.behavioral_profile,
+          name: entry.name,
+          jungian_type: entry.jungian_type,
+          session_number: sessionNumber,
+          coach_note: coachNote,
+          mode,
+          framework: mode === "framework" ? framework : null,
+          custom_topic: mode === "custom" ? customTopic : null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setPlan(data.plan);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8 px-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-white/10 flex flex-col" style={{ background: "#0D1825" }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+          <div>
+            <div className="flex items-center gap-2">
+              <CalendarPlus size={15} style={{ color: "#a78bfa" }} />
+              <span className="text-sm font-bold text-white">Session Builder</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">{entry.name} · {entry.jungian_type}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        {!plan ? (
+          <div className="px-6 py-5 space-y-5">
+            {/* Session number */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session Number</label>
+              <input
+                type="number"
+                min={1}
+                value={sessionNumber}
+                onChange={(e) => setSessionNumber(Number(e.target.value))}
+                className="w-24 px-3 py-2 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-purple-500/50"
+                style={{ background: "#131E2B" }}
+              />
+            </div>
+
+            {/* Coach note */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Where Are They Right Now?</label>
+              <textarea
+                value={coachNote}
+                onChange={(e) => setCoachNote(e.target.value)}
+                placeholder="e.g. skipped homework last week, opened up about a specific situation, seems stuck on approach anxiety..."
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50 resize-none"
+                style={{ background: "#131E2B" }}
+              />
+            </div>
+
+            {/* Mode */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session Focus</label>
+              <div className="flex flex-wrap gap-2">
+                {(["none", "framework", "custom"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+                    style={{
+                      background: mode === m ? "rgba(167,139,250,0.15)" : "transparent",
+                      borderColor: mode === m ? "rgba(167,139,250,0.4)" : "rgba(255,255,255,0.08)",
+                      color: mode === m ? "#a78bfa" : "#64748b",
+                    }}
+                  >
+                    {m === "none" ? "Let AI decide" : m === "framework" ? "Use a framework" : "Custom topic"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Framework picker */}
+            {mode === "framework" && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Framework</label>
+                <select
+                  value={framework}
+                  onChange={(e) => setFramework(e.target.value as typeof framework)}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-purple-500/50"
+                  style={{ background: "#131E2B" }}
+                >
+                  {FRAMEWORKS.map((f) => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Custom topic */}
+            {mode === "custom" && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">What Do They Need to Work On?</label>
+                <input
+                  type="text"
+                  value={customTopic}
+                  onChange={(e) => setCustomTopic(e.target.value)}
+                  placeholder="e.g. holding eye contact, handling rejection, reconnecting with old friends..."
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50"
+                  style={{ background: "#131E2B" }}
+                />
+              </div>
+            )}
+
+            {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
+
+            <button
+              onClick={generate}
+              disabled={generating || (mode === "custom" && !customTopic.trim())}
+              className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: "#a78bfa", color: "#fff" }}
+            >
+              {generating ? <><Loader2 size={14} className="animate-spin" />Building session plan...</> : <><CalendarPlus size={14} />Generate Session Plan</>}
+            </button>
+          </div>
+        ) : (
+          <div className="px-6 py-5 space-y-5 overflow-y-auto">
+            {/* Plan header */}
+            <div className="rounded-xl p-4 border" style={{ background: "rgba(167,139,250,0.06)", borderColor: "rgba(167,139,250,0.2)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#a78bfa" }}>Session {sessionNumber}</p>
+              <p className="text-lg font-black text-white">{plan.session_title}</p>
+              <p className="text-xs text-slate-400 mt-1">{plan.todays_focus}</p>
+            </div>
+
+            {/* Agenda */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Agenda</p>
+              <div className="space-y-2">
+                {plan.agenda.map((a, i) => (
+                  <div key={i} className="flex gap-3 text-xs">
+                    <span className="flex items-center gap-1 text-slate-600 flex-shrink-0 w-20">
+                      <Clock size={10} />{a.time}
+                    </span>
+                    <div>
+                      <span className="font-semibold text-slate-300">{a.block}</span>
+                      <span className="text-slate-500 ml-2">{a.notes}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <PlanField label="How to Open" value={plan.opening} />
+            <PlanField label="Check-In Question" value={plan.check_in} highlight />
+            {plan.framework_or_topic_approach && (
+              <PlanField label="Framework / Topic Approach" value={plan.framework_or_topic_approach} />
+            )}
+
+            {/* Session questions */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Questions — In This Order</p>
+              <ol className="space-y-2">
+                {plan.session_questions.map((q, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                    <span className="font-bold flex-shrink-0" style={{ color: "#a78bfa" }}>{i + 1}.</span>{q}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <PlanField label="Exercise / Drill" value={plan.exercise} />
+
+            {/* Watch for */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">What to Watch For Live</p>
+              <ul className="space-y-1.5">
+                {plan.what_to_watch.map((w, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                    <span className="flex-shrink-0" style={{ color: BRAND.teal }}>→</span>{w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-lg p-4 border border-white/5" style={{ background: "#131E2B" }}>
+              <p className="text-xs font-bold text-slate-400 mb-1.5">If They Resist</p>
+              <p className="text-xs text-slate-300 italic">"{plan.if_they_resist}"</p>
+            </div>
+
+            <PlanField label="How to Close the Session" value={plan.session_close} />
+
+            <div className="rounded-lg p-4 border" style={{ background: "rgba(0,217,192,0.04)", borderColor: "rgba(0,217,192,0.15)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: BRAND.teal }}>Homework</p>
+              <p className="text-xs text-slate-300 leading-relaxed">{plan.homework}</p>
+            </div>
+
+            <div className="rounded-lg p-4 border border-white/5" style={{ background: "#131E2B" }}>
+              <p className="text-xs font-bold text-slate-400 mb-1.5">Plant This for Next Session</p>
+              <p className="text-xs text-slate-300">{plan.next_session_seed}</p>
+            </div>
+
+            <button
+              onClick={() => setPlan(null)}
+              className="w-full py-2.5 rounded-xl text-xs font-semibold border border-white/10 text-slate-400 hover:text-white transition-colors"
+            >
+              ← Build Another Session
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PlanField({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">{label}</p>
+      <p className={`text-xs leading-relaxed ${highlight ? "text-white font-medium" : "text-slate-300"}`}>{value}</p>
     </div>
   );
 }
@@ -305,6 +589,7 @@ function AssessmentRow({
   confirmingRemove,
   onConfirmRemove,
   onCancelRemove,
+  onBuildSession,
 }: {
   entry: ClientEntry;
   expanded: boolean;
@@ -316,6 +601,7 @@ function AssessmentRow({
   confirmingRemove: boolean;
   onConfirmRemove: () => void;
   onCancelRemove: () => void;
+  onBuildSession: () => void;
 }) {
   const p = entry.behavioral_profile;
   const scores = entry.scores ?? {};
@@ -371,13 +657,23 @@ function AssessmentRow({
             </button>
           )}
           {p && (
-            <button
-              onClick={onToggle}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
-            >
-              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-              {expanded ? "Collapse" : "View Intel"}
-            </button>
+            <>
+              <button
+                onClick={onToggle}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
+              >
+                {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                {expanded ? "Collapse" : "View Intel"}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
+              >
+                <CalendarPlus size={11} />
+                Build Session
+              </button>
+            </>
           )}
           {confirmingRemove ? (
             <div className="flex items-center gap-1.5">
