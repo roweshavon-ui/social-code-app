@@ -56,14 +56,12 @@ const CORE_SCHEMA = `{
   }
 }`;
 
-// ── Part 2a: Sales handbook (~700 tokens max) ────────────────────────────────
+// ── Part 2a: Sales handbook — flat fields only, no arrays ────────────────────
 const SALES_SCHEMA = `{
   "sales_handbook": {
     "buyer_profile": "1-2 sentences on what kind of buyer this person is",
-    "likely_objections": [
-      {"objection": "most likely objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact 1-sentence response"},
-      {"objection": "second objection","what_it_really_means": "real reason","reframe": "how to handle","language": "exact 1-sentence response"}
-    ],
+    "obj1": "most likely objection", "obj1_means": "real reason", "obj1_reframe": "how to handle", "obj1_say": "exact 1-sentence script",
+    "obj2": "second objection", "obj2_means": "real reason", "obj2_reframe": "how to handle", "obj2_say": "exact 1-sentence script",
     "close_style": "closing approach for this profile",
     "what_kills_the_sale": "the specific thing NOT to do",
     "what_gets_them_off_fence": "the single most powerful move",
@@ -204,6 +202,20 @@ ${typeExtra}`;
     callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
   ]);
 
+  const ss = salesResult.sales_handbook ?? {};
+  const sales_handbook = {
+    buyer_profile: ss.buyer_profile,
+    likely_objections: [
+      { objection: ss.obj1, what_it_really_means: ss.obj1_means, reframe: ss.obj1_reframe, language: ss.obj1_say },
+      { objection: ss.obj2, what_it_really_means: ss.obj2_means, reframe: ss.obj2_reframe, language: ss.obj2_say },
+    ].filter((o: { objection?: string }) => o.objection),
+    close_style: ss.close_style,
+    what_kills_the_sale: ss.what_kills_the_sale,
+    what_gets_them_off_fence: ss.what_gets_them_off_fence,
+    coaching_close_script: ss.coaching_close_script,
+    anchor_moment: ss.anchor_moment,
+  };
+
   const sp = sessionResult.coaching_playbook ?? {};
   const tact = tacticsResult.coaching_playbook_tactics ?? {};
   const coaching_playbook = {
@@ -222,7 +234,7 @@ ${typeExtra}`;
     red_flags: [tact.red_flag_1, tact.red_flag_2, tact.red_flag_3].filter(Boolean),
   };
 
-  const merged = { ...(assessment.behavioral_profile ?? {}), ...salesResult, coaching_playbook };
+  const merged = { ...(assessment.behavioral_profile ?? {}), sales_handbook, coaching_playbook };
 
   await getSupabase()
     .from("assessments")
