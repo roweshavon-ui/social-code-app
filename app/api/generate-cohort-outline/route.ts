@@ -31,7 +31,7 @@ RULES:
 - Session 1 is ALWAYS titled "Welcome & Foundations" with framework "TALK Check". It covers: group introductions (everyone shares their name + one social challenge), teaching the Jungian personality types so everyone understands themselves and each other, then introducing TALK Check as the first framework to apply.
 - Sessions 2+ build progressively on SPARK, approach systems, confidence, and advanced frameworks
 - Not every session needs a framework — some can be practice/application
-- All activities are designed for online Zoom delivery (breakout rooms, screen sharing, etc.)
+- All activities are for a single Zoom call — coach and all clients together, no breakout rooms
 
 Return a JSON array with EXACTLY ${total_sessions} objects:
 [{"session_number":1,"title":"session title","framework":"framework name or null","custom_topic":"topic or null","objectives":"what this session builds toward (1-2 sentences)"}]

@@ -32,7 +32,7 @@ ${topicLine}
 Cohort Goal: ${cohort_goal ?? "Build social confidence"}
 ${session1Extra}
 
-Design all activities for online delivery (Zoom breakout rooms, chat exercises, screen sharing, partner work via video).
+Design all activities for a single Zoom call — coach and all clients together on one call, no breakout rooms. Activities are coach-led discussions, group exercises done verbally, and real-world practice challenges.
 
 Return ONLY this JSON (no markdown):
 {

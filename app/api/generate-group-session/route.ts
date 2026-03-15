@@ -73,7 +73,7 @@ Return ONLY this JSON (no markdown, no explanation):
     { "time": "20-35 min", "block": "Practice", "notes": "brief" },
     { "time": "35-45 min", "block": "Close", "notes": "brief" }
   ],
-  "group_exercise": "online exercise via Zoom — what it is and how to run it (breakout rooms, chat, partner video etc.) in 2-3 sentences",
+  "group_exercise": "online exercise via Zoom — what it is and how to run it as a full group call (no breakout rooms, just coach and clients together) in 2-3 sentences",
   "watch_for": "1-2 things to watch for with this type mix on a video call",
   "session_close": "how to close the Zoom session — 1-2 sentences",
   "homework": "specific real-world homework for the group",
