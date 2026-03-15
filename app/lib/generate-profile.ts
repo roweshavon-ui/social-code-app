@@ -181,7 +181,7 @@ ${typeExtra}`;
     if (c.type !== "text") throw new Error("Unexpected response type");
     const start = c.text.indexOf("{");
     const end = c.text.lastIndexOf("}");
-    if (start === -1 || end === -1) throw new Error("No JSON found");
+    if (start === -1 || end === -1) throw new Error(`No JSON found — model returned: "${c.text.slice(0, 300)}"`);
     return JSON.parse(c.text.slice(start, end + 1));
   }
 
@@ -189,7 +189,7 @@ ${typeExtra}`;
   const [salesResult, sessionResult, tacticsResult] = await Promise.all([
     callHaiku(base + SALES_SCHEMA, 700),
     callHaiku(base + SESSION_ACTIONS_SCHEMA, 700),
-    callHaiku(base + COACHING_TACTICS_SCHEMA, 500),
+    callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
   ]);
 
   const coaching_playbook = {

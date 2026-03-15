@@ -60,7 +60,7 @@ async function callHaiku(prompt: string, max_tokens: number) {
   const text = content.text;
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("No JSON found");
+  if (start === -1 || end === -1) throw new Error(`No JSON found — model returned: "${text.slice(0, 300)}"`);
   return JSON.parse(text.slice(start, end + 1));
 }
 
@@ -95,7 +95,7 @@ ${typeExtra}`;
       const [salesResult, sessionResult, tacticsResult] = await Promise.all([
         callHaiku(base + SALES_SCHEMA, 700),
         callHaiku(base + SESSION_ACTIONS_SCHEMA, 700),
-        callHaiku(base + COACHING_TACTICS_SCHEMA, 500),
+        callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
       ]);
 
       // Merge tactics into coaching_playbook object
