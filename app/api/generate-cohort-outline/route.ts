@@ -18,19 +18,20 @@ export async function POST(req: NextRequest) {
       ? `Group: ${clients.map((c: { name: string; jungian_type?: string }) => `${c.name} (${c.jungian_type ?? "Unknown"})`).join(", ")}`
       : "No clients enrolled yet — build a general curriculum for a social confidence group.";
 
-  const prompt = `You are a curriculum designer for Social Code, a social skills coaching practice.
+  const prompt = `You are a curriculum designer for Social Code, an online social skills coaching practice (all sessions via Zoom).
 
-Design a ${total_sessions}-session group coaching cohort.
+Design a ${total_sessions}-session online group coaching cohort.
 
 ${clientContext}
 Goal: ${cohort_goal || "Build social confidence and real-world social skills from the ground up."}
 
-Social Code Frameworks: SPARK (starting conversations), 3-Second Social Scan (reading who to approach), Fearless Approach System (approach anxiety), TALK Check (tone/attention/language/kinetics), BRAVE (difficult conversations), SHIELD (handling difficult people), Stop Replaying (post-social overthink).
+Social Code Frameworks: SPARK (starting conversations), 3-Second Social Scan (reading who to approach), Fearless Approach System (approach anxiety), TALK Check (tone/attention/language/kinetics — delivery), BRAVE (difficult conversations), SHIELD (handling difficult people), Stop Replaying (post-social overthink).
 
 RULES:
-- Session 1 is ALWAYS "TALK Check" — easy to apply immediately
-- Build skills progressively
-- Not every session needs a framework
+- Session 1 is ALWAYS titled "Welcome & Foundations" with framework "TALK Check". It covers: group introductions (everyone shares their name + one social challenge), teaching the Jungian personality types so everyone understands themselves and each other, then introducing TALK Check as the first framework to apply.
+- Sessions 2+ build progressively on SPARK, approach systems, confidence, and advanced frameworks
+- Not every session needs a framework — some can be practice/application
+- All activities are designed for online Zoom delivery (breakout rooms, screen sharing, etc.)
 
 Return a JSON array with EXACTLY ${total_sessions} objects:
 [{"session_number":1,"title":"session title","framework":"framework name or null","custom_topic":"topic or null","objectives":"what this session builds toward (1-2 sentences)"}]

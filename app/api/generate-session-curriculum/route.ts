@@ -17,19 +17,28 @@ export async function POST(req: NextRequest) {
     ? `Framework: ${framework}`
     : `Topic: ${objectives ?? title}`;
 
-  const prompt = `You are a session designer for Social Code, a social skills coaching practice.
+  const isSession1 = title?.toLowerCase().includes("welcome") || title?.toLowerCase().includes("foundation");
 
-Create teaching content for ONE group coaching session.
+  const session1Extra = isSession1
+    ? `This is Session 1. It includes: (1) group intro round on Zoom — everyone shares name + one social challenge, (2) the coach teaches the 4 Jungian personality groups (Introverted/Extroverted + Thinking/Feeling) so everyone understands themselves and each other, (3) introduction to TALK Check framework.`
+    : "";
+
+  const prompt = `You are a session designer for Social Code, an online social skills coaching practice (all sessions via Zoom/video call).
+
+Create teaching content for ONE online group coaching session.
 
 Session: "${title}"
 ${topicLine}
 Cohort Goal: ${cohort_goal ?? "Build social confidence"}
+${session1Extra}
+
+Design all activities for online delivery (Zoom breakout rooms, chat exercises, screen sharing, partner work via video).
 
 Return ONLY this JSON (no markdown):
 {
   "teach_points": ["key point 1", "key point 2", "key point 3"],
-  "activity": "the group exercise or drill for this session (2-3 sentences)",
-  "homework": "specific homework before next session (1-2 sentences)",
+  "activity": "the online group exercise or drill — what it is and how to run it on Zoom (2-3 sentences)",
+  "homework": "specific real-world homework to do before next session (1-2 sentences)",
   "discussion_questions": ["question 1", "question 2", "question 3"]
 }`;
 

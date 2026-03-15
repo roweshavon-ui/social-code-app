@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
   const jungianTypes = (clients as ClientSummary[]).map((c) => c.jungian_type).filter(Boolean);
   const typeBreakdown = [...new Set(jungianTypes)].join(", ");
 
-  const prompt = `You are a group session planner for Social Code, a social skills coaching practice.
+  const prompt = `You are a group session planner for Social Code, an online social skills coaching practice (all sessions via Zoom/video call).
 
-Plan a 45-min group coaching session for ${clients.length} clients.
+Plan a 45-min online group coaching session for ${clients.length} clients.
 
 CLIENTS: ${clientList}
 TYPES: ${typeBreakdown}
@@ -64,8 +64,8 @@ Return ONLY this JSON (no markdown, no explanation):
 
 {
   "session_title": "short title",
-  "group_dynamics": "1 sentence on this type mix and what to expect",
-  "opening": "how to open — 2-3 sentences",
+  "group_dynamics": "1 sentence on this type mix and what to expect on Zoom",
+  "opening": "how to open the Zoom call — 2-3 sentences",
   "todays_focus": "what this session builds toward",
   "agenda": [
     { "time": "0-5 min", "block": "Opening", "notes": "brief" },
@@ -73,10 +73,10 @@ Return ONLY this JSON (no markdown, no explanation):
     { "time": "20-35 min", "block": "Practice", "notes": "brief" },
     { "time": "35-45 min", "block": "Close", "notes": "brief" }
   ],
-  "group_exercise": "the exercise — what it is and how to run it in 2-3 sentences",
-  "watch_for": "1-2 things to watch for with this specific type mix",
-  "session_close": "how to close — 1-2 sentences",
-  "homework": "specific homework for the group",
+  "group_exercise": "online exercise via Zoom — what it is and how to run it (breakout rooms, chat, partner video etc.) in 2-3 sentences",
+  "watch_for": "1-2 things to watch for with this type mix on a video call",
+  "session_close": "how to close the Zoom session — 1-2 sentences",
+  "homework": "specific real-world homework for the group",
   "next_session_seed": "one line to plant momentum for next session"
 }`;
 

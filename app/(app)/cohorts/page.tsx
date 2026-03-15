@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Users, Loader2, X, ChevronRight } from "lucide-react";
+import { Plus, Users, Loader2, X, ChevronRight, Trash2, Brain } from "lucide-react";
 import { useClients } from "../../hooks/useClients";
 
 type Cohort = {
@@ -40,6 +40,13 @@ export default function CohortsPage() {
     setLoading(false);
   }
 
+  async function handleDelete(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm("Delete this cohort? This cannot be undone.")) return;
+    const res = await fetch(`/api/cohorts/${id}`, { method: "DELETE" });
+    if (res.ok) setCohorts((prev) => prev.filter((c) => c.id !== id));
+  }
+
   async function handleCreate(cohort: Omit<Cohort, "id" | "created_at" | "status">) {
     const res = await fetch("/api/cohorts", {
       method: "POST",
@@ -73,14 +80,24 @@ export default function CohortsPage() {
             Pre-built group programs — add clients anytime
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-          style={{ background: BRAND.teal }}
-        >
-          <Plus size={15} strokeWidth={2.5} />
-          New Cohort
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push("/cohorts/type-guide")}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
+            style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
+          >
+            <Brain size={15} />
+            Type Guide
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: BRAND.teal }}
+          >
+            <Plus size={15} strokeWidth={2.5} />
+            New Cohort
+          </button>
+        </div>
       </div>
 
       {showForm && clientsLoaded && (
@@ -154,7 +171,15 @@ export default function CohortsPage() {
                   <p className="text-xs text-slate-500 mt-1">{c.description}</p>
                 )}
               </div>
-              <ChevronRight size={16} className="text-slate-600 flex-shrink-0" />
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={(e) => handleDelete(c.id, e)}
+                  className="p-1.5 rounded text-slate-600 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+                <ChevronRight size={16} className="text-slate-600" />
+              </div>
             </div>
           ))}
         </div>

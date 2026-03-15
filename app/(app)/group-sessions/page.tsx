@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Clock,
   Zap,
+  Trash2,
 } from "lucide-react";
 import { useClients } from "../../hooks/useClients";
 
@@ -76,6 +77,12 @@ export default function GroupSessionsPage() {
       setSavedSessions(Array.isArray(data) ? data : []);
     }
     setLoadingSaved(false);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this group session? Cannot be undone.")) return;
+    const res = await fetch(`/api/group-sessions/${id}`, { method: "DELETE" });
+    if (res.ok) setSavedSessions((prev) => prev.filter((s) => s.id !== id));
   }
 
   async function handleSave(session: {
@@ -161,6 +168,7 @@ export default function GroupSessionsPage() {
               session={s}
               expanded={expanded === s.id}
               onToggle={() => setExpanded(expanded === s.id ? null : s.id)}
+              onDelete={() => handleDelete(s.id)}
             />
           ))}
         </div>
@@ -629,10 +637,12 @@ function SavedSessionCard({
   session,
   expanded,
   onToggle,
+  onDelete,
 }: {
   session: SavedGroupSession;
   expanded: boolean;
   onToggle: () => void;
+  onDelete: () => void;
 }) {
   const p = session.plan;
 
@@ -677,9 +687,17 @@ function SavedSessionCard({
             </span>
           </div>
         </div>
-        <button className="text-slate-600 hover:text-slate-300 transition-colors ml-3 flex-shrink-0">
-          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
+        <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-1.5 rounded text-slate-600 hover:text-red-400 transition-colors"
+          >
+            <Trash2 size={13} />
+          </button>
+          <button className="p-1.5 text-slate-600 hover:text-slate-300 transition-colors">
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        </div>
       </div>
 
       {expanded && p && (
