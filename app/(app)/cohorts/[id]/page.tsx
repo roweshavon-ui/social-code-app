@@ -11,8 +11,23 @@ import {
   Users,
   Zap,
   X,
+  Plus,
+  UserMinus,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  MessageSquare,
+  Dumbbell,
+  ClipboardList,
 } from "lucide-react";
 import { useClients } from "../../../hooks/useClients";
+
+type Curriculum = {
+  teach_points: string[];
+  activity: string;
+  homework: string;
+  discussion_questions: string[];
+};
 
 type CohortSession = {
   id: string;
@@ -22,6 +37,7 @@ type CohortSession = {
   framework: string | null;
   custom_topic: string | null;
   objectives: string | null;
+  curriculum: Curriculum | null;
   plan: Record<string, unknown> | null;
   status: string;
   session_date: string | null;
@@ -48,9 +64,7 @@ type GroupSessionPlan = {
   agenda?: { time: string; block: string; notes: string }[];
   framework_or_topic_approach?: string | null;
   group_exercise?: string;
-  // new compact shape
   watch_for?: string;
-  // legacy shape
   type_callouts?: { types: string[]; members: string[]; watch_for: string; how_to_engage: string }[];
   group_friction_points?: string;
   how_to_handle_friction?: string;
@@ -72,6 +86,7 @@ export default function CohortDetailPage() {
   const [buildingPlan, setBuildingPlan] = useState<string | null>(null);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAddClients, setShowAddClients] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -124,7 +139,7 @@ export default function CohortDetailPage() {
     if (!cohort) return;
     const cohortClients = clients.filter((c) => cohort.client_ids.includes(c.id));
     if (cohortClients.length < 2) {
-      setError("Need at least 2 clients in this cohort to build a group plan. Make sure clients are added.");
+      setError("Need at least 2 enrolled clients to build a personalized group plan.");
       return;
     }
     setBuildingPlan(session.id);
@@ -149,9 +164,8 @@ export default function CohortDetailPage() {
         throw new Error("Server error — try again in a moment");
       }
       if (!res.ok) throw new Error(data.error ?? "Failed");
-
       if (!data.plan) throw new Error("No plan returned from AI");
-      // Save plan to session
+
       const updateRes = await fetch(`/api/cohort-sessions/${session.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -182,6 +196,22 @@ export default function CohortDetailPage() {
     }
   }
 
+  async function updateClients(newClientIds: string[]) {
+    if (!cohort) return;
+    const newClientNames = clients
+      .filter((c) => newClientIds.includes(c.id))
+      .map((c) => c.name);
+    const res = await fetch(`/api/cohorts/${cohort.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientIds: newClientIds, clientNames: newClientNames }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setCohort(updated);
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-8 flex items-center gap-2 text-slate-500 text-sm">
@@ -191,16 +221,15 @@ export default function CohortDetailPage() {
   }
 
   if (!cohort) {
-    return (
-      <div className="p-8 text-sm text-slate-500">Cohort not found.</div>
-    );
+    return <div className="p-8 text-sm text-slate-500">Cohort not found.</div>;
   }
 
   const completed = sessions.filter((s) => s.status === "completed").length;
+  const enrolledClients = clients.filter((c) => cohort.client_ids.includes(c.id));
+  const unenrolledClients = clients.filter((c) => !cohort.client_ids.includes(c.id));
 
   return (
     <div className="p-4 md:p-8 max-w-5xl">
-      {/* Back */}
       <button
         onClick={() => router.push("/cohorts")}
         className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors mb-6"
@@ -210,7 +239,7 @@ export default function CohortDetailPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Users size={18} style={{ color: BRAND.teal }} />
@@ -229,7 +258,7 @@ export default function CohortDetailPage() {
               <p className="text-sm text-slate-400 mt-1">{cohort.description}</p>
             )}
             <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-              <span>{cohort.client_names?.length ?? 0} clients</span>
+              <span>{enrolledClients.length} enrolled</span>
               <span>{completed}/{cohort.total_sessions} sessions done</span>
               {cohort.start_date && (
                 <span>
@@ -243,20 +272,91 @@ export default function CohortDetailPage() {
               )}
             </div>
           </div>
+
+          <button
+            onClick={() => setShowAddClients(!showAddClients)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+            style={{ background: "rgba(0,217,192,0.1)", color: BRAND.teal, border: "1px solid rgba(0,217,192,0.2)" }}
+          >
+            <Users size={13} />
+            Manage Clients
+          </button>
         </div>
 
-        {/* Client list */}
-        {cohort.client_names?.length > 0 && (
+        {/* Client manager */}
+        {showAddClients && (
+          <div
+            className="mt-4 rounded-xl border p-4"
+            style={{ background: "#131E2B", borderColor: "rgba(0,217,192,0.2)" }}
+          >
+            <p className="text-xs font-semibold text-white mb-3">Enrolled Clients</p>
+            {enrolledClients.length === 0 ? (
+              <p className="text-xs text-slate-500 mb-3">No one enrolled yet.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {enrolledClients.map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg font-medium"
+                    style={{ background: "rgba(0,217,192,0.08)", color: BRAND.teal }}
+                  >
+                    {c.name}
+                    {c.jungianType && <span className="text-slate-500">· {c.jungianType}</span>}
+                    <button
+                      onClick={() => updateClients(cohort.client_ids.filter((cid) => cid !== c.id))}
+                      className="ml-1 hover:text-red-400 transition-colors"
+                    >
+                      <UserMinus size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {unenrolledClients.length > 0 && (
+              <>
+                <p className="text-xs font-semibold text-slate-500 mb-2">Add to Cohort</p>
+                <div className="flex flex-wrap gap-2">
+                  {unenrolledClients.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => updateClients([...cohort.client_ids, c.id])}
+                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg font-medium border transition-all hover:border-teal-500/40"
+                      style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.08)", color: "#94a3b8" }}
+                    >
+                      <Plus size={10} />
+                      {c.name}
+                      {c.jungianType && <span className="text-slate-600">· {c.jungianType}</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Enrolled chips (collapsed state) */}
+        {!showAddClients && enrolledClients.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
-            {cohort.client_names.map((name) => (
+            {enrolledClients.map((c) => (
               <span
-                key={name}
+                key={c.id}
                 className="text-xs px-2.5 py-1 rounded-full font-medium"
                 style={{ background: "rgba(0,217,192,0.08)", color: BRAND.teal }}
               >
-                {name}
+                {c.name}
               </span>
             ))}
+          </div>
+        )}
+
+        {!showAddClients && enrolledClients.length === 0 && (
+          <div
+            className="mt-4 rounded-lg px-4 py-3 text-xs flex items-center gap-2"
+            style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)", color: "#fbbf24" }}
+          >
+            <Users size={13} />
+            No clients enrolled yet — click "Manage Clients" to add them as people sign up.
           </div>
         )}
 
@@ -281,16 +381,19 @@ export default function CohortDetailPage() {
         </div>
       )}
 
-      {/* Generate outline CTA */}
+      {/* Generate curriculum CTA */}
       {sessions.length === 0 && (
         <div
           className="rounded-xl border p-8 flex flex-col items-center justify-center text-center mb-6"
           style={{ background: "#131E2B", borderColor: "rgba(0,217,192,0.15)" }}
         >
           <Zap size={24} style={{ color: BRAND.teal }} className="mb-3" />
-          <p className="text-sm font-semibold text-white mb-1">No session plan yet</p>
-          <p className="text-xs text-slate-500 mb-5">
-            Generate a full {cohort.total_sessions}-session curriculum tailored to your group.
+          <p className="text-sm font-semibold text-white mb-1">No curriculum yet</p>
+          <p className="text-xs text-slate-500 mb-2">
+            Generate a full {cohort.total_sessions}-session curriculum — what to teach, activities, homework, and discussion questions.
+          </p>
+          <p className="text-xs text-slate-600 mb-5">
+            Session 1 always starts with TALK Check. Add clients anytime before running sessions.
           </p>
           <button
             onClick={generateOutline}
@@ -301,18 +404,18 @@ export default function CohortDetailPage() {
             {generatingOutline ? (
               <><Loader2 size={14} className="animate-spin" />Generating curriculum...</>
             ) : (
-              <><Zap size={14} />Generate {cohort.total_sessions}-Session Curriculum</>
+              <><Zap size={14} />Build {cohort.total_sessions}-Session Curriculum</>
             )}
           </button>
         </div>
       )}
 
-      {/* Session grid */}
+      {/* Session list */}
       {sessions.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-              Session Curriculum
+              Curriculum · {sessions.length} Sessions
             </p>
           </div>
 
@@ -322,6 +425,7 @@ export default function CohortDetailPage() {
               session={session}
               expanded={expandedSession === session.id}
               buildingPlan={buildingPlan === session.id}
+              canBuildPlan={enrolledClients.length >= 2}
               onToggle={() =>
                 setExpandedSession(expandedSession === session.id ? null : session.id)
               }
@@ -339,6 +443,7 @@ function SessionCard({
   session,
   expanded,
   buildingPlan,
+  canBuildPlan,
   onToggle,
   onBuildPlan,
   onMarkComplete,
@@ -346,11 +451,13 @@ function SessionCard({
   session: CohortSession;
   expanded: boolean;
   buildingPlan: boolean;
+  canBuildPlan: boolean;
   onToggle: () => void;
   onBuildPlan: () => void;
   onMarkComplete: () => void;
 }) {
   const hasPlan = !!session.plan;
+  const hasCurriculum = !!session.curriculum;
   const isCompleted = session.status === "completed";
 
   return (
@@ -362,7 +469,6 @@ function SessionCard({
       }}
     >
       <div className="flex items-start gap-4 px-5 py-4">
-        {/* Session number */}
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-black flex-shrink-0 mt-0.5"
           style={{
@@ -386,20 +492,12 @@ function SessionCard({
                 {session.framework}
               </span>
             )}
-            {session.custom_topic && !session.framework && (
-              <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24" }}
-              >
-                {session.custom_topic}
-              </span>
-            )}
             {hasPlan && (
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ background: "rgba(0,217,192,0.08)", color: BRAND.teal }}
               >
-                Plan ready
+                Group plan ready
               </span>
             )}
           </div>
@@ -418,7 +516,17 @@ function SessionCard({
             <CheckCircle size={15} />
           </button>
 
-          {!hasPlan ? (
+          {(hasCurriculum || hasPlan) && (
+            <button
+              onClick={onToggle}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
+            >
+              {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+              {expanded ? "Hide" : "Details"}
+            </button>
+          )}
+
+          {canBuildPlan && !hasPlan && (
             <button
               onClick={onBuildPlan}
               disabled={buildingPlan}
@@ -432,23 +540,124 @@ function SessionCard({
               )}
               {buildingPlan ? "Building..." : "Build Plan"}
             </button>
-          ) : (
-            <button
-              onClick={onToggle}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
-            >
-              <Clock size={11} />
-              {expanded ? "Hide" : "View Plan"}
-            </button>
           )}
         </div>
       </div>
 
-      {expanded && session.plan && (
-        <div className="border-t border-white/5 px-5 py-4 space-y-4">
-          <GroupPlanSummary plan={session.plan as unknown as GroupSessionPlan} />
+      {expanded && (
+        <div className="border-t border-white/5 px-5 py-5 space-y-5">
+          {/* Pre-built curriculum */}
+          {session.curriculum && !hasPlan && (
+            <CurriculumView curriculum={session.curriculum} framework={session.framework} />
+          )}
+
+          {/* Full AI group session plan */}
+          {hasPlan && (
+            <>
+              {session.curriculum && (
+                <CurriculumView curriculum={session.curriculum} framework={session.framework} compact />
+              )}
+              <GroupPlanSummary plan={session.plan as unknown as GroupSessionPlan} />
+            </>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+function CurriculumView({
+  curriculum,
+  framework,
+  compact,
+}: {
+  curriculum: Curriculum;
+  framework: string | null;
+  compact?: boolean;
+}) {
+  return (
+    <div className={compact ? "opacity-70" : ""}>
+      {!compact && (
+        <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: BRAND.teal }}>
+          {framework ? `${framework} Curriculum` : "Session Curriculum"}
+        </p>
+      )}
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {curriculum.teach_points?.length > 0 && (
+          <div
+            className="rounded-lg p-3 border border-white/5"
+            style={{ background: "#0D1825" }}
+          >
+            <div className="flex items-center gap-1.5 mb-2">
+              <BookOpen size={11} style={{ color: BRAND.purple }} />
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.purple }}>
+                Teach
+              </p>
+            </div>
+            <ul className="space-y-1">
+              {curriculum.teach_points.map((pt, i) => (
+                <li key={i} className="text-xs text-slate-300 flex gap-2">
+                  <span style={{ color: BRAND.purple }}>·</span>
+                  {pt}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {curriculum.activity && (
+          <div
+            className="rounded-lg p-3 border border-white/5"
+            style={{ background: "#0D1825" }}
+          >
+            <div className="flex items-center gap-1.5 mb-2">
+              <Dumbbell size={11} style={{ color: "#fbbf24" }} />
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#fbbf24" }}>
+                Activity
+              </p>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">{curriculum.activity}</p>
+          </div>
+        )}
+
+        {curriculum.homework && (
+          <div
+            className="rounded-lg p-3 border"
+            style={{ background: "rgba(0,217,192,0.04)", borderColor: "rgba(0,217,192,0.15)" }}
+          >
+            <div className="flex items-center gap-1.5 mb-2">
+              <ClipboardList size={11} style={{ color: BRAND.teal }} />
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.teal }}>
+                Homework
+              </p>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">{curriculum.homework}</p>
+          </div>
+        )}
+
+        {curriculum.discussion_questions?.length > 0 && (
+          <div
+            className="rounded-lg p-3 border border-white/5"
+            style={{ background: "#0D1825" }}
+          >
+            <div className="flex items-center gap-1.5 mb-2">
+              <MessageSquare size={11} style={{ color: BRAND.coral }} />
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>
+                Discussion Questions
+              </p>
+            </div>
+            <ul className="space-y-1">
+              {curriculum.discussion_questions.map((q, i) => (
+                <li key={i} className="text-xs text-slate-300 flex gap-2">
+                  <span style={{ color: BRAND.coral }}>{i + 1}.</span>
+                  {q}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -457,12 +666,10 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
   return (
     <div className="space-y-4">
       <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.purple }}>
-        Full Group Session Plan
+        Personalized Group Session Plan
       </p>
 
-      {plan.todays_focus && (
-        <PlanField label="Focus" value={plan.todays_focus} />
-      )}
+      {plan.todays_focus && <PlanField label="Focus" value={plan.todays_focus} />}
 
       {plan.group_dynamics && (
         <div
@@ -492,58 +699,31 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
       )}
 
       {plan.opening && <PlanField label="How to Open" value={plan.opening} />}
-      {plan.check_in_activity && (
-        <PlanField label="Check-In Activity" value={plan.check_in_activity} highlight />
-      )}
-      {plan.framework_or_topic_approach && (
-        <PlanField label="Framework Approach" value={plan.framework_or_topic_approach} />
-      )}
+      {plan.check_in_activity && <PlanField label="Check-In Activity" value={plan.check_in_activity} highlight />}
+      {plan.framework_or_topic_approach && <PlanField label="Framework Approach" value={plan.framework_or_topic_approach} />}
       {plan.group_exercise && <PlanField label="Group Exercise" value={plan.group_exercise} />}
 
-      {/* New compact shape: watch_for as a string */}
-      {plan.watch_for && !plan.type_callouts?.length && (
-        <div
-          className="rounded-lg p-3 border border-white/5 text-xs"
-          style={{ background: "#0D1825" }}
-        >
+      {plan.watch_for && !(plan.type_callouts?.length) && (
+        <div className="rounded-lg p-3 border border-white/5 text-xs" style={{ background: "#0D1825" }}>
           <p className="font-bold text-slate-400 mb-1 uppercase tracking-widest text-xs">Watch For</p>
           <p className="text-slate-300 leading-relaxed">{plan.watch_for}</p>
         </div>
       )}
 
-      {/* Legacy shape: type_callouts array */}
       {(plan.type_callouts?.length ?? 0) > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
-            Type-Specific Notes
-          </p>
-          <div className="space-y-2">
-            {plan.type_callouts!.map((tc, i) => (
-              <div
-                key={i}
-                className="rounded-lg p-3 border border-white/5 text-xs"
-                style={{ background: "#0D1825" }}
-              >
-                <p className="font-bold text-white mb-1">
-                  {tc.members?.join(", ") || tc.types?.join(", ")}
-                </p>
-                <p className="text-slate-400">
-                  <span className="text-slate-500">Watch:</span> {tc.watch_for}
-                </p>
-                <p className="text-slate-400 mt-0.5">
-                  <span className="text-slate-500">Engage:</span> {tc.how_to_engage}
-                </p>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-2">
+          {plan.type_callouts!.map((tc, i) => (
+            <div key={i} className="rounded-lg p-3 border border-white/5 text-xs" style={{ background: "#0D1825" }}>
+              <p className="font-bold text-white mb-1">{tc.members?.join(", ") || tc.types?.join(", ")}</p>
+              <p className="text-slate-400"><span className="text-slate-500">Watch:</span> {tc.watch_for}</p>
+              <p className="text-slate-400 mt-0.5"><span className="text-slate-500">Engage:</span> {tc.how_to_engage}</p>
+            </div>
+          ))}
         </div>
       )}
 
       {plan.group_friction_points && (
-        <div
-          className="rounded-lg p-3 border"
-          style={{ background: "rgba(255,107,107,0.04)", borderColor: "rgba(255,107,107,0.15)" }}
-        >
+        <div className="rounded-lg p-3 border" style={{ background: "rgba(255,107,107,0.04)", borderColor: "rgba(255,107,107,0.15)" }}>
           <p className="text-xs font-bold mb-1" style={{ color: BRAND.coral }}>Friction Points</p>
           <p className="text-xs text-slate-300">{plan.group_friction_points}</p>
           {plan.how_to_handle_friction && (
@@ -553,35 +733,19 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
       )}
 
       {plan.homework && (
-        <div
-          className="rounded-lg p-3 border"
-          style={{ background: "rgba(0,217,192,0.04)", borderColor: "rgba(0,217,192,0.15)" }}
-        >
-          <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: BRAND.teal }}>
-            Homework
-          </p>
+        <div className="rounded-lg p-3 border" style={{ background: "rgba(0,217,192,0.04)", borderColor: "rgba(0,217,192,0.15)" }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: BRAND.teal }}>Homework</p>
           <p className="text-xs text-slate-300">{plan.homework}</p>
         </div>
       )}
 
       {plan.session_close && <PlanField label="How to Close" value={plan.session_close} />}
-
-      {plan.next_session_seed && (
-        <PlanField label="Plant This for Next Session" value={plan.next_session_seed} />
-      )}
+      {plan.next_session_seed && <PlanField label="Plant This for Next Session" value={plan.next_session_seed} />}
     </div>
   );
 }
 
-function PlanField({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function PlanField({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div>
       <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">{label}</p>

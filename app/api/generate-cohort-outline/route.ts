@@ -9,35 +9,36 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 export async function POST(req: NextRequest) {
   const { cohort_id, clients, total_sessions, cohort_goal } = await req.json();
 
-  if (!cohort_id || !clients || clients.length < 1) {
-    return NextResponse.json({ error: "cohort_id and clients required" }, { status: 400 });
+  if (!cohort_id) {
+    return NextResponse.json({ error: "cohort_id required" }, { status: 400 });
   }
 
-  const clientList = clients
-    .map((c: { name: string; jungian_type?: string }, i: number) =>
-      `${i + 1}. ${c.name} (${c.jungian_type ?? "Unknown"})`
-    )
-    .join("\n");
+  const clientContext =
+    clients && clients.length > 0
+      ? `Group: ${clients.map((c: { name: string; jungian_type?: string }) => `${c.name} (${c.jungian_type ?? "Unknown"})`).join(", ")}`
+      : "No clients enrolled yet — build a general curriculum applicable to any social confidence group.";
 
-  const prompt = `You are an expert curriculum designer for Social Code, a social skills coaching practice.
+  const prompt = `You are a curriculum designer for Social Code, a social skills coaching practice.
 
-Plan a ${total_sessions}-session group coaching cohort for this group.
+Design a ${total_sessions}-session group coaching cohort.
 
-GROUP:
-${clientList}
+${clientContext}
+Goal: ${cohort_goal || "Build social confidence and real-world social skills from the ground up."}
 
-Cohort Goal: ${cohort_goal || "Build social confidence and real-world social skills from the ground up."}
-
-Social Code Frameworks available:
+Social Code Frameworks:
 - SPARK (starting conversations)
 - 3-Second Social Scan (reading who to approach)
-- Fearless Approach System (overcoming approach anxiety — full system)
-- TALK Check (delivery: tone, attention, language, kinetics)
-- BRAVE (navigating difficult conversations)
+- Fearless Approach System (full approach anxiety system)
+- TALK Check (tone, attention, language, kinetics — delivery)
+- BRAVE (difficult conversations)
 - SHIELD (handling difficult people)
 - Stop Replaying (breaking post-social overthink)
 
-Design a logical progression across ${total_sessions} sessions. Session 1 is always Intake. Build skills progressively. Not every session needs a framework — some can be practice/application sessions.
+RULES:
+- Session 1 is ALWAYS "TALK Check" framework — it is easy to apply immediately and sets a strong foundation
+- Build skills progressively
+- Not every session needs a framework — some can be practice/application sessions
+- Keep responses concise
 
 Return a JSON array with EXACTLY ${total_sessions} objects:
 
@@ -45,9 +46,13 @@ Return a JSON array with EXACTLY ${total_sessions} objects:
   {
     "session_number": 1,
     "title": "session title",
-    "framework": "framework name or null if no framework",
-    "custom_topic": "topic description or null",
-    "objectives": "1-2 sentences — what this session builds toward"
+    "framework": "framework name or null",
+    "custom_topic": "topic or null",
+    "objectives": "what this session builds toward (1-2 sentences)",
+    "teach_points": ["key teaching point 1", "key teaching point 2", "key teaching point 3"],
+    "activity": "the main group exercise or drill for this session (2-3 sentences)",
+    "homework": "specific homework assignment before next session",
+    "discussion_questions": ["discussion question 1", "discussion question 2", "discussion question 3"]
   }
 ]
 
@@ -74,9 +79,12 @@ Return ONLY valid JSON array. No markdown, no explanation.`;
       framework: string | null;
       custom_topic: string | null;
       objectives: string;
+      teach_points: string[];
+      activity: string;
+      homework: string;
+      discussion_questions: string[];
     }[] = JSON.parse(text.slice(start, end + 1));
 
-    // Insert all cohort sessions
     const rows = outline.map((s) => ({
       cohort_id,
       session_number: s.session_number,
@@ -84,6 +92,12 @@ Return ONLY valid JSON array. No markdown, no explanation.`;
       framework: s.framework ?? null,
       custom_topic: s.custom_topic ?? null,
       objectives: s.objectives,
+      curriculum: {
+        teach_points: s.teach_points ?? [],
+        activity: s.activity ?? "",
+        homework: s.homework ?? "",
+        discussion_questions: s.discussion_questions ?? [],
+      },
       status: "planned",
     }));
 

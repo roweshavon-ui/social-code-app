@@ -70,7 +70,7 @@ export default function CohortsPage() {
             <h1 className="text-2xl font-bold text-white tracking-tight">Cohorts</h1>
           </div>
           <p className="mt-0.5 text-sm text-slate-500">
-            Multi-week group coaching programs
+            Pre-built group programs — add clients anytime
           </p>
         </div>
         <button
@@ -266,9 +266,9 @@ function CreateCohortForm({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-slate-400 mb-2">Select Clients</label>
+          <label className="block text-xs font-medium text-slate-400 mb-1">Select Clients <span className="text-slate-600 font-normal">(optional — add them later as people enroll)</span></label>
           {clients.length === 0 ? (
-            <p className="text-xs text-slate-500">No clients yet.</p>
+            <p className="text-xs text-slate-600 italic">No clients in CRM yet — you can add them to the cohort after creating it.</p>
           ) : (
             <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
               {clients.map((c) => {

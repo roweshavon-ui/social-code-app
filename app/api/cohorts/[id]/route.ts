@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
-  const { name, description, startDate, totalSessions, status } = body;
+  const { name, description, startDate, totalSessions, status, clientIds, clientNames } = body;
 
   const { data, error } = await getSupabase()
     .from("cohorts")
@@ -36,6 +36,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       ...(startDate !== undefined && { start_date: startDate }),
       ...(totalSessions !== undefined && { total_sessions: totalSessions }),
       ...(status !== undefined && { status }),
+      ...(clientIds !== undefined && { client_ids: clientIds }),
+      ...(clientNames !== undefined && { client_names: clientNames }),
     })
     .eq("id", id)
     .select()

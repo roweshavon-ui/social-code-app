@@ -298,6 +298,7 @@ function SessionForm({
             className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/5 outline-none"
             style={{ background: "#1A2332" }}
           >
+            <option value="planned">Planned (future session)</option>
             <option value="intake">Intake</option>
             <option value="ongoing">Ongoing</option>
             <option value="follow-up">Follow-up</option>
@@ -440,19 +441,19 @@ function SessionForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-5">
+      <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/5 sticky bottom-0 pb-1" style={{ background: "#131E2B" }}>
         <button
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-colors"
+          className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-colors"
         >
           Cancel
         </button>
         <button
           onClick={onSave}
-          className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
+          className="px-6 py-2.5 rounded-lg text-sm font-bold transition-all hover:opacity-90"
           style={{ background: "#00D9C0", color: "#080F18" }}
         >
-          {isEdit ? "Save Changes" : "Log Session"}
+          {isEdit ? "Save Changes" : "Save Session"}
         </button>
       </div>
     </div>
