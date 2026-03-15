@@ -215,12 +215,21 @@ export default function BehavioralIntelPage() {
   async function generatePlaybook(entry: ClientEntry) {
     setGeneratingPlaybook(entry.id);
     try {
-      await fetch("/api/generate-coaching-playbook", {
+      const res = await fetch("/api/generate-coaching-playbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assessment_id: entry.id }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Playbook generation failed:", data);
+        alert("Playbook generation failed — " + (data.error ?? "try again"));
+        return;
+      }
       await load();
+    } catch (e) {
+      console.error("Playbook error:", e);
+      alert("Something went wrong — check console");
     } finally {
       setGeneratingPlaybook(null);
     }
@@ -758,7 +767,7 @@ function AssessmentRow({
               {generating ? "Generating..." : "Generate Profile"}
             </button>
           )}
-          {p && !p.coaching_playbook && entry.source === "assessment" && (
+          {p && entry.source === "assessment" && (
             <button
               onClick={(e) => { e.stopPropagation(); onGeneratePlaybook(); }}
               disabled={generatingPlaybook}
@@ -766,7 +775,7 @@ function AssessmentRow({
               style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
             >
               {generatingPlaybook ? <Loader2 size={11} className="animate-spin" /> : <Zap size={11} />}
-              {generatingPlaybook ? "Building..." : "Add Playbook"}
+              {generatingPlaybook ? "Building..." : p.coaching_playbook ? "Refresh Playbook" : "Add Playbook"}
             </button>
           )}
           {p && (
