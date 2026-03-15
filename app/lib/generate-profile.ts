@@ -173,6 +173,12 @@ ${typeExtra}`;
 
   const base = `You are a coaching strategist using Chase Hughes' frameworks. Be specific and tactical — coach's private use only.\n\n${context}\n\nReturn ONLY this JSON (no markdown):\n`;
 
+  function repairJson(raw: string): string {
+    return raw.replace(/"((?:[^"\\]|\\.)*)"/g, (_, inner) =>
+      `"${inner.replace(/\n/g, " ").replace(/\r/g, "")}"`
+    );
+  }
+
   // Prefill forces model to start with { immediately — no wasted tokens on preamble
   async function callHaiku(prompt: string, max_tokens: number) {
     const msg = await client.messages.create({
@@ -185,10 +191,10 @@ ${typeExtra}`;
     });
     const c = msg.content[0];
     if (c.type !== "text") throw new Error("Unexpected response type");
-    const text = "{" + c.text;
-    const end = text.lastIndexOf("}");
-    if (end === -1) throw new Error(`JSON truncated — got: "${text.slice(0, 300)}"`);
-    return JSON.parse(text.slice(0, end + 1));
+    const raw = "{" + c.text;
+    const end = raw.lastIndexOf("}");
+    if (end === -1) throw new Error(`JSON truncated — got: "${raw.slice(0, 300)}"`);
+    return JSON.parse(repairJson(raw.slice(0, end + 1)));
   }
 
   // 3 parallel calls — each capped small, run simultaneously (~3-5s wall time)

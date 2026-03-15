@@ -51,6 +51,13 @@ const COACHING_TACTICS_SCHEMA = `{
   }
 }`;
 
+// Replace actual newlines inside JSON string values with a space
+function repairJson(raw: string): string {
+  return raw.replace(/"((?:[^"\\]|\\.)*)"/g, (_, inner) =>
+    `"${inner.replace(/\n/g, " ").replace(/\r/g, "")}"`
+  );
+}
+
 // Prefill forces model to start with { immediately — no wasted tokens on preamble
 async function callHaiku(prompt: string, max_tokens: number) {
   const message = await client.messages.create({
@@ -63,10 +70,10 @@ async function callHaiku(prompt: string, max_tokens: number) {
   });
   const content = message.content[0];
   if (content.type !== "text") throw new Error("Unexpected response type");
-  const text = "{" + content.text;
-  const end = text.lastIndexOf("}");
-  if (end === -1) throw new Error(`JSON truncated — got: "${text.slice(0, 300)}"`);
-  return JSON.parse(text.slice(0, end + 1));
+  const raw = "{" + content.text;
+  const end = raw.lastIndexOf("}");
+  if (end === -1) throw new Error(`JSON truncated — got: "${raw.slice(0, 300)}"`);
+  return JSON.parse(repairJson(raw.slice(0, end + 1)));
 }
 
 export async function POST(req: NextRequest) {
