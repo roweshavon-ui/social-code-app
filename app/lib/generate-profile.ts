@@ -112,7 +112,7 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
 
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 2000,
+    max_tokens: 3000,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -123,12 +123,15 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
   const text = content.text;
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("No JSON object found in response");
+  if (start === -1 || end === -1) throw new Error(`No JSON object found. Response was: ${text.slice(0, 300)}`);
   const raw = text.slice(start, end + 1);
-  const profile = JSON.parse(raw);
-
-  await getSupabase()
-    .from("assessments")
-    .update({ behavioral_profile: profile })
-    .eq("id", assessmentId);
+  try {
+    const profile = JSON.parse(raw);
+    await getSupabase()
+      .from("assessments")
+      .update({ behavioral_profile: profile })
+      .eq("id", assessmentId);
+  } catch (e) {
+    throw new Error(`JSON parse failed. Raw (first 500): ${raw.slice(0, 500)}`);
+  }
 }
