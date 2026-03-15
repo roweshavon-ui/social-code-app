@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     .from("clients")
     .update({
       name,
-      email,
+      email: email?.trim().toLowerCase() ?? email,
       jungian_type: jungianType,
       goal,
       status,

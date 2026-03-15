@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from("clients")
-    .insert({ name, email, jungian_type: jungianType, goal, status: status ?? "active", notes, observations, social_patterns: socialPatterns })
+    .insert({ name, email: email?.trim().toLowerCase() ?? email, jungian_type: jungianType, goal, status: status ?? "active", notes, observations, social_patterns: socialPatterns })
     .select()
     .single();
 

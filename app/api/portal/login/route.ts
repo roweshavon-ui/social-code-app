@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { data: client, error } = await getSupabase()
     .from("clients")
     .select("id, name, email, portal_access, portal_password_hash, force_password_change")
-    .eq("email", email.trim().toLowerCase())
+    .ilike("email", email.trim())
     .single();
 
   if (error || !client) {
