@@ -13,6 +13,7 @@ import {
   Shield,
   Zap,
   BookOpen,
+  Trash2,
 } from "lucide-react";
 
 const BRAND = {
@@ -89,6 +90,8 @@ export default function BehavioralIntelPage() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
 
@@ -183,6 +186,22 @@ export default function BehavioralIntelPage() {
     setBackfilling(false);
   }
 
+  async function removeEntry(entry: ClientEntry) {
+    setRemoving(entry.id);
+    try {
+      if (entry.source === "assessment") {
+        await fetch(`/api/assessments/${entry.id}`, { method: "DELETE" });
+      } else {
+        await fetch(`/api/clients/${entry.id}`, { method: "DELETE" });
+      }
+      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+      if (expanded === entry.id) setExpanded(null);
+    } finally {
+      setRemoving(null);
+      setConfirmRemove(null);
+    }
+  }
+
   const withProfile = entries.filter((e) => e.behavioral_profile);
   const withoutProfile = entries.filter((e) => !e.behavioral_profile);
 
@@ -239,6 +258,11 @@ export default function BehavioralIntelPage() {
               onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
               onGenerate={() => generateProfile(entry)}
               generating={generating === entry.id}
+              onRemove={() => removeEntry(entry)}
+              removing={removing === entry.id}
+              confirmingRemove={confirmRemove === entry.id}
+              onConfirmRemove={() => setConfirmRemove(entry.id)}
+              onCancelRemove={() => setConfirmRemove(null)}
             />
           ))}
         </div>
@@ -262,12 +286,22 @@ function AssessmentRow({
   onToggle,
   onGenerate,
   generating,
+  onRemove,
+  removing,
+  confirmingRemove,
+  onConfirmRemove,
+  onCancelRemove,
 }: {
   entry: ClientEntry;
   expanded: boolean;
   onToggle: () => void;
   onGenerate: () => void;
   generating: boolean;
+  onRemove: () => void;
+  removing: boolean;
+  confirmingRemove: boolean;
+  onConfirmRemove: () => void;
+  onCancelRemove: () => void;
 }) {
   const p = entry.behavioral_profile;
   const scores = entry.scores ?? {};
@@ -329,6 +363,34 @@ function AssessmentRow({
             >
               {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               {expanded ? "Collapse" : "View Intel"}
+            </button>
+          )}
+          {confirmingRemove ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                disabled={removing}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
+                style={{ background: "rgba(255,107,107,0.15)", color: BRAND.coral }}
+              >
+                {removing ? <Loader2 size={11} className="animate-spin" /> : null}
+                Confirm
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onCancelRemove(); }}
+                className="px-2.5 py-1.5 rounded-lg text-xs text-slate-500 hover:text-slate-300 border border-white/5"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); onConfirmRemove(); }}
+              disabled={removing}
+              className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
+              title="Remove from intel"
+            >
+              <Trash2 size={13} />
             </button>
           )}
         </div>
