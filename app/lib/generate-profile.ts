@@ -36,6 +36,7 @@ export async function generateBehavioralProfile(assessmentId: string): Promise<v
 
   const scorePercentages = buildScorePercentages(assessment.scores ?? {});
   const behavioralSignals = buildBehavioralSignals(assessment.answer_map ?? {});
+  const hasBehavioralSignals = behavioralSignals.trim().length > 0;
 
   const prompt = `You are an expert behavioral profiler with deep knowledge of Chase Hughes' frameworks including the Six-Minute X-Ray, Human Needs Map, Six-Axis Model, and influence/persuasion methodology.
 
@@ -49,8 +50,10 @@ Goal they stated: ${assessment.goal ?? "Not specified"}
 SCORE PERCENTAGES (calibration matters — 55% vs 92% are very different):
 ${scorePercentages}
 
-BEHAVIORAL SIGNALS FROM ANSWERS:
-${behavioralSignals}
+${hasBehavioralSignals
+  ? `BEHAVIORAL SIGNALS FROM ANSWERS:\n${behavioralSignals}`
+  : `BEHAVIORAL SIGNALS: Not available (older submission — infer from Jungian scores and stated goal only)`
+}
 
 Generate a JSON object with EXACTLY this structure. Be specific and tactical — every sentence written for THIS person, not a generic type.
 
