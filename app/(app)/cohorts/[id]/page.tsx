@@ -7,7 +7,6 @@ import {
   Loader2,
   CalendarPlus,
   CheckCircle,
-  Clock,
   Users,
   Zap,
   X,
@@ -87,6 +86,7 @@ export default function CohortDetailPage() {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAddClients, setShowAddClients] = useState(false);
+  const [generatingCurriculum, setGeneratingCurriculum] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -180,6 +180,37 @@ export default function CohortDetailPage() {
       setError(e instanceof Error ? e.message : "Failed to build plan");
     } finally {
       setBuildingPlan(null);
+    }
+  }
+
+  async function generateCurriculum(session: CohortSession) {
+    if (!cohort) return;
+    setGeneratingCurriculum(session.id);
+    setError(null);
+    try {
+      const res = await fetch("/api/generate-session-curriculum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: session.id,
+          title: session.title,
+          framework: session.framework,
+          objectives: session.objectives,
+          cohort_goal: cohort.description,
+        }),
+      });
+      const text = await res.text();
+      let data: { session?: CohortSession; error?: string };
+      try { data = JSON.parse(text); } catch { throw new Error("Server error — try again"); }
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      if (data.session) {
+        setSessions((prev) => prev.map((s) => (s.id === session.id ? data.session! : s)));
+        setExpandedSession(session.id);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to generate details");
+    } finally {
+      setGeneratingCurriculum(null);
     }
   }
 
@@ -425,11 +456,13 @@ export default function CohortDetailPage() {
               session={session}
               expanded={expandedSession === session.id}
               buildingPlan={buildingPlan === session.id}
+              generatingCurriculum={generatingCurriculum === session.id}
               canBuildPlan={enrolledClients.length >= 2}
               onToggle={() =>
                 setExpandedSession(expandedSession === session.id ? null : session.id)
               }
               onBuildPlan={() => buildSessionPlan(session)}
+              onGenerateCurriculum={() => generateCurriculum(session)}
               onMarkComplete={() => markComplete(session)}
             />
           ))}
@@ -443,17 +476,21 @@ function SessionCard({
   session,
   expanded,
   buildingPlan,
+  generatingCurriculum,
   canBuildPlan,
   onToggle,
   onBuildPlan,
+  onGenerateCurriculum,
   onMarkComplete,
 }: {
   session: CohortSession;
   expanded: boolean;
   buildingPlan: boolean;
+  generatingCurriculum: boolean;
   canBuildPlan: boolean;
   onToggle: () => void;
   onBuildPlan: () => void;
+  onGenerateCurriculum: () => void;
   onMarkComplete: () => void;
 }) {
   const hasPlan = !!session.plan;
@@ -515,6 +552,18 @@ function SessionCard({
           >
             <CheckCircle size={15} />
           </button>
+
+          {!hasCurriculum && !hasPlan && (
+            <button
+              onClick={onGenerateCurriculum}
+              disabled={generatingCurriculum}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: "rgba(0,217,192,0.08)", color: BRAND.teal }}
+            >
+              {generatingCurriculum ? <Loader2 size={11} className="animate-spin" /> : <BookOpen size={11} />}
+              {generatingCurriculum ? "Generating..." : "Details"}
+            </button>
+          )}
 
           {(hasCurriculum || hasPlan) && (
             <button

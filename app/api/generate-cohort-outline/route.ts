@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const clientContext =
     clients && clients.length > 0
       ? `Group: ${clients.map((c: { name: string; jungian_type?: string }) => `${c.name} (${c.jungian_type ?? "Unknown"})`).join(", ")}`
-      : "No clients enrolled yet — build a general curriculum applicable to any social confidence group.";
+      : "No clients enrolled yet — build a general curriculum for a social confidence group.";
 
   const prompt = `You are a curriculum designer for Social Code, a social skills coaching practice.
 
@@ -25,43 +25,22 @@ Design a ${total_sessions}-session group coaching cohort.
 ${clientContext}
 Goal: ${cohort_goal || "Build social confidence and real-world social skills from the ground up."}
 
-Social Code Frameworks:
-- SPARK (starting conversations)
-- 3-Second Social Scan (reading who to approach)
-- Fearless Approach System (full approach anxiety system)
-- TALK Check (tone, attention, language, kinetics — delivery)
-- BRAVE (difficult conversations)
-- SHIELD (handling difficult people)
-- Stop Replaying (breaking post-social overthink)
+Social Code Frameworks: SPARK (starting conversations), 3-Second Social Scan (reading who to approach), Fearless Approach System (approach anxiety), TALK Check (tone/attention/language/kinetics), BRAVE (difficult conversations), SHIELD (handling difficult people), Stop Replaying (post-social overthink).
 
 RULES:
-- Session 1 is ALWAYS "TALK Check" framework — it is easy to apply immediately and sets a strong foundation
+- Session 1 is ALWAYS "TALK Check" — easy to apply immediately
 - Build skills progressively
-- Not every session needs a framework — some can be practice/application sessions
-- Keep responses concise
+- Not every session needs a framework
 
 Return a JSON array with EXACTLY ${total_sessions} objects:
+[{"session_number":1,"title":"session title","framework":"framework name or null","custom_topic":"topic or null","objectives":"what this session builds toward (1-2 sentences)"}]
 
-[
-  {
-    "session_number": 1,
-    "title": "session title",
-    "framework": "framework name or null",
-    "custom_topic": "topic or null",
-    "objectives": "what this session builds toward (1-2 sentences)",
-    "teach_points": ["key teaching point 1", "key teaching point 2", "key teaching point 3"],
-    "activity": "the main group exercise or drill for this session (2-3 sentences)",
-    "homework": "specific homework assignment before next session",
-    "discussion_questions": ["discussion question 1", "discussion question 2", "discussion question 3"]
-  }
-]
-
-Return ONLY valid JSON array. No markdown, no explanation.`;
+Return ONLY valid JSON array. No markdown.`;
 
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 2000,
+      max_tokens: 1200,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -79,10 +58,6 @@ Return ONLY valid JSON array. No markdown, no explanation.`;
       framework: string | null;
       custom_topic: string | null;
       objectives: string;
-      teach_points: string[];
-      activity: string;
-      homework: string;
-      discussion_questions: string[];
     }[] = JSON.parse(text.slice(start, end + 1));
 
     const rows = outline.map((s) => ({
@@ -92,12 +67,6 @@ Return ONLY valid JSON array. No markdown, no explanation.`;
       framework: s.framework ?? null,
       custom_topic: s.custom_topic ?? null,
       objectives: s.objectives,
-      curriculum: {
-        teach_points: s.teach_points ?? [],
-        activity: s.activity ?? "",
-        homework: s.homework ?? "",
-        discussion_questions: s.discussion_questions ?? [],
-      },
       status: "planned",
     }));
 
