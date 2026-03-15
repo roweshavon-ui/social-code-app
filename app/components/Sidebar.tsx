@@ -31,6 +31,7 @@ const navItems = [
   { href: "/questionnaire", label: "Assessment", icon: ClipboardList },
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
   { href: "/group-sessions", label: "Group Sessions", icon: Users2 },
+  { href: "/cohorts", label: "Cohorts", icon: Users },
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
   { href: "/posts", label: "Blog", icon: Newspaper },
