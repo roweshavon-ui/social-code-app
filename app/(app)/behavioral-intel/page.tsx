@@ -136,6 +136,7 @@ export default function BehavioralIntelPage() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
   const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
+  const [generatingPlaybook, setGeneratingPlaybook] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -219,6 +220,27 @@ export default function BehavioralIntelPage() {
       alert(e instanceof Error ? e.message : "Generation failed — try again");
     } finally {
       setGenerating(null);
+    }
+  }
+
+  async function generatePlaybook(entry: ClientEntry) {
+    setGeneratingPlaybook(entry.id);
+    try {
+      const body = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
+      const res = await fetch("/api/generate-coaching-playbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error ?? "Playbook generation failed");
+      }
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Playbook generation failed — try again");
+    } finally {
+      setGeneratingPlaybook(null);
     }
   }
 
@@ -322,6 +344,8 @@ export default function BehavioralIntelPage() {
               onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
               onGenerate={() => generateProfile(entry)}
               generating={generating === entry.id}
+              onGeneratePlaybook={() => generatePlaybook(entry)}
+              generatingPlaybook={generatingPlaybook === entry.id}
               onRemove={() => removeEntry(entry)}
               removing={removing === entry.id}
               confirmingRemove={confirmRemove === entry.id}
@@ -676,6 +700,8 @@ function AssessmentRow({
   onToggle,
   onGenerate,
   generating,
+  onGeneratePlaybook,
+  generatingPlaybook,
   onRemove,
   removing,
   confirmingRemove,
@@ -688,6 +714,8 @@ function AssessmentRow({
   onToggle: () => void;
   onGenerate: () => void;
   generating: boolean;
+  onGeneratePlaybook: () => void;
+  generatingPlaybook: boolean;
   onRemove: () => void;
   removing: boolean;
   confirmingRemove: boolean;
@@ -757,6 +785,17 @@ function AssessmentRow({
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                 {expanded ? "Collapse" : "View Intel"}
               </button>
+              {!p.coaching_playbook && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onGeneratePlaybook(); }}
+                  disabled={generatingPlaybook}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+                  style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
+                >
+                  {generatingPlaybook ? <Loader2 size={11} className="animate-spin" /> : <ClipboardList size={11} />}
+                  {generatingPlaybook ? "Building..." : "Add Playbook"}
+                </button>
+              )}
               <button
                 onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
