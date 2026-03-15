@@ -116,9 +116,12 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
   const content = message.content[0];
   if (content.type !== "text") throw new Error("Unexpected response type");
 
-  // Strip markdown code fences if Haiku wraps the JSON anyway
-  const raw = content.text.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-  console.log("RAW CLAUDE RESPONSE (first 500):", raw.slice(0, 500));
+  // Extract just the JSON object — works regardless of markdown fences or extra text
+  const text = content.text;
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("No JSON object found in response");
+  const raw = text.slice(start, end + 1);
   const profile = JSON.parse(raw);
 
   await getSupabase()
