@@ -25,19 +25,18 @@ const SALES_SCHEMA = `{
 
 const COACHING_SCHEMA = `{
   "coaching_playbook": {
-    "how_to_open_sessions": "1-sentence opening question",
-    "unlock_questions": ["question 1","question 2","question 3","question 4"],
+    "how_to_open_sessions": "1-sentence question",
+    "unlock_questions": ["q1","q2","q3"],
     "session_actions": [
-      {"session": "Session 1", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
-      {"session": "Sessions 2-3", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
-      {"session": "Sessions 4-6", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"},
-      {"session": "Sessions 7+", "goal": "1 sentence", "do_this": "1-2 sentences", "avoid": "1 sentence"}
+      {"session": "Session 1", "goal": "short", "do_this": "1 sentence", "avoid": "short"},
+      {"session": "Sessions 2-4", "goal": "short", "do_this": "1 sentence", "avoid": "short"},
+      {"session": "Sessions 5+", "goal": "short", "do_this": "1 sentence", "avoid": "short"}
     ],
-    "when_stuck": "1-2 sentence script",
-    "when_spiraling": "1-2 sentence script",
-    "feedback_delivery": "1 sentence",
-    "homework_style": "1 sentence",
-    "red_flags": ["flag + action","flag + action","flag + action"]
+    "when_stuck": "1-sentence script",
+    "when_spiraling": "1-sentence script",
+    "feedback_delivery": "short",
+    "homework_style": "short",
+    "red_flags": ["flag 1","flag 2","flag 3"]
   }
 }`;
 
