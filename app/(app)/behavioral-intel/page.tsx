@@ -765,17 +765,6 @@ function AssessmentRow({
         )}
 
         <div className="flex items-center gap-2">
-          {!p && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onGenerate(); }}
-              disabled={generating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
-            >
-              {generating ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
-              {generating ? "Generating full profile..." : "Generate Profile"}
-            </button>
-          )}
           {p && (
             <>
               <button
@@ -785,17 +774,19 @@ function AssessmentRow({
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                 {expanded ? "Collapse" : "View Intel"}
               </button>
-              {!p.coaching_playbook && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onGeneratePlaybook(); }}
-                  disabled={generatingPlaybook}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
-                >
-                  {generatingPlaybook ? <Loader2 size={11} className="animate-spin" /> : <ClipboardList size={11} />}
-                  {generatingPlaybook ? "Building..." : "Add Playbook"}
-                </button>
-              )}
+            </>
+          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); onGenerate(); }}
+            disabled={generating}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+            style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
+          >
+            {generating ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
+            {generating ? "Generating..." : p ? "Regenerate" : "Generate Profile"}
+          </button>
+          {p && (
+            <>
               <button
                 onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
