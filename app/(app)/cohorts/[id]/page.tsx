@@ -40,20 +40,23 @@ type Cohort = {
 };
 
 type GroupSessionPlan = {
-  session_title: string;
-  group_dynamics: string;
-  opening: string;
-  check_in_activity: string;
-  todays_focus: string;
-  agenda: { time: string; block: string; notes: string }[];
-  framework_or_topic_approach: string | null;
-  group_exercise: string;
-  type_callouts: { types: string[]; members: string[]; watch_for: string; how_to_engage: string }[];
-  group_friction_points: string;
-  how_to_handle_friction: string;
-  session_close: string;
-  homework: string;
-  next_session_seed: string;
+  session_title?: string;
+  group_dynamics?: string;
+  opening?: string;
+  check_in_activity?: string;
+  todays_focus?: string;
+  agenda?: { time: string; block: string; notes: string }[];
+  framework_or_topic_approach?: string | null;
+  group_exercise?: string;
+  // new compact shape
+  watch_for?: string;
+  // legacy shape
+  type_callouts?: { types: string[]; members: string[]; watch_for: string; how_to_engage: string }[];
+  group_friction_points?: string;
+  how_to_handle_friction?: string;
+  session_close?: string;
+  homework?: string;
+  next_session_seed?: string;
 };
 
 const BRAND = { teal: "#00D9C0", coral: "#FF6B6B", purple: "#a78bfa" };
@@ -497,13 +500,25 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
       )}
       {plan.group_exercise && <PlanField label="Group Exercise" value={plan.group_exercise} />}
 
-      {plan.type_callouts?.length > 0 && (
+      {/* New compact shape: watch_for as a string */}
+      {plan.watch_for && !plan.type_callouts?.length && (
+        <div
+          className="rounded-lg p-3 border border-white/5 text-xs"
+          style={{ background: "#0D1825" }}
+        >
+          <p className="font-bold text-slate-400 mb-1 uppercase tracking-widest text-xs">Watch For</p>
+          <p className="text-slate-300 leading-relaxed">{plan.watch_for}</p>
+        </div>
+      )}
+
+      {/* Legacy shape: type_callouts array */}
+      {(plan.type_callouts?.length ?? 0) > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
             Type-Specific Notes
           </p>
           <div className="space-y-2">
-            {plan.type_callouts.map((tc, i) => (
+            {plan.type_callouts!.map((tc, i) => (
               <div
                 key={i}
                 className="rounded-lg p-3 border border-white/5 text-xs"
@@ -548,6 +563,8 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
           <p className="text-xs text-slate-300">{plan.homework}</p>
         </div>
       )}
+
+      {plan.session_close && <PlanField label="How to Close" value={plan.session_close} />}
 
       {plan.next_session_seed && (
         <PlanField label="Plant This for Next Session" value={plan.next_session_seed} />

@@ -51,57 +51,39 @@ export async function POST(req: NextRequest) {
   const jungianTypes = (clients as ClientSummary[]).map((c) => c.jungian_type).filter(Boolean);
   const typeBreakdown = [...new Set(jungianTypes)].join(", ");
 
-  const prompt = `You are an expert session planner for Social Code, a 1:1 and group social skills coaching practice.
+  const prompt = `You are a group session planner for Social Code, a social skills coaching practice.
 
-Generate a complete GROUP SESSION plan for a coaching call with ${clients.length} clients.
+Plan a 45-min group coaching session for ${clients.length} clients.
 
-GROUP ROSTER:
-${clientList}
-
-Type Mix in Room: ${typeBreakdown}
-Session Goal: ${session_goal || "No specific goal provided — assess and build for the group's current level."}
-
+CLIENTS: ${clientList}
+TYPES: ${typeBreakdown}
+GOAL: ${session_goal || "Build social skills for this group."}
 ${frameworkSection}
 
-Your job: Generate a group session plan that accounts for the TYPE MIX in the room. Different Jungian types will respond differently. Design the session to serve the full group while noting where to individualize.
-
-Generate a JSON object with EXACTLY this structure:
+Return ONLY this JSON (no markdown, no explanation):
 
 {
-  "session_title": "short punchy group session title",
-  "group_dynamics": "1-2 sentences on the type mix and what this means for the group dynamic — where will tension come from, who will lead, who will hold back",
-  "opening": "exactly how to open this group call — set the tone for the group, create safety",
-  "check_in_activity": "a group check-in activity or question — one that works for the type mix and gets everyone talking",
-  "todays_focus": "what this group session builds toward and why it matters for this specific group",
+  "session_title": "short title",
+  "group_dynamics": "1 sentence on this type mix and what to expect",
+  "opening": "how to open — 2-3 sentences",
+  "todays_focus": "what this session builds toward",
   "agenda": [
-    { "time": "0-5 min", "block": "Opening & check-in", "notes": "what to do" },
-    { "time": "5-20 min", "block": "block name", "notes": "what to cover" },
-    { "time": "20-35 min", "block": "block name", "notes": "what to cover" },
-    { "time": "35-45 min", "block": "Close & assign", "notes": "what to do" }
+    { "time": "0-5 min", "block": "Opening", "notes": "brief" },
+    { "time": "5-20 min", "block": "Teach", "notes": "brief" },
+    { "time": "20-35 min", "block": "Practice", "notes": "brief" },
+    { "time": "35-45 min", "block": "Close", "notes": "brief" }
   ],
-  "framework_or_topic_approach": "how to introduce and teach this framework to a mixed group — or null if AI-decided",
-  "group_exercise": "the specific group exercise or drill — what it is, how to run it, how to pair or sequence participants based on their types",
-  "type_callouts": [
-    {
-      "types": ["INTJ", "INFJ"],
-      "members": ["name1", "name2"],
-      "watch_for": "specific behavior to watch for from these types in the group",
-      "how_to_engage": "how to bring them in or manage them specifically"
-    }
-  ],
-  "group_friction_points": "where this group could hit friction — type conflicts, energy clashes, anyone who might dominate or withdraw",
-  "how_to_handle_friction": "exact language and moves for managing the friction points — what to say and do",
-  "session_close": "how to close the group session — what to summarize, what to acknowledge for the group",
-  "homework": "homework assignment — can be the same for everyone or differentiated by type. Be specific.",
-  "next_session_seed": "what to plant at the end to create momentum for the next group call"
-}
-
-Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
+  "group_exercise": "the exercise — what it is and how to run it in 2-3 sentences",
+  "watch_for": "1-2 things to watch for with this specific type mix",
+  "session_close": "how to close — 1-2 sentences",
+  "homework": "specific homework for the group",
+  "next_session_seed": "one line to plant momentum for next session"
+}`;
 
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 4000,
+      max_tokens: 1500,
       messages: [{ role: "user", content: prompt }],
     });
 
