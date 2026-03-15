@@ -118,6 +118,7 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
 
   // Strip markdown code fences if Haiku wraps the JSON anyway
   const raw = content.text.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+  console.log("RAW CLAUDE RESPONSE (first 500):", raw.slice(0, 500));
   const profile = JSON.parse(raw);
 
   await getSupabase()
