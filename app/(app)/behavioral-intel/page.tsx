@@ -139,6 +139,7 @@ export default function BehavioralIntelPage() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
   const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
+  const [generatingPlaybook, setGeneratingPlaybook] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -208,6 +209,20 @@ export default function BehavioralIntelPage() {
       await load();
     } finally {
       setGenerating(null);
+    }
+  }
+
+  async function generatePlaybook(entry: ClientEntry) {
+    setGeneratingPlaybook(entry.id);
+    try {
+      await fetch("/api/generate-coaching-playbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assessment_id: entry.id }),
+      });
+      await load();
+    } finally {
+      setGeneratingPlaybook(null);
     }
   }
 
@@ -311,6 +326,8 @@ export default function BehavioralIntelPage() {
               onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
               onGenerate={() => generateProfile(entry)}
               generating={generating === entry.id}
+              onGeneratePlaybook={() => generatePlaybook(entry)}
+              generatingPlaybook={generatingPlaybook === entry.id}
               onRemove={() => removeEntry(entry)}
               removing={removing === entry.id}
               confirmingRemove={confirmRemove === entry.id}
@@ -665,6 +682,8 @@ function AssessmentRow({
   onToggle,
   onGenerate,
   generating,
+  onGeneratePlaybook,
+  generatingPlaybook,
   onRemove,
   removing,
   confirmingRemove,
@@ -677,6 +696,8 @@ function AssessmentRow({
   onToggle: () => void;
   onGenerate: () => void;
   generating: boolean;
+  onGeneratePlaybook: () => void;
+  generatingPlaybook: boolean;
   onRemove: () => void;
   removing: boolean;
   confirmingRemove: boolean;
@@ -734,7 +755,18 @@ function AssessmentRow({
               style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
             >
               {generating ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
-              Generate
+              {generating ? "Generating..." : "Generate Profile"}
+            </button>
+          )}
+          {p && !p.coaching_playbook && entry.source === "assessment" && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onGeneratePlaybook(); }}
+              disabled={generatingPlaybook}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
+            >
+              {generatingPlaybook ? <Loader2 size={11} className="animate-spin" /> : <Zap size={11} />}
+              {generatingPlaybook ? "Building..." : "Add Playbook"}
             </button>
           )}
           {p && (
