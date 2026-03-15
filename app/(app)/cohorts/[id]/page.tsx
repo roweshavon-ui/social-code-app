@@ -474,11 +474,11 @@ function GroupPlanSummary({ plan }: { plan: GroupSessionPlan }) {
         </div>
       )}
 
-      {plan.agenda?.length > 0 && (
+      {(plan.agenda?.length ?? 0) > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Agenda</p>
           <div className="space-y-1.5">
-            {plan.agenda.map((a, i) => (
+            {plan.agenda!.map((a, i) => (
               <div key={i} className="flex gap-3 text-xs">
                 <span className="text-slate-600 flex-shrink-0 w-16">{a.time}</span>
                 <div>
