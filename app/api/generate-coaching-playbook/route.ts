@@ -24,28 +24,30 @@ const SALES_SCHEMA = `{
   }
 }`;
 
-// Call 2: Per-session action plan (~700 tokens)
+// Call 2: Per-session action plan — flat fields, no arrays (arrays cause comma/truncation errors)
 const SESSION_ACTIONS_SCHEMA = `{
   "coaching_playbook": {
-    "how_to_open_sessions": "exact opening question to use at the start of every session",
-    "unlock_questions": ["exact question 1","exact question 2","exact question 3","exact question 4"],
-    "session_actions": [
-      {"session": "Session 1", "goal": "what to establish", "do_this": "exact things to do and say", "avoid": "what not to do"},
-      {"session": "Sessions 2-3", "goal": "what to build", "do_this": "exact things to do and say", "avoid": "what not to do"},
-      {"session": "Sessions 4-6", "goal": "what to push on", "do_this": "exact things to do and say", "avoid": "what not to do"},
-      {"session": "Sessions 7+", "goal": "endgame", "do_this": "exact things to do and say", "avoid": "what not to do"}
-    ]
+    "how_to_open_sessions": "exact opening question",
+    "unlock_q1": "question 1",
+    "unlock_q2": "question 2",
+    "unlock_q3": "question 3",
+    "s1_goal": "Session 1 goal", "s1_do": "Session 1 exact actions", "s1_avoid": "Session 1 what not to do",
+    "s23_goal": "Sessions 2-3 goal", "s23_do": "Sessions 2-3 exact actions", "s23_avoid": "Sessions 2-3 what not to do",
+    "s46_goal": "Sessions 4-6 goal", "s46_do": "Sessions 4-6 exact actions", "s46_avoid": "Sessions 4-6 what not to do",
+    "s7_goal": "Sessions 7+ goal", "s7_do": "Sessions 7+ exact actions", "s7_avoid": "Sessions 7+ what not to do"
   }
 }`;
 
-// Call 3: Coaching tactics (~500 tokens)
+// Call 3: Coaching tactics — flat fields, no arrays
 const COACHING_TACTICS_SCHEMA = `{
   "coaching_playbook_tactics": {
-    "when_stuck": "word-for-word script when they go quiet, deflect, or resist",
-    "when_spiraling": "exact script when they are overwhelmed or in their head",
-    "feedback_delivery": "how to challenge this person so it lands without triggering their fear",
-    "homework_style": "what assignments work and how to frame them for this profile",
-    "red_flags": ["warning sign 1 + what to do","warning sign 2 + what to do","warning sign 3 + what to do"]
+    "when_stuck": "word-for-word script when they go quiet or resist",
+    "when_spiraling": "exact script when they are overwhelmed",
+    "feedback_delivery": "how to challenge this person without triggering their fear",
+    "homework_style": "what assignments work for this profile",
+    "red_flag_1": "warning sign 1 + what to do",
+    "red_flag_2": "warning sign 2 + what to do",
+    "red_flag_3": "warning sign 3 + what to do"
   }
 }`;
 
@@ -101,10 +103,23 @@ ${typeExtra}`;
         callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
       ]);
 
-      // Merge tactics into coaching_playbook object
+      // Reconstruct arrays from flat fields, merge everything
+      const sp = sessionResult.coaching_playbook ?? {};
+      const tp = tacticsResult.coaching_playbook_tactics ?? {};
       const coaching_playbook = {
-        ...sessionResult.coaching_playbook,
-        ...tacticsResult.coaching_playbook_tactics,
+        how_to_open_sessions: sp.how_to_open_sessions,
+        unlock_questions: [sp.unlock_q1, sp.unlock_q2, sp.unlock_q3].filter(Boolean),
+        session_actions: [
+          { session: "Session 1", goal: sp.s1_goal, do_this: sp.s1_do, avoid: sp.s1_avoid },
+          { session: "Sessions 2-3", goal: sp.s23_goal, do_this: sp.s23_do, avoid: sp.s23_avoid },
+          { session: "Sessions 4-6", goal: sp.s46_goal, do_this: sp.s46_do, avoid: sp.s46_avoid },
+          { session: "Sessions 7+", goal: sp.s7_goal, do_this: sp.s7_do, avoid: sp.s7_avoid },
+        ].filter(s => s.goal),
+        when_stuck: tp.when_stuck,
+        when_spiraling: tp.when_spiraling,
+        feedback_delivery: tp.feedback_delivery,
+        homework_style: tp.homework_style,
+        red_flags: [tp.red_flag_1, tp.red_flag_2, tp.red_flag_3].filter(Boolean),
       };
 
       const merged = {
