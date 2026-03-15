@@ -74,8 +74,18 @@ type Assessment = {
   created_at: string;
 };
 
+type ClientEntry = {
+  id: string;
+  name: string;
+  email: string;
+  jungian_type: string;
+  behavioral_profile: BehavioralProfile | null;
+  source: "assessment" | "client";
+  scores?: Record<string, number>;
+};
+
 export default function BehavioralIntelPage() {
-  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [entries, setEntries] = useState<ClientEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
@@ -88,20 +98,57 @@ export default function BehavioralIntelPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/assessments");
-    const data = await res.json();
-    setAssessments(Array.isArray(data) ? data : []);
+    const [assessRes, clientRes] = await Promise.all([
+      fetch("/api/assessments"),
+      fetch("/api/clients"),
+    ]);
+    const assessments: Assessment[] = await assessRes.json();
+    const clients = await clientRes.json();
+
+    // Build unified list — assessments first, then clients not in assessments
+    const assessmentEmails = new Set(
+      (Array.isArray(assessments) ? assessments : []).map((a) => a.email?.toLowerCase())
+    );
+    const assessmentEntries: ClientEntry[] = (Array.isArray(assessments) ? assessments : []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      email: a.email,
+      jungian_type: a.jungian_type,
+      behavioral_profile: a.behavioral_profile,
+      scores: a.scores,
+      source: "assessment",
+    }));
+    const clientOnlyEntries: ClientEntry[] = (Array.isArray(clients) ? clients : [])
+      .filter((c: { email?: string }) => !assessmentEmails.has(c.email?.toLowerCase() ?? ""))
+      .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null }) => ({
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        jungian_type: c.jungian_type,
+        behavioral_profile: c.behavioral_profile,
+        source: "client" as const,
+      }));
+
+    setEntries([...assessmentEntries, ...clientOnlyEntries]);
     setLoading(false);
   }
 
-  async function generateProfile(id: string) {
-    setGenerating(id);
+  async function generateProfile(entry: ClientEntry) {
+    setGenerating(entry.id);
     try {
-      await fetch("/api/generate-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ assessment_id: id }),
-      });
+      if (entry.source === "assessment") {
+        await fetch("/api/generate-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assessment_id: entry.id }),
+        });
+      } else {
+        await fetch("/api/generate-client-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: entry.id }),
+        });
+      }
       await load();
     } finally {
       setGenerating(null);
@@ -111,20 +158,21 @@ export default function BehavioralIntelPage() {
   async function runBackfill() {
     setBackfilling(true);
     setBackfillResult(null);
-    const missing = assessments.filter((a) => !a.behavioral_profile);
+    const missing = entries.filter((e) => !e.behavioral_profile);
     if (!missing.length) {
-      setBackfillResult("All assessments already have profiles.");
+      setBackfillResult("All profiles already generated.");
       setBackfilling(false);
       return;
     }
     let success = 0;
-    // Process one at a time — each gets its own serverless call to avoid timeout
-    for (const a of missing) {
+    for (const entry of missing) {
       try {
-        const res = await fetch("/api/generate-profile", {
+        const endpoint = entry.source === "assessment" ? "/api/generate-profile" : "/api/generate-client-profile";
+        const body = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ assessment_id: a.id }),
+          body: JSON.stringify(body),
         });
         if (res.ok) success++;
       } catch { /* continue */ }
@@ -135,8 +183,8 @@ export default function BehavioralIntelPage() {
     setBackfilling(false);
   }
 
-  const withProfile = assessments.filter((a) => a.behavioral_profile);
-  const withoutProfile = assessments.filter((a) => !a.behavioral_profile);
+  const withProfile = entries.filter((e) => e.behavioral_profile);
+  const withoutProfile = entries.filter((e) => !e.behavioral_profile);
 
   return (
     <div className="p-6 max-w-5xl">
@@ -170,27 +218,27 @@ export default function BehavioralIntelPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label="Total Assessments" value={assessments.length} />
+        <StatCard label="Total Clients" value={entries.length} />
         <StatCard label="Profiles Generated" value={withProfile.length} color={BRAND.teal} />
         <StatCard label="Awaiting Profile" value={withoutProfile.length} color={withoutProfile.length > 0 ? BRAND.coral : undefined} />
       </div>
 
       {loading ? (
         <div className="flex items-center gap-2 text-slate-500 text-sm">
-          <Loader2 size={14} className="animate-spin" />Loading assessments...
+          <Loader2 size={14} className="animate-spin" />Loading profiles...
         </div>
-      ) : assessments.length === 0 ? (
-        <div className="text-sm text-slate-500">No assessments yet.</div>
+      ) : entries.length === 0 ? (
+        <div className="text-sm text-slate-500">No clients yet.</div>
       ) : (
         <div className="space-y-3">
-          {assessments.map((a) => (
+          {entries.map((entry) => (
             <AssessmentRow
-              key={a.id}
-              assessment={a}
-              expanded={expanded === a.id}
-              onToggle={() => setExpanded(expanded === a.id ? null : a.id)}
-              onGenerate={() => generateProfile(a.id)}
-              generating={generating === a.id}
+              key={entry.id}
+              entry={entry}
+              expanded={expanded === entry.id}
+              onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
+              onGenerate={() => generateProfile(entry)}
+              generating={generating === entry.id}
             />
           ))}
         </div>
@@ -209,25 +257,22 @@ function StatCard({ label, value, color }: { label: string; value: number; color
 }
 
 function AssessmentRow({
-  assessment: a,
+  entry,
   expanded,
   onToggle,
   onGenerate,
   generating,
 }: {
-  assessment: Assessment;
+  entry: ClientEntry;
   expanded: boolean;
   onToggle: () => void;
   onGenerate: () => void;
   generating: boolean;
 }) {
-  const p = a.behavioral_profile;
-  const scores = a.scores ?? {};
-  const total_ei = (scores.E ?? 0) + (scores.I ?? 0);
-  const total_sn = (scores.S ?? 0) + (scores.N ?? 0);
-  const total_tf = (scores.T ?? 0) + (scores.F ?? 0);
-  const total_jp = (scores.J ?? 0) + (scores.P ?? 0);
+  const p = entry.behavioral_profile;
+  const scores = entry.scores ?? {};
   const pct = (a: number, b: number) => (a + b > 0 ? Math.round((a / (a + b)) * 100) : 50);
+  const hasScores = entry.source === "assessment" && Object.keys(scores).length > 0;
 
   return (
     <div className="rounded-xl border border-white/5 overflow-hidden" style={{ background: "#131E2B" }}>
@@ -235,10 +280,13 @@ function AssessmentRow({
       <div className="flex items-center gap-4 px-5 py-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-bold text-white">{a.name}</span>
+            <span className="text-sm font-bold text-white">{entry.name}</span>
             <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,217,192,0.1)", color: BRAND.teal }}>
-              {a.jungian_type}
+              {entry.jungian_type ?? "—"}
             </span>
+            {entry.source === "client" && (
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium text-slate-500 border border-white/5">manual</span>
+            )}
             {p ? (
               <span className="text-xs flex items-center gap-1" style={{ color: BRAND.teal }}>
                 <CheckCircle size={11} /> Profile ready
@@ -249,16 +297,18 @@ function AssessmentRow({
               </span>
             )}
           </div>
-          <div className="text-xs text-slate-500">{a.email}</div>
+          <div className="text-xs text-slate-500">{entry.email}</div>
         </div>
 
-        {/* Score bars (compact) */}
+        {/* Score bars (compact) — only for assessment entries */}
+        {hasScores && (
         <div className="hidden md:flex gap-3 text-xs text-slate-600">
           <ScorePill a="E" b="I" pctA={pct(scores.E, scores.I)} dominant={scores.E >= scores.I ? "E" : "I"} />
           <ScorePill a="S" b="N" pctA={pct(scores.S, scores.N)} dominant={scores.S >= scores.N ? "S" : "N"} />
           <ScorePill a="T" b="F" pctA={pct(scores.T, scores.F)} dominant={scores.T >= scores.F ? "T" : "F"} />
           <ScorePill a="J" b="P" pctA={pct(scores.J, scores.P)} dominant={scores.J >= scores.P ? "J" : "P"} />
         </div>
+        )}
 
         <div className="flex items-center gap-2">
           {!p && (
