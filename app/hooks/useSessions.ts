@@ -19,6 +19,7 @@ export type Session = {
   breakthroughMoment: string;
   coachObservations: string;
   frameworksUsed: string[];
+  plan: Record<string, unknown> | null;
 };
 
 type RawSession = {
@@ -38,6 +39,7 @@ type RawSession = {
   breakthrough_moment: string;
   coach_observations: string;
   frameworks_used: string[];
+  plan: Record<string, unknown> | null;
 };
 
 function toSession(raw: RawSession): Session {
@@ -58,6 +60,7 @@ function toSession(raw: RawSession): Session {
     breakthroughMoment: raw.breakthrough_moment ?? "",
     coachObservations: raw.coach_observations ?? "",
     frameworksUsed: raw.frameworks_used ?? [],
+    plan: raw.plan ?? null,
   };
 }
 

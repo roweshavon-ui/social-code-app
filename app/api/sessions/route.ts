@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     breakthroughMoment,
     coachObservations,
     frameworksUsed,
+    plan,
   } = body;
 
   if (!clientName?.trim() || !date) {
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
       breakthrough_moment: breakthroughMoment ?? null,
       coach_observations: coachObservations ?? null,
       frameworks_used: frameworksUsed ?? [],
+      plan: plan ?? null,
     })
     .select()
     .single();

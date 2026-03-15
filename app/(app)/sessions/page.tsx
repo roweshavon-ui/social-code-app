@@ -31,6 +31,7 @@ type FormState = {
   breakthroughMoment: string;
   coachObservations: string;
   frameworksUsed: string[];
+  plan: Record<string, unknown> | null;
 };
 
 const DEFAULT_FORM: FormState = {
@@ -49,6 +50,7 @@ const DEFAULT_FORM: FormState = {
   breakthroughMoment: "",
   coachObservations: "",
   frameworksUsed: [],
+  plan: null,
 };
 
 export default function SessionsPage() {
@@ -96,6 +98,7 @@ export default function SessionsPage() {
       breakthroughMoment: session.breakthroughMoment,
       coachObservations: session.coachObservations,
       frameworksUsed: session.frameworksUsed ?? [],
+      plan: session.plan ?? null,
     });
     setEditId(session.id);
     setShowForm(true);
@@ -479,6 +482,7 @@ function SessionCard({
     intake: "Intake",
     ongoing: "Ongoing",
     "follow-up": "Follow-up",
+    planned: "Plan",
   };
 
   return (
@@ -500,8 +504,14 @@ function SessionCard({
               style={{
                 background: session.sessionType === "intake"
                   ? "rgba(0,217,192,0.1)"
+                  : session.sessionType === "planned"
+                  ? "rgba(167,139,250,0.12)"
                   : "rgba(255,255,255,0.05)",
-                color: session.sessionType === "intake" ? "#00D9C0" : "#64748b",
+                color: session.sessionType === "intake"
+                  ? "#00D9C0"
+                  : session.sessionType === "planned"
+                  ? "#a78bfa"
+                  : "#64748b",
               }}
             >
               {typeLabel[session.sessionType] ?? session.sessionType}
@@ -556,39 +566,67 @@ function SessionCard({
 
       {expanded && (
         <div className="border-t border-white/5 px-5 py-4 space-y-3">
-          {session.notes && <DetailField label="Session Notes" value={session.notes} />}
-          {session.frameworksUsed?.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
-                Frameworks Covered
+          {/* Saved plan view */}
+          {session.plan && session.sessionType === "planned" && (
+            <>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#a78bfa" }}>
+                Session Plan
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {session.frameworksUsed.map((f) => (
-                  <span
-                    key={f}
-                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa" }}
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </div>
+              {(session.plan.todays_focus as string) && (
+                <DetailField label="Focus" value={session.plan.todays_focus as string} />
+              )}
+              {(session.plan.opening as string) && (
+                <DetailField label="How to Open" value={session.plan.opening as string} />
+              )}
+              {(session.plan.check_in as string) && (
+                <DetailField label="Check-In Question" value={session.plan.check_in as string} highlight />
+              )}
+              {(session.plan.exercise as string) && (
+                <DetailField label="Exercise" value={session.plan.exercise as string} />
+              )}
+              {(session.plan.homework as string) && (
+                <DetailField label="Homework to Assign" value={session.plan.homework as string} />
+              )}
+            </>
           )}
-          {session.homeworkAssigned && (
-            <DetailField label="Homework Assigned" value={session.homeworkAssigned} />
-          )}
-          {session.homeworkCompletion !== "none" && (
-            <DetailField label="Homework Completion" value={session.homeworkCompletion} />
-          )}
-          {session.breakthroughMoment && (
-            <DetailField label="Breakthrough Moment" value={session.breakthroughMoment} highlight />
-          )}
-          {session.coachObservations && (
-            <DetailField label="Coach Observations" value={session.coachObservations} />
-          )}
-          {session.actionItems && (
-            <DetailField label="Action Items" value={session.actionItems} />
+          {/* Logged session view */}
+          {session.sessionType !== "planned" && (
+            <>
+              {session.notes && <DetailField label="Session Notes" value={session.notes} />}
+              {session.frameworksUsed?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
+                    Frameworks Covered
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {session.frameworksUsed.map((f) => (
+                      <span
+                        key={f}
+                        className="text-xs px-2 py-0.5 rounded-full font-medium"
+                        style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa" }}
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {session.homeworkAssigned && (
+                <DetailField label="Homework Assigned" value={session.homeworkAssigned} />
+              )}
+              {session.homeworkCompletion !== "none" && (
+                <DetailField label="Homework Completion" value={session.homeworkCompletion} />
+              )}
+              {session.breakthroughMoment && (
+                <DetailField label="Breakthrough Moment" value={session.breakthroughMoment} highlight />
+              )}
+              {session.coachObservations && (
+                <DetailField label="Coach Observations" value={session.coachObservations} />
+              )}
+              {session.actionItems && (
+                <DetailField label="Action Items" value={session.actionItems} />
+              )}
+            </>
           )}
         </div>
       )}

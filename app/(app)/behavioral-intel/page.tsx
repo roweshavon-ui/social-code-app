@@ -340,12 +340,46 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
   const [framework, setFramework] = useState(FRAMEWORKS[0]);
   const [customTopic, setCustomTopic] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [plan, setPlan] = useState<SessionPlan | null>(null);
   const [isIntake, setIsIntake] = useState(false);
   const [lastSessionBrief, setLastSessionBrief] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const clientId = entry.clientId ?? (entry.source === "client" ? entry.id : null);
+
+  async function savePlan() {
+    if (!plan) return;
+    setSaving(true);
+    try {
+      await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId,
+          clientName: entry.name,
+          date: new Date().toISOString().split("T")[0],
+          duration: "60",
+          sessionNumber,
+          sessionType: isIntake ? "intake" : "planned",
+          notes: "",
+          actionItems: "",
+          rating: 5,
+          clientEngagement: "open",
+          homeworkCompletion: "none",
+          homeworkAssigned: plan.homework ?? "",
+          breakthroughMoment: "",
+          coachObservations: "",
+          frameworksUsed: [],
+          plan,
+        }),
+      });
+      setSaved(true);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function generate() {
     setGenerating(true);
@@ -578,12 +612,28 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
               <p className="text-xs text-slate-300">{plan.next_session_seed}</p>
             </div>
 
-            <button
-              onClick={() => setPlan(null)}
-              className="w-full py-2.5 rounded-xl text-xs font-semibold border border-white/10 text-slate-400 hover:text-white transition-colors"
-            >
-              ← Build Another Session
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setPlan(null); setSaved(false); }}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold border border-white/10 text-slate-400 hover:text-white transition-colors"
+              >
+                ← Build Another
+              </button>
+              <button
+                onClick={savePlan}
+                disabled={saving || saved}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+                style={{ background: saved ? "rgba(0,217,192,0.15)" : "#a78bfa", color: saved ? "#00D9C0" : "#fff" }}
+              >
+                {saving ? (
+                  <><Loader2 size={13} className="animate-spin" />Saving...</>
+                ) : saved ? (
+                  "✓ Plan Saved"
+                ) : (
+                  "Save Plan to Sessions"
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>
