@@ -31,7 +31,7 @@ export default function PublicAssessPage() {
   function handleAnswer(choice: "a" | "b") {
     const updated = { ...answers, [question.id]: choice };
     setAnswers(updated);
-    if (current < QUESTIONS.length - 1) {
+    if (current < ALL_QUESTIONS.length - 1) {
       setTimeout(() => setCurrent((c) => c + 1), 200);
     }
   }

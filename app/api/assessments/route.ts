@@ -28,14 +28,18 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Trigger behavioral profile generation in the background (non-blocking)
+  // Generate behavioral profile synchronously — Vercel kills fire-and-forget after response
   if (data?.id && answer_map) {
-    const baseUrl = req.nextUrl.origin;
-    fetch(`${baseUrl}/api/generate-profile`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assessment_id: data.id }),
-    }).catch(() => {}); // fire and forget
+    try {
+      const baseUrl = req.nextUrl.origin;
+      await fetch(`${baseUrl}/api/generate-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assessment_id: data.id }),
+      });
+    } catch (e) {
+      console.error("Profile generation failed silently:", e);
+    }
   }
 
   // Send results email (non-blocking)
