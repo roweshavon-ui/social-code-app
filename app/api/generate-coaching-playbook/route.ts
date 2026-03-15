@@ -105,7 +105,7 @@ ${typeExtra}`;
 
       // Reconstruct arrays from flat fields, merge everything
       const sp = sessionResult.coaching_playbook ?? {};
-      const tp = tacticsResult.coaching_playbook_tactics ?? {};
+      const tact = tacticsResult.coaching_playbook_tactics ?? {};
       const coaching_playbook = {
         how_to_open_sessions: sp.how_to_open_sessions,
         unlock_questions: [sp.unlock_q1, sp.unlock_q2, sp.unlock_q3].filter(Boolean),
@@ -115,11 +115,11 @@ ${typeExtra}`;
           { session: "Sessions 4-6", goal: sp.s46_goal, do_this: sp.s46_do, avoid: sp.s46_avoid },
           { session: "Sessions 7+", goal: sp.s7_goal, do_this: sp.s7_do, avoid: sp.s7_avoid },
         ].filter(s => s.goal),
-        when_stuck: tp.when_stuck,
-        when_spiraling: tp.when_spiraling,
-        feedback_delivery: tp.feedback_delivery,
-        homework_style: tp.homework_style,
-        red_flags: [tp.red_flag_1, tp.red_flag_2, tp.red_flag_3].filter(Boolean),
+        when_stuck: tact.when_stuck,
+        when_spiraling: tact.when_spiraling,
+        feedback_delivery: tact.feedback_delivery,
+        homework_style: tact.homework_style,
+        red_flags: [tact.red_flag_1, tact.red_flag_2, tact.red_flag_3].filter(Boolean),
       };
 
       const merged = {
