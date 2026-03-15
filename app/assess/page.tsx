@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronRight, ChevronLeft, CheckCircle } from "lucide-react";
-import { QUESTIONS, calculateType } from "../(app)/questionnaire/questions";
+import { ALL_QUESTIONS, QUESTIONS, calculateType } from "../(app)/questionnaire/questions";
 
 type Step = "info" | "quiz" | "result" | "done";
 
@@ -24,9 +24,9 @@ export default function PublicAssessPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const question = QUESTIONS[current];
-  const progress = (Object.keys(answers).length / QUESTIONS.length) * 100;
-  const allAnswered = Object.keys(answers).length === QUESTIONS.length;
+  const question = ALL_QUESTIONS[current];
+  const progress = (Object.keys(answers).length / ALL_QUESTIONS.length) * 100;
+  const allAnswered = Object.keys(answers).length === ALL_QUESTIONS.length;
 
   function handleAnswer(choice: "a" | "b") {
     const updated = { ...answers, [question.id]: choice };
@@ -59,6 +59,7 @@ export default function PublicAssessPage() {
           description: res.description,
           strengths: res.socialStrengths,
           challenges: res.socialChallenges,
+          answer_map: answers,
         }),
       });
       setSubmitted(true);
@@ -80,7 +81,7 @@ export default function PublicAssessPage() {
               Free Social Type Assessment
             </h1>
             <p className="text-slate-400 text-sm leading-relaxed">
-              20 questions · ~5 minutes · Based on Jungian psychology
+              30 questions · ~8 minutes · Based on Jungian psychology
             </p>
           </div>
 
@@ -156,6 +157,7 @@ export default function PublicAssessPage() {
       SN: "Perception",
       TF: "Decisions",
       JP: "Lifestyle",
+      BH: "Social Style",
     };
 
     return (
@@ -165,7 +167,7 @@ export default function PublicAssessPage() {
           {/* Progress */}
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-slate-500">{info.name}</span>
-            <span className="text-xs text-slate-500">{current + 1} / {QUESTIONS.length}</span>
+            <span className="text-xs text-slate-500">{current + 1} / {ALL_QUESTIONS.length}</span>
           </div>
           <div className="w-full h-1 rounded-full mb-8" style={{ background: BRAND.navy }}>
             <div
@@ -226,7 +228,7 @@ export default function PublicAssessPage() {
               Back
             </button>
 
-            {current < QUESTIONS.length - 1 ? (
+            {current < ALL_QUESTIONS.length - 1 ? (
               <button
                 onClick={() => answers[question.id] && setCurrent((c) => c + 1)}
                 disabled={!answers[question.id]}
@@ -249,7 +251,7 @@ export default function PublicAssessPage() {
 
           {/* Dot nav */}
           <div className="flex gap-1.5 justify-center mt-8 flex-wrap">
-            {QUESTIONS.map((q, i) => (
+            {ALL_QUESTIONS.map((q, i) => (
               <button
                 key={q.id}
                 onClick={() => setCurrent(i)}

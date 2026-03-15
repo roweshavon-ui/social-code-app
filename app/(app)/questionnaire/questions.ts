@@ -1,4 +1,4 @@
-export type Dimension = "EI" | "SN" | "TF" | "JP";
+export type Dimension = "EI" | "SN" | "TF" | "JP" | "BH";
 
 export type Question = {
   id: number;
@@ -6,6 +6,14 @@ export type Question = {
   text: string;
   a: { label: string; scores: "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P" };
   b: { label: string; scores: "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P" };
+};
+
+export type BehavioralQuestion = {
+  id: number;
+  dimension: "BH";
+  text: string;
+  a: { label: string; signal: string };
+  b: { label: string; signal: string };
 };
 
 export const QUESTIONS: Question[] = [
@@ -136,6 +144,78 @@ export const QUESTIONS: Question[] = [
     a: { label: "Bother you until they're done — closure matters", scores: "J" },
     b: { label: "Don't stress you out much — things get done when they get done", scores: "P" },
   },
+];
+
+// ── Behavioral Signal Questions (IDs 21–30) ─────────────────
+// These look like personality questions but capture Chase Hughes behavioral signals.
+// Only the answer_map is stored — the AI reads the signals to generate the profile.
+
+export const BEHAVIORAL_QUESTIONS: BehavioralQuestion[] = [
+  {
+    id: 21, dimension: "BH",
+    text: "When meeting someone new, what matters most to you?",
+    a: { label: "That they see what you're capable of and respect what you bring to the table", signal: "need_significance" },
+    b: { label: "That they like you, feel comfortable around you, and want to be around you", signal: "need_approval" },
+  },
+  {
+    id: 22, dimension: "BH",
+    text: "In a new group, your main internal concern is usually...",
+    a: { label: "Whether they'll welcome you and you'll naturally fit in", signal: "need_acceptance" },
+    b: { label: "Whether they'll take your perspective seriously and see you as sharp", signal: "need_intelligence" },
+  },
+  {
+    id: 23, dimension: "BH",
+    text: "When something goes wrong in a social situation, your first thought is...",
+    a: { label: "What could I have done differently? You look at your own role first", signal: "locus_internal" },
+    b: { label: "The situation or the other person played a big part — context matters", signal: "locus_external" },
+  },
+  {
+    id: 24, dimension: "BH",
+    text: "Before making an important personal decision, you typically...",
+    a: { label: "Think it through yourself and trust your own judgment", signal: "decision_independent" },
+    b: { label: "Talk it through with people you trust before committing", signal: "decision_validation" },
+  },
+  {
+    id: 25, dimension: "BH",
+    text: "When faced with real social tension or conflict, your instinct is to...",
+    a: { label: "Address it directly — you'd rather deal with it than let it sit", signal: "stress_confront" },
+    b: { label: "Step back and get space — you process better when you're not in the heat of it", signal: "stress_retreat" },
+  },
+  {
+    id: 26, dimension: "BH",
+    text: "With someone new, your trust...",
+    a: { label: "Builds over time — you watch for consistency before you really open up", signal: "trust_slow" },
+    b: { label: "Can come quickly — when someone feels right, you know early", signal: "trust_fast" },
+  },
+  {
+    id: 27, dimension: "BH",
+    text: "When experts or popular opinion say one thing but your gut says another...",
+    a: { label: "You take their view seriously — they likely know something you don't", signal: "authority_responsive" },
+    b: { label: "You go with your own read — you'll verify for yourself", signal: "authority_resistant" },
+  },
+  {
+    id: 28, dimension: "BH",
+    text: "What drives your personal growth most?",
+    a: { label: "Proving to yourself — and maybe others — that you can rise above something", signal: "drive_proving" },
+    b: { label: "Simply wanting a better version of your life — no audience needed", signal: "drive_internal" },
+  },
+  {
+    id: 29, dimension: "BH",
+    text: "In a group where you're the only one with a different opinion, you...",
+    a: { label: "Voice it — you'd rather be honest than go along with something you don't believe", signal: "social_independent" },
+    b: { label: "Usually go with the group unless it's really important to you", signal: "social_conformist" },
+  },
+  {
+    id: 30, dimension: "BH",
+    text: "When reading a person or situation, you trust most...",
+    a: { label: "What you can observe — their actions, patterns, behavior over time", signal: "channel_behavioral" },
+    b: { label: "The overall feeling you get — your gut sense of the whole situation", signal: "channel_intuitive" },
+  },
+];
+
+export const ALL_QUESTIONS: (Question | BehavioralQuestion)[] = [
+  ...QUESTIONS,
+  ...BEHAVIORAL_QUESTIONS,
 ];
 
 export type TypeResult = {

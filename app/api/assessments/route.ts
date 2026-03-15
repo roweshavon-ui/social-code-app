@@ -14,7 +14,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, email, goal, type, scores } = body;
+  const { name, email, goal, type, scores, answer_map } = body;
 
   if (!name?.trim() || !email?.trim() || !type) {
     return NextResponse.json({ error: "Name, email, and type are required" }, { status: 400 });
@@ -22,11 +22,21 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from("assessments")
-    .insert({ name, email, goal, jungian_type: type, scores })
+    .insert({ name, email, goal, jungian_type: type, scores, answer_map })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Trigger behavioral profile generation in the background (non-blocking)
+  if (data?.id && answer_map) {
+    const baseUrl = req.nextUrl.origin;
+    fetch(`${baseUrl}/api/generate-profile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assessment_id: data.id }),
+    }).catch(() => {}); // fire and forget
+  }
 
   // Send results email (non-blocking)
   try {

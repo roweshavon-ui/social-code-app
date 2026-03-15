@@ -15,6 +15,7 @@ import {
   Kanban,
   LogOut,
   Newspaper,
+  Brain,
 } from "lucide-react";
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
   { href: "/posts", label: "Blog", icon: Newspaper },
   { href: "/comments", label: "Comments", icon: MessageSquare },
+  { href: "/behavioral-intel", label: "Behavioral Intel", icon: Brain },
 ];
 
 export default function Sidebar() {
