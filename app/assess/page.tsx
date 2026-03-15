@@ -47,7 +47,7 @@ export default function PublicAssessPage() {
     // Save to DB in background
     setSubmitting(true);
     try {
-      await fetch("/api/assessments", {
+      const saveRes = await fetch("/api/assessments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +62,17 @@ export default function PublicAssessPage() {
           answer_map: answers,
         }),
       });
+      const saved = await saveRes.json();
       setSubmitted(true);
+
+      // Fire profile generation separately — its own serverless function, own timeout
+      if (saved?.id) {
+        fetch("/api/generate-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assessment_id: saved.id }),
+        }).catch(() => {});
+      }
     } catch {
       setError("Couldn't save results — but your type is shown below.");
     } finally {
