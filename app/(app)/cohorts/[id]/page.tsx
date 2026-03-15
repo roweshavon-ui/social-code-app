@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
   Loader2,
@@ -58,8 +58,8 @@ type GroupSessionPlan = {
 
 const BRAND = { teal: "#00D9C0", coral: "#FF6B6B", purple: "#a78bfa" };
 
-export default function CohortDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function CohortDetailPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { clients } = useClients();
   const [cohort, setCohort] = useState<Cohort | null>(null);
@@ -101,9 +101,15 @@ export default function CohortDetailPage({ params }: { params: Promise<{ id: str
           cohort_goal: cohort.description,
         }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { sessions?: CohortSession[]; error?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Server error — check Vercel logs");
+      }
       if (!res.ok) throw new Error(data.error ?? "Failed");
-      setSessions(data.sessions);
+      setSessions(data.sessions ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate outline");
     } finally {
