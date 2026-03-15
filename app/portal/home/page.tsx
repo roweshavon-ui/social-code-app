@@ -60,7 +60,7 @@ export default function PortalHome() {
 
   return (
     <PortalShell clientName={client.name}>
-      <div className="p-8 max-w-3xl">
+      <div className="p-4 md:p-8 max-w-3xl">
         {/* Greeting */}
         <div className="mb-8">
           <h1 className="text-2xl font-black text-white tracking-tight mb-1">

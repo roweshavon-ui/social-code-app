@@ -53,7 +53,7 @@ export default function PortalLoginPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border p-8 space-y-5"
+          className="rounded-2xl border p-6 md:p-8 space-y-5"
           style={{ background: "#131E2B", borderColor: "rgba(0,217,192,0.12)" }}
         >
           <div>

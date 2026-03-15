@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div
-          className="rounded-2xl border p-8"
+          className="rounded-2xl border p-6 md:p-8"
           style={{ background: "#131E2B", borderColor: "rgba(0,217,192,0.12)" }}
         >
           {sent ? (

@@ -220,7 +220,7 @@ export default function BehavioralIntelPage() {
   const withoutProfile = entries.filter((e) => !e.behavioral_profile);
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 md:p-6 max-w-5xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

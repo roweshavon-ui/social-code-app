@@ -209,7 +209,7 @@ After your response, on a new line add a brief coaching note starting with "💡
   const currentCategory = SCENARIO_CATEGORIES[categoryIndex];
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white tracking-tight">Simulator</h1>
         <p className="mt-1 text-sm text-slate-500">Practice social scenarios with AI. Get real-time coaching.</p>

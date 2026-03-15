@@ -490,7 +490,7 @@ export default function ClientsPage() {
   if (!loaded) return null;
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 md:p-8 max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Clients</h1>

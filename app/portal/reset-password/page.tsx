@@ -126,7 +126,7 @@ export default function ResetPasswordPage() {
           <p className="text-sm font-medium mt-1" style={{ color: "#00D9C0" }}>Client Portal</p>
         </div>
         <div
-          className="rounded-2xl border p-8"
+          className="rounded-2xl border p-6 md:p-8"
           style={{ background: "#131E2B", borderColor: "rgba(0,217,192,0.12)" }}
         >
           <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
