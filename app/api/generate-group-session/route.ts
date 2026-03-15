@@ -24,6 +24,7 @@ type ClientSummary = {
 };
 
 export async function POST(req: NextRequest) {
+  try {
   const { clients, mode, framework, custom_topic, session_goal } = await req.json();
 
   if (!clients || clients.length < 2) {
@@ -100,7 +101,7 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 6000,
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -117,5 +118,10 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
   } catch (e) {
     console.error("Group session plan generation failed:", e);
     return NextResponse.json({ error: "Group session plan generation failed" }, { status: 500 });
+  }
+
+  } catch (e) {
+    console.error("Unhandled error in generate-group-session:", e);
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 });
   }
 }
