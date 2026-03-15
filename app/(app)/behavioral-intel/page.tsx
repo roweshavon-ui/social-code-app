@@ -120,6 +120,7 @@ type Assessment = {
 
 type ClientEntry = {
   id: string;
+  clientId?: string; // actual client UUID for session history lookup
   name: string;
   email: string;
   jungian_type: string;
@@ -156,8 +157,15 @@ export default function BehavioralIntelPage() {
     const assessmentEmails = new Set(
       (Array.isArray(assessments) ? assessments : []).map((a) => a.email?.toLowerCase())
     );
+    const clientsByEmail = new Map(
+      (Array.isArray(clients) ? clients : []).map((c: { id: string; email?: string }) => [
+        c.email?.toLowerCase() ?? "",
+        c.id,
+      ])
+    );
     const assessmentEntries: ClientEntry[] = (Array.isArray(assessments) ? assessments : []).map((a) => ({
       id: a.id,
+      clientId: clientsByEmail.get(a.email?.toLowerCase() ?? ""),
       name: a.name,
       email: a.email,
       jungian_type: a.jungian_type,
@@ -169,6 +177,7 @@ export default function BehavioralIntelPage() {
       .filter((c: { email?: string }) => !assessmentEmails.has(c.email?.toLowerCase() ?? ""))
       .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null }) => ({
         id: c.id,
+        clientId: c.id,
         name: c.name,
         email: c.email,
         jungian_type: c.jungian_type,
@@ -336,7 +345,7 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
   const [lastSessionBrief, setLastSessionBrief] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const clientId = entry.source === "client" ? entry.id : null;
+  const clientId = entry.clientId ?? (entry.source === "client" ? entry.id : null);
 
   async function generate() {
     setGenerating(true);
