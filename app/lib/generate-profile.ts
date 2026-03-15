@@ -116,7 +116,9 @@ Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
   const content = message.content[0];
   if (content.type !== "text") throw new Error("Unexpected response type");
 
-  const profile = JSON.parse(content.text);
+  // Strip markdown code fences if Haiku wraps the JSON anyway
+  const raw = content.text.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+  const profile = JSON.parse(raw);
 
   await getSupabase()
     .from("assessments")
