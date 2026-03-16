@@ -114,7 +114,7 @@ function parseFlat(flat: Record<string, string>) {
 async function callHaiku(prompt: string): Promise<Record<string, string>> {
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 1000,
+    max_tokens: 1400,
     messages: [
       { role: "user", content: prompt },
       { role: "assistant", content: "{" },
@@ -162,7 +162,7 @@ export async function generateBehavioralProfile(assessmentId: string): Promise<v
   const scores = buildScorePercentages(assessment.scores ?? {});
   const signals = buildBehavioralSignals(assessment.answer_map ?? {});
 
-  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. Keep ALL values SHORT — strictly follow each field's word limit.
+  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. STRICT: every value must obey its word limit exactly. Exceeding limits causes truncation and data loss.
 
 ${assessment.name} | ${assessment.jungian_type}${typeExtra}
 Goal: ${assessment.goal ?? "Not specified"}
@@ -192,7 +192,7 @@ export async function generateClientFullProfile(clientId: string): Promise<void>
   const tp = TYPE_PROFILES[c.jungian_type];
   const typeExtra = tp ? ` | Social style: ${tp.socialStyle}` : "";
 
-  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. Keep ALL values SHORT — strictly follow each field's word limit.
+  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. STRICT: every value must obey its word limit exactly. Exceeding limits causes truncation and data loss.
 
 ${c.name} | ${c.jungian_type ?? "Unknown"}${typeExtra}
 Goal: ${c.goal ?? "Not specified"}
