@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Profile generation failed:", e);
-    return NextResponse.json({ error: "Profile generation failed" }, { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Profile generation failed:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
