@@ -60,6 +60,7 @@ export default function SessionsPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [filterClientId, setFilterClientId] = useState<string>("all");
 
   function handleClientSelect(clientId: string) {
     const client = clients.find((c) => c.id === clientId);
@@ -131,13 +132,20 @@ export default function SessionsPage() {
 
   if (!loaded) return null;
 
+  const filteredSessions = filterClientId === "all"
+    ? sessions
+    : sessions.filter((s) => s.clientId === filterClientId);
+
+  const selectedClient = clients.find((c) => c.id === filterClientId);
+
   return (
     <div className="p-4 md:p-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Sessions</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {sessions.length} session{sessions.length !== 1 ? "s" : ""} logged
+            {filteredSessions.length} of {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+            {selectedClient ? ` · ${selectedClient.name}` : ""}
           </p>
         </div>
         <button
@@ -149,6 +157,37 @@ export default function SessionsPage() {
           Log Session
         </button>
       </div>
+
+      {/* Client filter */}
+      {clients.length > 0 && (
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1">
+          <button
+            onClick={() => setFilterClientId("all")}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
+            style={{
+              background: filterClientId === "all" ? "rgba(255,107,107,0.12)" : "transparent",
+              borderColor: filterClientId === "all" ? "rgba(255,107,107,0.4)" : "rgba(255,255,255,0.08)",
+              color: filterClientId === "all" ? "#FF6B6B" : "#64748b",
+            }}
+          >
+            All clients
+          </button>
+          {clients.filter((c) => sessions.some((s) => s.clientId === c.id)).map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setFilterClientId(c.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
+              style={{
+                background: filterClientId === c.id ? "rgba(255,107,107,0.12)" : "transparent",
+                borderColor: filterClientId === c.id ? "rgba(255,107,107,0.4)" : "rgba(255,255,255,0.08)",
+                color: filterClientId === c.id ? "#FF6B6B" : "#64748b",
+              }}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showForm && (
         <SessionForm
@@ -163,7 +202,7 @@ export default function SessionsPage() {
         />
       )}
 
-      {sessions.length === 0 ? (
+      {filteredSessions.length === 0 ? (
         <div
           className="rounded-xl border border-white/5 p-16 flex flex-col items-center justify-center text-center"
           style={{ background: "#131E2B" }}
@@ -174,12 +213,16 @@ export default function SessionsPage() {
           >
             <CalendarDays size={20} style={{ color: "#FF6B6B" }} strokeWidth={1.5} />
           </div>
-          <p className="text-sm text-slate-500">No sessions logged yet.</p>
-          <p className="text-xs text-slate-600 mt-1">Click &quot;Log Session&quot; to add one.</p>
+          <p className="text-sm text-slate-500">
+            {filterClientId === "all" ? "No sessions logged yet." : "No sessions for this client yet."}
+          </p>
+          {filterClientId === "all" && (
+            <p className="text-xs text-slate-600 mt-1">Click &quot;Log Session&quot; to add one.</p>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
-          {sessions.map((s) => (
+          {filteredSessions.map((s) => (
             <SessionCard
               key={s.id}
               session={s}
