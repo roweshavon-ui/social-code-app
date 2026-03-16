@@ -153,11 +153,24 @@ export async function generateBehavioralProfile(assessmentId: string): Promise<v
   const scores = buildScorePercentages(assessment.scores ?? {});
   const signals = buildBehavioralSignals(assessment.answer_map ?? {});
 
+  // Pull coach observations from matching client record if one exists
+  const { data: matchingClient } = await getSupabase()
+    .from("clients")
+    .select("observations, social_patterns, notes")
+    .ilike("email", assessment.email ?? "")
+    .maybeSingle();
+
+  const coachContext = [
+    matchingClient?.notes && `General notes: ${matchingClient.notes}`,
+    matchingClient?.observations && `Coach observations: ${matchingClient.observations}`,
+    matchingClient?.social_patterns && `Social patterns: ${matchingClient.social_patterns}`,
+  ].filter(Boolean).join("\n");
+
   const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. STRICT: every value must obey its word limit exactly. Exceeding limits causes truncation and data loss.
 
 ${assessment.name} | ${assessment.jungian_type}${typeExtra}
 Goal: ${assessment.goal ?? "Not specified"}
-Scores: ${scores}${signals ? `\nSignals: ${signals}` : ""}
+Scores: ${scores}${signals ? `\nSignals: ${signals}` : ""}${coachContext ? `\n${coachContext}` : ""}
 
 Return ONLY this JSON (no markdown, no explanation):
 ${FULL_SCHEMA}`;
@@ -183,11 +196,16 @@ export async function generateClientFullProfile(clientId: string): Promise<void>
   const tp = TYPE_PROFILES[c.jungian_type];
   const typeExtra = tp ? ` | Social style: ${tp.socialStyle}` : "";
 
+  const coachContext = [
+    c.notes && `General notes: ${c.notes}`,
+    c.observations && `Coach observations: ${c.observations}`,
+    c.social_patterns && `Social patterns: ${c.social_patterns}`,
+  ].filter(Boolean).join("\n");
+
   const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. STRICT: every value must obey its word limit exactly. Exceeding limits causes truncation and data loss.
 
 ${c.name} | ${c.jungian_type ?? "Unknown"}${typeExtra}
-Goal: ${c.goal ?? "Not specified"}
-Notes: ${c.notes ?? "None"}
+Goal: ${c.goal ?? "Not specified"}${coachContext ? `\n${coachContext}` : ""}
 
 Return ONLY this JSON (no markdown, no explanation):
 ${FULL_SCHEMA}`;

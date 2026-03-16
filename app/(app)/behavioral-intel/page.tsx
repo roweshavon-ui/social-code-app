@@ -125,6 +125,7 @@ type ClientEntry = {
   behavioral_profile: BehavioralProfile | null;
   source: "assessment" | "client";
   scores?: Record<string, number>;
+  observations?: string;
 };
 
 export default function BehavioralIntelPage() {
@@ -156,24 +157,28 @@ export default function BehavioralIntelPage() {
       (Array.isArray(assessments) ? assessments : []).map((a) => a.email?.toLowerCase())
     );
     const clientsByEmail = new Map(
-      (Array.isArray(clients) ? clients : []).map((c: { id: string; email?: string }) => [
+      (Array.isArray(clients) ? clients : []).map((c: { id: string; email?: string; observations?: string }) => [
         c.email?.toLowerCase() ?? "",
-        c.id,
+        { id: c.id, observations: c.observations ?? "" },
       ])
     );
-    const assessmentEntries: ClientEntry[] = (Array.isArray(assessments) ? assessments : []).map((a) => ({
-      id: a.id,
-      clientId: clientsByEmail.get(a.email?.toLowerCase() ?? ""),
-      name: a.name,
-      email: a.email,
-      jungian_type: a.jungian_type,
-      behavioral_profile: a.behavioral_profile,
-      scores: a.scores,
-      source: "assessment",
-    }));
+    const assessmentEntries: ClientEntry[] = (Array.isArray(assessments) ? assessments : []).map((a) => {
+      const clientMatch = clientsByEmail.get(a.email?.toLowerCase() ?? "");
+      return {
+        id: a.id,
+        clientId: clientMatch?.id,
+        name: a.name,
+        email: a.email,
+        jungian_type: a.jungian_type,
+        behavioral_profile: a.behavioral_profile,
+        scores: a.scores,
+        source: "assessment",
+        observations: clientMatch?.observations ?? "",
+      };
+    });
     const clientOnlyEntries: ClientEntry[] = (Array.isArray(clients) ? clients : [])
       .filter((c: { email?: string }) => !assessmentEmails.has(c.email?.toLowerCase() ?? ""))
-      .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null }) => ({
+      .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null; observations?: string }) => ({
         id: c.id,
         clientId: c.id,
         name: c.name,
@@ -181,6 +186,7 @@ export default function BehavioralIntelPage() {
         jungian_type: c.jungian_type,
         behavioral_profile: c.behavioral_profile,
         source: "client" as const,
+        observations: c.observations ?? "",
       }));
 
     setEntries([...assessmentEntries, ...clientOnlyEntries]);
@@ -330,6 +336,53 @@ async function runBackfill() {
           onClose={() => setSessionBuilderEntry(null)}
         />
       )}
+    </div>
+  );
+}
+
+function CoachNotes({ clientId, initial }: { clientId: string; initial: string }) {
+  const [text, setText] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    if (text === initial && !saved) return;
+    setSaving(true);
+    await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ observations: text }),
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Coach Notes</p>
+        <p className="text-xs text-slate-600">Fed into AI on next regeneration</p>
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => { setText(e.target.value); setSaved(false); }}
+        onBlur={save}
+        rows={3}
+        placeholder="What have you noticed? Breakthroughs, resistance patterns, what's working..."
+        className="w-full px-3 py-2.5 rounded-lg text-xs text-white placeholder-slate-600 border border-white/5 outline-none focus:border-teal-500/40 resize-none transition-colors"
+        style={{ background: "#0D1825" }}
+      />
+      <div className="flex justify-end mt-1.5">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="text-xs px-3 py-1 rounded-lg font-semibold transition-all disabled:opacity-50"
+          style={{ background: saved ? "rgba(0,217,192,0.1)" : "rgba(255,255,255,0.05)", color: saved ? "#00D9C0" : "#64748b" }}
+        >
+          {saving ? "Saving..." : saved ? "✓ Saved" : "Save Notes"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -795,6 +848,11 @@ function AssessmentRow({
       {/* Expanded profile */}
       {expanded && p && (
         <div className="border-t border-white/5 px-3 sm:px-5 py-4 sm:py-5 space-y-6">
+          {/* Coach Notes */}
+          {entry.clientId && (
+            <CoachNotes clientId={entry.clientId} initial={entry.observations ?? ""} />
+          )}
+
           {/* Section 1: Needs */}
           <Section icon={<Target size={14} />} title="Needs & Core Driver" color={BRAND.teal}>
             <div className="grid sm:grid-cols-2 gap-4">
