@@ -425,6 +425,14 @@ function Page({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col items-center py-10 gap-8" style={{ background: BRAND.dark }}>
       {children}
+      <footer className="w-full max-w-2xl px-4 pb-4 flex justify-center">
+        <a
+          href="/privacy"
+          className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+        >
+          Privacy Policy
+        </a>
+      </footer>
     </div>
   );
 }
