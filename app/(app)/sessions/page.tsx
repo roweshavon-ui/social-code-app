@@ -132,11 +132,14 @@ export default function SessionsPage() {
 
   if (!loaded) return null;
 
+  const selectedClient = clients.find((c) => c.id === filterClientId);
+
   const filteredSessions = filterClientId === "all"
     ? sessions
-    : sessions.filter((s) => s.clientId === filterClientId);
-
-  const selectedClient = clients.find((c) => c.id === filterClientId);
+    : sessions.filter((s) =>
+        s.clientId === filterClientId ||
+        (s.clientId === null && s.clientName?.toLowerCase() === selectedClient?.name?.toLowerCase())
+      );
 
   return (
     <div className="p-4 md:p-8 max-w-5xl">
@@ -172,7 +175,10 @@ export default function SessionsPage() {
           >
             All clients
           </button>
-          {clients.filter((c) => sessions.some((s) => s.clientId === c.id)).map((c) => (
+          {clients.filter((c) => sessions.some((s) =>
+            s.clientId === c.id ||
+            (s.clientId === null && s.clientName?.toLowerCase() === c.name?.toLowerCase())
+          )).map((c) => (
             <button
               key={c.id}
               onClick={() => setFilterClientId(c.id)}
