@@ -7,7 +7,17 @@ export async function GET(req: NextRequest) {
   let query = getSupabase().from("sessions").select("*").order("date", { ascending: false });
 
   if (clientId) {
-    query = query.eq("client_id", clientId);
+    // Match by client_id OR by client_name (for sessions saved without an ID)
+    const { data: clientData } = await getSupabase()
+      .from("clients")
+      .select("name")
+      .eq("id", clientId)
+      .maybeSingle();
+    if (clientData?.name) {
+      query = query.or(`client_id.eq.${clientId},client_name.ilike.${clientData.name}`);
+    } else {
+      query = query.eq("client_id", clientId);
+    }
   }
 
   const { data, error } = await query;
@@ -41,10 +51,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Client name and date are required" }, { status: 400 });
   }
 
+  // Auto-resolve clientId by name if not provided
+  let resolvedClientId = clientId ?? null;
+  if (!resolvedClientId && clientName?.trim()) {
+    const { data: match } = await getSupabase()
+      .from("clients")
+      .select("id")
+      .ilike("name", clientName.trim())
+      .maybeSingle();
+    if (match) resolvedClientId = match.id;
+  }
+
   const { data, error } = await getSupabase()
     .from("sessions")
     .insert({
-      client_id: clientId ?? null,
+      client_id: resolvedClientId,
       client_name: clientName,
       date,
       duration: duration ?? "60",
