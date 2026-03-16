@@ -177,7 +177,14 @@ Generate a JSON object with EXACTLY this structure:
   "if_they_resist": "what to say if they deflect, keep things surface-level, or seem guarded in the intake",
   "session_close": "how to close the intake — what to summarize, what to commit to, how to set the tone for the coaching relationship",
   "homework": "first homework assignment — small, specific, low-stakes. Something that gives you data for session 2 and gets them moving immediately",
-  "next_session_seed": "what to plant at the end of the intake to create anticipation for session 2"
+  "next_session_seed": "what to plant at the end of the intake to create anticipation for session 2",
+  "sessions_roadmap": {
+    "recommended_total": "a number like 6 or 8 or 12",
+    "rationale": "1-2 sentences: why this many sessions based on their goal, profile, locus of control, and trust pattern",
+    "phase_1": "sessions 1-X: what gets covered and what shifts",
+    "phase_2": "sessions X-Y: what gets covered and what shifts",
+    "phase_3": "sessions Y-end: what gets covered and what the outcome looks like"
+  }
 }
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;
@@ -244,7 +251,14 @@ Generate a JSON object with EXACTLY this structure:
   "if_they_resist": "what to say and do if they push back or disengage — word-for-word if possible",
   "session_close": "how to close this session — what to summarize, what to acknowledge",
   "homework": "exact homework assignment tailored to this person and this session",
-  "next_session_seed": "what to plant at the end to create momentum for the next call"
+  "next_session_seed": "what to plant at the end to create momentum for the next call",
+  "sessions_roadmap": {
+    "recommended_total": "a number like 6 or 8 or 12",
+    "rationale": "1-2 sentences: why this many sessions based on their goal, profile, locus of control, and trust pattern",
+    "phase_1": "sessions 1-X: what gets covered and what shifts",
+    "phase_2": "sessions X-Y: what gets covered and what shifts",
+    "phase_3": "sessions Y-end: what gets covered and what the outcome looks like"
+  }
 }
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks.`;

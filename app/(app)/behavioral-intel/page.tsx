@@ -45,6 +45,13 @@ type SessionPlan = {
   session_close: string;
   homework: string;
   next_session_seed: string;
+  sessions_roadmap?: {
+    recommended_total: string;
+    rationale: string;
+    phase_1: string;
+    phase_2: string;
+    phase_3: string;
+  };
 };
 
 const BRAND = {
@@ -765,6 +772,25 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
               <p className="text-lg font-black text-white">{plan.session_title}</p>
               <p className="text-xs text-slate-400 mt-1">{plan.todays_focus}</p>
             </div>
+
+            {/* Sessions roadmap */}
+            {plan.sessions_roadmap && (
+              <div className="rounded-xl p-4 border border-white/5" style={{ background: "#131E2B" }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Session Roadmap</p>
+                  <span className="text-sm font-black" style={{ color: BRAND.teal }}>{plan.sessions_roadmap.recommended_total} sessions</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-3">{plan.sessions_roadmap.rationale}</p>
+                <div className="space-y-2">
+                  {[plan.sessions_roadmap.phase_1, plan.sessions_roadmap.phase_2, plan.sessions_roadmap.phase_3].filter(Boolean).map((phase, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs">
+                      <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: BRAND.teal }}>P{i + 1}</span>
+                      <span className="text-slate-400">{phase}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Since last session brief */}
             {lastSessionBrief && (
