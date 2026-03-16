@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, User, X, ClipboardList, ChevronRight } from "lucide-react";
+import { Plus, Search, User, X, ClipboardList, ChevronRight, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { useClients, type Client } from "../../hooks/useClients";
 import { TYPE_ACRONYMS, TYPE_PROFILES } from "../../lib/mbtiData";
@@ -462,16 +462,24 @@ function NoteField({
 export default function ClientsPage() {
   const { clients, loaded, addClient, removeClient, updateClient } = useClients();
   const [search, setSearch] = useState("");
+  const [portalFilter, setPortalFilter] = useState<"all" | "access" | "no-access">("all");
   const [showForm, setShowForm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
-  const filtered = clients.filter(
-    (c) =>
+  const withAccess = clients.filter((c) => c.portalAccess).length;
+
+  const filtered = clients.filter((c) => {
+    const matchSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.jungianType.includes(search.toUpperCase())
-  );
+      c.jungianType.includes(search.toUpperCase());
+    const matchPortal =
+      portalFilter === "all" ? true :
+      portalFilter === "access" ? c.portalAccess :
+      !c.portalAccess;
+    return matchSearch && matchPortal;
+  });
 
   const selectedClient = clients.find((c) => c.id === selectedId) ?? null;
 
@@ -529,6 +537,24 @@ export default function ClientsPage() {
           className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm text-white placeholder-slate-500 border border-white/5 outline-none transition-colors"
           style={{ background: "#131E2B" }}
         />
+      </div>
+
+      {/* Portal access filter */}
+      <div className="flex items-center gap-2 mb-6">
+        {(["all", "access", "no-access"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setPortalFilter(f)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+            style={{
+              background: portalFilter === f ? "rgba(0,217,192,0.1)" : "transparent",
+              borderColor: portalFilter === f ? "rgba(0,217,192,0.3)" : "rgba(255,255,255,0.08)",
+              color: portalFilter === f ? "#00D9C0" : "#64748b",
+            }}
+          >
+            {f === "all" ? `All (${clients.length})` : f === "access" ? `Portal login (${withAccess})` : `No login (${clients.length - withAccess})`}
+          </button>
+        ))}
       </div>
 
       {/* Manual form */}
@@ -626,6 +652,12 @@ export default function ClientsPage() {
                     >
                       {client.status}
                     </span>
+                    {client.portalAccess && (
+                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa" }}>
+                        <KeyRound size={10} />
+                        Portal
+                      </span>
+                    )}
                   </div>
                   {acronym && (
                     <p className="text-xs mt-0.5" style={{ color: `${color}70` }}>{acronym.join(" · ")}</p>

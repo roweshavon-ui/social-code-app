@@ -16,6 +16,7 @@ export type Client = {
   socialPatterns: string;
   createdAt: string;
   pipelineStage: PipelineStage;
+  portalAccess?: boolean;
 };
 
 type RawClient = {
@@ -30,6 +31,7 @@ type RawClient = {
   social_patterns: string;
   created_at: string;
   pipeline_stage: PipelineStage;
+  portal_access: boolean;
 };
 
 function toClient(raw: RawClient): Client {
@@ -45,6 +47,7 @@ function toClient(raw: RawClient): Client {
     socialPatterns: raw.social_patterns ?? "",
     createdAt: raw.created_at,
     pipelineStage: raw.pipeline_stage ?? "lead",
+    portalAccess: raw.portal_access ?? false,
   };
 }
 
