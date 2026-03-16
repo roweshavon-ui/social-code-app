@@ -75,6 +75,7 @@ type BehavioralProfile = {
   compliance_description: string;
   stress_behavior: string;
   sensory_channel: string;
+  social_style?: string;
   communication_approach: string;
   influence_map: {
     what_works: string[];
@@ -94,7 +95,7 @@ type BehavioralProfile = {
   coaching_playbook?: {
     how_to_open_sessions: string;
     unlock_questions: string[];
-    session_actions?: { session: string; goal: string; do_this: string; avoid: string }[];
+    session_arc?: string;
     when_stuck: string;
     when_spiraling: string;
     feedback_delivery: string;
@@ -820,6 +821,7 @@ function AssessmentRow({
               <div className="sm:col-span-2"><Field label="Trust — How to Earn It" value={p.trust_description} /></div>
               <div className="sm:col-span-2"><Field label="Compliance — How They Follow" value={p.compliance_description} /></div>
               <div className="sm:col-span-2"><Field label="Under Pressure" value={p.stress_behavior} /></div>
+              {p.social_style && <div className="sm:col-span-2"><Field label="Social Style" value={p.social_style} /></div>}
               <div className="sm:col-span-2"><Field label="Communication Approach" value={p.communication_approach} /></div>
             </div>
           </Section>
@@ -871,20 +873,10 @@ function AssessmentRow({
                   </ul>
                 </div>
 
-                {/* Session-by-session actions */}
-                {(p.coaching_playbook.session_actions ?? []).length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Per-Session Action Plan</p>
-                    <div className="space-y-3">
-                      {(p.coaching_playbook.session_actions ?? []).map((sa, i) => (
-                        <div key={i} className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
-                          <p className="text-xs font-bold mb-2" style={{ color: "#a78bfa" }}>{sa.session}</p>
-                          <p className="text-xs text-slate-400 mb-1"><span className="font-semibold text-slate-300">Goal:</span> {sa.goal}</p>
-                          <p className="text-xs text-slate-400 mb-1"><span className="font-semibold" style={{ color: BRAND.teal }}>Do this:</span> {sa.do_this}</p>
-                          <p className="text-xs text-slate-400"><span className="font-semibold" style={{ color: BRAND.coral }}>Avoid:</span> {sa.avoid}</p>
-                        </div>
-                      ))}
-                    </div>
+                {p.coaching_playbook.session_arc && (
+                  <div className="rounded-lg p-4 border border-white/5" style={{ background: "#0D1825" }}>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#a78bfa" }}>Coaching Arc</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{p.coaching_playbook.session_arc}</p>
                   </div>
                 )}
 
