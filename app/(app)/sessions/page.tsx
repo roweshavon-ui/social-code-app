@@ -616,12 +616,12 @@ function SessionCard({
 
       {expanded && (
         <div className="border-t border-white/5 px-5 py-4 space-y-3">
-          {/* Saved plan view */}
-          {session.plan && session.sessionType === "planned" && (
+          {/* Saved plan view — show for planned and intake sessions */}
+          {session.plan && (session.sessionType === "planned" || session.sessionType === "intake") && (
             <FullPlanView plan={session.plan} />
           )}
           {/* Logged session view */}
-          {session.sessionType !== "planned" && (
+          {session.sessionType !== "planned" && session.sessionType !== "intake" && (
             <>
               {session.notes && <DetailField label="Session Notes" value={session.notes} />}
               {session.frameworksUsed?.length > 0 && (
