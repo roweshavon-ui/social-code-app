@@ -5,150 +5,150 @@ import { TYPE_PROFILES } from "@/app/lib/mbtiData";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
+// ── Single-call full schema — everything flattened, no arrays ────────────────
+// Arrays are reconstructed after parsing. All values max 10-15 words to fit
+// the entire profile in ~900 output tokens (safe under Vercel 10s limit).
+const FULL_SCHEMA = `{
+  "primary_need": "one of: Significance | Approval | Acceptance | Intelligence | Pity | Strength",
+  "secondary_need": "one of: Significance | Approval | Acceptance | Intelligence | Pity | Strength | None",
+  "need_breakdown": "max 15 words on what their primary need means socially",
+  "hidden_fear": "max 12 words: the fear underneath their primary need",
+  "fear_in_session": "max 12 words: how this fear shows up in coaching",
+  "locus_of_control": "Internal | External | Mixed-Internal | Mixed-External",
+  "locus_description": "max 12 words: how to frame coaching accountability with them",
+  "trust_pattern": "Slow-build | Fast-open | Guarded | Selective",
+  "trust_description": "max 12 words: how they build trust and what breaks it",
+  "compliance_style": "Authority-responsive | Logic-first | Relationship-first | Resistance-prone | Validation-seeking",
+  "compliance_description": "max 12 words: what makes them follow vs resist",
+  "stress_behavior": "max 12 words: how this person shows up under pressure",
+  "sensory_channel": "Visual | Auditory | Kinesthetic | Analytical",
+  "communication_approach": "max 15 words: tactical communication advice for this person",
+  "what_works_1": "max 10 words: influence approach that works",
+  "what_works_2": "max 10 words: second influence approach",
+  "what_works_3": "max 10 words: third influence approach",
+  "what_doesnt_1": "max 10 words: approach that creates resistance",
+  "what_doesnt_2": "max 10 words: second approach that backfires",
+  "decision_making_style": "max 12 words: how this person makes decisions",
+  "motivation_triggers": "max 15 words: the 2 deepest motivators",
+  "buyer_profile": "max 12 words: buyer type summary",
+  "obj1": "max 8 words", "obj1_means": "max 8 words", "obj1_reframe": "max 10 words", "obj1_say": "max 12 words",
+  "obj2": "max 8 words", "obj2_means": "max 8 words", "obj2_reframe": "max 10 words", "obj2_say": "max 12 words",
+  "close_style": "max 8 words: closing approach",
+  "what_kills_the_sale": "max 12 words",
+  "what_gets_them_off_fence": "max 12 words",
+  "coaching_close_script": "max 20 words: 2-sentence close script",
+  "anchor_moment": "max 12 words: emotional anchor for first 10 minutes",
+  "how_to_open_sessions": "max 15 words: exact opening question",
+  "unlock_q1": "max 12 words", "unlock_q2": "max 12 words", "unlock_q3": "max 12 words",
+  "s1_goal": "max 8 words", "s1_do": "max 10 words", "s1_avoid": "max 8 words",
+  "s23_goal": "max 8 words", "s23_do": "max 10 words", "s23_avoid": "max 8 words",
+  "s46_goal": "max 8 words", "s46_do": "max 10 words", "s46_avoid": "max 8 words",
+  "s7_goal": "max 8 words", "s7_do": "max 10 words", "s7_avoid": "max 8 words",
+  "when_stuck": "max 20 words: exact script to use",
+  "when_spiraling": "max 20 words: exact script to use",
+  "feedback_delivery": "max 15 words: how to challenge without triggering fear",
+  "homework_style": "max 12 words: what assignments work for this profile",
+  "red_flag_1": "max 12 words: warning sign + what to do",
+  "red_flag_2": "max 12 words: warning sign + what to do",
+  "red_flag_3": "max 12 words: warning sign + what to do"
+}`;
+
+function repairJson(raw: string): string {
+  return raw.replace(/"((?:[^"\\]|\\.)*)"/g, (_, inner) =>
+    `"${inner.replace(/\n/g, " ").replace(/\r/g, "")}"`
+  );
+}
+
+function parseFlat(flat: Record<string, string>) {
+  return {
+    primary_need: flat.primary_need,
+    secondary_need: flat.secondary_need,
+    need_breakdown: flat.need_breakdown,
+    hidden_fear: flat.hidden_fear,
+    fear_in_session: flat.fear_in_session,
+    locus_of_control: flat.locus_of_control,
+    locus_description: flat.locus_description,
+    trust_pattern: flat.trust_pattern,
+    trust_description: flat.trust_description,
+    compliance_style: flat.compliance_style,
+    compliance_description: flat.compliance_description,
+    stress_behavior: flat.stress_behavior,
+    sensory_channel: flat.sensory_channel,
+    communication_approach: flat.communication_approach,
+    influence_map: {
+      what_works: [flat.what_works_1, flat.what_works_2, flat.what_works_3].filter(Boolean),
+      what_doesnt_work: [flat.what_doesnt_1, flat.what_doesnt_2].filter(Boolean),
+      decision_making_style: flat.decision_making_style,
+      motivation_triggers: flat.motivation_triggers,
+    },
+    sales_handbook: {
+      buyer_profile: flat.buyer_profile,
+      likely_objections: [
+        { objection: flat.obj1, what_it_really_means: flat.obj1_means, reframe: flat.obj1_reframe, language: flat.obj1_say },
+        { objection: flat.obj2, what_it_really_means: flat.obj2_means, reframe: flat.obj2_reframe, language: flat.obj2_say },
+      ].filter(o => o.objection),
+      close_style: flat.close_style,
+      what_kills_the_sale: flat.what_kills_the_sale,
+      what_gets_them_off_fence: flat.what_gets_them_off_fence,
+      coaching_close_script: flat.coaching_close_script,
+      anchor_moment: flat.anchor_moment,
+    },
+    coaching_playbook: {
+      how_to_open_sessions: flat.how_to_open_sessions,
+      unlock_questions: [flat.unlock_q1, flat.unlock_q2, flat.unlock_q3].filter(Boolean),
+      session_actions: [
+        { session: "Session 1", goal: flat.s1_goal, do_this: flat.s1_do, avoid: flat.s1_avoid },
+        { session: "Sessions 2-3", goal: flat.s23_goal, do_this: flat.s23_do, avoid: flat.s23_avoid },
+        { session: "Sessions 4-6", goal: flat.s46_goal, do_this: flat.s46_do, avoid: flat.s46_avoid },
+        { session: "Sessions 7+", goal: flat.s7_goal, do_this: flat.s7_do, avoid: flat.s7_avoid },
+      ].filter(s => s.goal),
+      when_stuck: flat.when_stuck,
+      when_spiraling: flat.when_spiraling,
+      feedback_delivery: flat.feedback_delivery,
+      homework_style: flat.homework_style,
+      red_flags: [flat.red_flag_1, flat.red_flag_2, flat.red_flag_3].filter(Boolean),
+    },
+  };
+}
+
+async function callHaiku(prompt: string): Promise<Record<string, string>> {
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1000,
+    messages: [
+      { role: "user", content: prompt },
+      { role: "assistant", content: "{" },
+    ],
+  });
+  const content = message.content[0];
+  if (content.type !== "text") throw new Error("Unexpected response type");
+  const raw = "{" + content.text;
+  const end = raw.lastIndexOf("}");
+  if (end === -1) throw new Error(`JSON truncated — got: "${raw.slice(0, 300)}"`);
+  return JSON.parse(repairJson(raw.slice(0, end + 1)));
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
 function buildBehavioralSignals(answerMap: Record<string, "a" | "b">): string {
   const signals: string[] = [];
   for (const q of BEHAVIORAL_QUESTIONS) {
     const answer = answerMap[String(q.id)];
     if (!answer) continue;
     const signal = answer === "a" ? q.a.signal : q.b.signal;
-    signals.push(`Q${q.id}: ${signal} ("${answer === "a" ? q.a.label : q.b.label}")`);
+    signals.push(`Q${q.id}: ${signal}`);
   }
-  return signals.join("\n");
+  return signals.join(" | ");
 }
 
 function buildScorePercentages(scores: Record<string, number>): string {
   const pct = (a: number, b: number) => (a + b > 0 ? Math.round((a / (a + b)) * 100) : 50);
-  return [
-    `E ${pct(scores.E, scores.I)}% / I ${pct(scores.I, scores.E)}%`,
-    `S ${pct(scores.S, scores.N)}% / N ${pct(scores.N, scores.S)}%`,
-    `T ${pct(scores.T, scores.F)}% / F ${pct(scores.F, scores.T)}%`,
-    `J ${pct(scores.J, scores.P)}% / P ${pct(scores.P, scores.J)}%`,
-  ].join("\n");
+  return `E${pct(scores.E, scores.I)}% I${pct(scores.I, scores.E)}% S${pct(scores.S, scores.N)}% N${pct(scores.N, scores.S)}% T${pct(scores.T, scores.F)}% F${pct(scores.F, scores.T)}% J${pct(scores.J, scores.P)}% P${pct(scores.P, scores.J)}%`;
 }
 
-function buildTypeContext(jungianType: string): string {
-  const tp = TYPE_PROFILES[jungianType];
-  if (!tp) return "";
-  return `TYPE: ${jungianType} — Social Style: ${tp.socialStyle} | Comm Tip: ${tp.communicationTip}`;
-}
-
-// ── Part 1: Core profile (fast, ~1400 tokens max) ──────────────────────────
-const CORE_SCHEMA = `{
-  "primary_need": "one of: Significance | Approval | Acceptance | Intelligence | Pity | Strength",
-  "secondary_need": "one of: Significance | Approval | Acceptance | Intelligence | Pity | Strength | None",
-  "need_breakdown": "2 sentences — what their primary need means for how they show up socially",
-  "hidden_fear": "the specific fear underneath their primary need",
-  "fear_in_session": "how this fear shows up in coaching — what it looks like when triggered",
-  "locus_of_control": "Internal | External | Mixed-Internal | Mixed-External",
-  "locus_description": "1 sentence on how to frame coaching accountability with them",
-  "trust_pattern": "Slow-build | Fast-open | Guarded | Selective",
-  "trust_description": "how they build trust and what breaks it",
-  "compliance_style": "Authority-responsive | Logic-first | Relationship-first | Resistance-prone | Validation-seeking",
-  "compliance_description": "how they respond to being guided — what makes them follow vs. resist",
-  "stress_behavior": "how this person shows up under pressure",
-  "sensory_channel": "Visual | Auditory | Kinesthetic | Analytical",
-  "communication_approach": "tactical advice on how to communicate with this person",
-  "influence_map": {
-    "what_works": ["3 specific influence approaches that work on this profile"],
-    "what_doesnt_work": ["2 approaches that create resistance"],
-    "decision_making_style": "how this person makes decisions",
-    "motivation_triggers": "the 2 deepest motivators that get this person to actually move"
-  }
-}`;
-
-// ── Part 2a: Sales handbook — flat fields only, no arrays ────────────────────
-const SALES_SCHEMA = `{
-  "sales_handbook": {
-    "buyer_profile": "1-2 sentences on what kind of buyer this person is",
-    "obj1": "most likely objection", "obj1_means": "real reason", "obj1_reframe": "how to handle", "obj1_say": "exact 1-sentence script",
-    "obj2": "second objection", "obj2_means": "real reason", "obj2_reframe": "how to handle", "obj2_say": "exact 1-sentence script",
-    "close_style": "closing approach for this profile",
-    "what_kills_the_sale": "the specific thing NOT to do",
-    "what_gets_them_off_fence": "the single most powerful move",
-    "coaching_close_script": "2-sentence close script",
-    "anchor_moment": "emotional anchor to plant in first 10 minutes"
-  }
-}`;
-
-// ── Part 2b: Per-session action plan — flat fields, no arrays ────────────────
-const SESSION_ACTIONS_SCHEMA = `{
-  "coaching_playbook": {
-    "how_to_open_sessions": "exact opening question",
-    "unlock_q1": "question 1",
-    "unlock_q2": "question 2",
-    "unlock_q3": "question 3",
-    "s1_goal": "Session 1 goal", "s1_do": "Session 1 exact actions", "s1_avoid": "Session 1 what not to do",
-    "s23_goal": "Sessions 2-3 goal", "s23_do": "Sessions 2-3 exact actions", "s23_avoid": "Sessions 2-3 what not to do",
-    "s46_goal": "Sessions 4-6 goal", "s46_do": "Sessions 4-6 exact actions", "s46_avoid": "Sessions 4-6 what not to do",
-    "s7_goal": "Sessions 7+ goal", "s7_do": "Sessions 7+ exact actions", "s7_avoid": "Sessions 7+ what not to do"
-  }
-}`;
-
-// ── Part 2c: Coaching tactics — flat fields, no arrays ───────────────────────
-const COACHING_TACTICS_SCHEMA = `{
-  "coaching_playbook_tactics": {
-    "when_stuck": "word-for-word script when they go quiet or resist",
-    "when_spiraling": "exact script when they are overwhelmed",
-    "feedback_delivery": "how to challenge this person without triggering their fear",
-    "homework_style": "what assignments work for this profile",
-    "red_flag_1": "warning sign 1 + what to do",
-    "red_flag_2": "warning sign 2 + what to do",
-    "red_flag_3": "warning sign 3 + what to do"
-  }
-}`;
+// ── Public API ────────────────────────────────────────────────────────────────
 
 export async function generateBehavioralProfile(assessmentId: string): Promise<void> {
-  const { data: assessment, error } = await getSupabase()
-    .from("assessments")
-    .select("*")
-    .eq("id", assessmentId)
-    .single();
-
-  if (error || !assessment) {
-    throw new Error(`Assessment not found: id=${assessmentId}`);
-  }
-
-  const scorePercentages = buildScorePercentages(assessment.scores ?? {});
-  const behavioralSignals = buildBehavioralSignals(assessment.answer_map ?? {});
-  const typeContext = buildTypeContext(assessment.jungian_type);
-
-  const context = `Name: ${assessment.name} | Type: ${assessment.jungian_type}
-Goal: ${assessment.goal ?? "Not specified"}
-Scores: ${scorePercentages}
-${typeContext}
-${behavioralSignals ? `Behavioral signals:\n${behavioralSignals}` : ""}`;
-
-  const corePrompt = `You are a behavioral profiler using Chase Hughes' frameworks.
-Analyze this assessment and return a core behavioral profile. Every field must be specific to THIS person.
-
-${context}
-
-Return ONLY this JSON (no markdown):
-${CORE_SCHEMA}`;
-
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 1400,
-    messages: [{ role: "user", content: corePrompt }],
-  });
-
-  const content = message.content[0];
-  if (content.type !== "text") throw new Error("Unexpected response type");
-
-  const text = content.text;
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("No JSON found in response");
-
-  const profile = JSON.parse(text.slice(start, end + 1));
-
-  await getSupabase()
-    .from("assessments")
-    .update({ behavioral_profile: profile })
-    .eq("id", assessmentId);
-}
-
-export async function generateCoachingPlaybook(assessmentId: string): Promise<void> {
   const { data: assessment, error } = await getSupabase()
     .from("assessments")
     .select("*")
@@ -158,86 +158,59 @@ export async function generateCoachingPlaybook(assessmentId: string): Promise<vo
   if (error || !assessment) throw new Error(`Assessment not found: id=${assessmentId}`);
 
   const tp = TYPE_PROFILES[assessment.jungian_type];
-  const typeExtra = tp
-    ? `Red flags for this type: ${tp.redFlags.join(", ")}\nSession questions: ${tp.sessionQuestions.slice(0, 3).join(" | ")}`
-    : "";
+  const typeExtra = tp ? ` | Social style: ${tp.socialStyle}` : "";
+  const scores = buildScorePercentages(assessment.scores ?? {});
+  const signals = buildBehavioralSignals(assessment.answer_map ?? {});
 
-  const context = `Name: ${assessment.name} | Type: ${assessment.jungian_type}
+  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. Keep ALL values SHORT — strictly follow each field's word limit.
+
+${assessment.name} | ${assessment.jungian_type}${typeExtra}
 Goal: ${assessment.goal ?? "Not specified"}
-Primary need: ${assessment.behavioral_profile?.primary_need ?? "Unknown"}
-Hidden fear: ${assessment.behavioral_profile?.hidden_fear ?? "Unknown"}
-Trust pattern: ${assessment.behavioral_profile?.trust_pattern ?? "Unknown"}
-${typeExtra}`;
+Scores: ${scores}${signals ? `\nSignals: ${signals}` : ""}
 
-  const base = `You are a coaching strategist using Chase Hughes' frameworks. Be specific and tactical — coach's private use only.\n\n${context}\n\nReturn ONLY this JSON (no markdown):\n`;
+Return ONLY this JSON (no markdown, no explanation):
+${FULL_SCHEMA}`;
 
-  function repairJson(raw: string): string {
-    return raw.replace(/"((?:[^"\\]|\\.)*)"/g, (_, inner) =>
-      `"${inner.replace(/\n/g, " ").replace(/\r/g, "")}"`
-    );
-  }
-
-  // Prefill forces model to start with { immediately — no wasted tokens on preamble
-  async function callHaiku(prompt: string, max_tokens: number) {
-    const msg = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens,
-      messages: [
-        { role: "user", content: prompt },
-        { role: "assistant", content: "{" },
-      ],
-    });
-    const c = msg.content[0];
-    if (c.type !== "text") throw new Error("Unexpected response type");
-    const raw = "{" + c.text;
-    const end = raw.lastIndexOf("}");
-    if (end === -1) throw new Error(`JSON truncated — got: "${raw.slice(0, 300)}"`);
-    return JSON.parse(repairJson(raw.slice(0, end + 1)));
-  }
-
-  // 3 parallel calls — each capped small, run simultaneously (~3-5s wall time)
-  const [salesResult, sessionResult, tacticsResult] = await Promise.all([
-    callHaiku(base + SALES_SCHEMA, 700),
-    callHaiku(base + SESSION_ACTIONS_SCHEMA, 1000),
-    callHaiku(base + COACHING_TACTICS_SCHEMA, 700),
-  ]);
-
-  const ss = salesResult.sales_handbook ?? {};
-  const sales_handbook = {
-    buyer_profile: ss.buyer_profile,
-    likely_objections: [
-      { objection: ss.obj1, what_it_really_means: ss.obj1_means, reframe: ss.obj1_reframe, language: ss.obj1_say },
-      { objection: ss.obj2, what_it_really_means: ss.obj2_means, reframe: ss.obj2_reframe, language: ss.obj2_say },
-    ].filter((o: { objection?: string }) => o.objection),
-    close_style: ss.close_style,
-    what_kills_the_sale: ss.what_kills_the_sale,
-    what_gets_them_off_fence: ss.what_gets_them_off_fence,
-    coaching_close_script: ss.coaching_close_script,
-    anchor_moment: ss.anchor_moment,
-  };
-
-  const sp = sessionResult.coaching_playbook ?? {};
-  const tact = tacticsResult.coaching_playbook_tactics ?? {};
-  const coaching_playbook = {
-    how_to_open_sessions: sp.how_to_open_sessions,
-    unlock_questions: [sp.unlock_q1, sp.unlock_q2, sp.unlock_q3].filter(Boolean),
-    session_actions: [
-      { session: "Session 1", goal: sp.s1_goal, do_this: sp.s1_do, avoid: sp.s1_avoid },
-      { session: "Sessions 2-3", goal: sp.s23_goal, do_this: sp.s23_do, avoid: sp.s23_avoid },
-      { session: "Sessions 4-6", goal: sp.s46_goal, do_this: sp.s46_do, avoid: sp.s46_avoid },
-      { session: "Sessions 7+", goal: sp.s7_goal, do_this: sp.s7_do, avoid: sp.s7_avoid },
-    ].filter(s => s.goal),
-    when_stuck: tact.when_stuck,
-    when_spiraling: tact.when_spiraling,
-    feedback_delivery: tact.feedback_delivery,
-    homework_style: tact.homework_style,
-    red_flags: [tact.red_flag_1, tact.red_flag_2, tact.red_flag_3].filter(Boolean),
-  };
-
-  const merged = { ...(assessment.behavioral_profile ?? {}), sales_handbook, coaching_playbook };
+  const flat = await callHaiku(prompt);
+  const profile = parseFlat(flat);
 
   await getSupabase()
     .from("assessments")
-    .update({ behavioral_profile: merged })
+    .update({ behavioral_profile: profile })
     .eq("id", assessmentId);
+}
+
+export async function generateClientFullProfile(clientId: string): Promise<void> {
+  const { data: c, error } = await getSupabase()
+    .from("clients")
+    .select("*")
+    .eq("id", clientId)
+    .single();
+
+  if (error || !c) throw new Error("Client not found");
+
+  const tp = TYPE_PROFILES[c.jungian_type];
+  const typeExtra = tp ? ` | Social style: ${tp.socialStyle}` : "";
+
+  const prompt = `You are a behavioral profiler and coaching strategist using Chase Hughes' frameworks. Coach's private use only — never shown to client. Keep ALL values SHORT — strictly follow each field's word limit.
+
+${c.name} | ${c.jungian_type ?? "Unknown"}${typeExtra}
+Goal: ${c.goal ?? "Not specified"}
+Notes: ${c.notes ?? "None"}
+
+Return ONLY this JSON (no markdown, no explanation):
+${FULL_SCHEMA}`;
+
+  const flat = await callHaiku(prompt);
+  const profile = parseFlat(flat);
+
+  await getSupabase()
+    .from("clients")
+    .update({ behavioral_profile: profile })
+    .eq("id", clientId);
+}
+
+// Legacy — kept for backward compat, just re-runs full profile generation
+export async function generateCoachingPlaybook(assessmentId: string): Promise<void> {
+  await generateBehavioralProfile(assessmentId);
 }

@@ -136,7 +136,6 @@ export default function BehavioralIntelPage() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
   const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
-  const [generatingPlaybook, setGeneratingPlaybook] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -190,31 +189,17 @@ export default function BehavioralIntelPage() {
   async function generateProfile(entry: ClientEntry) {
     setGenerating(entry.id);
     try {
-      // Step 1: core profile
-      const coreEndpoint = entry.source === "assessment" ? "/api/generate-profile" : "/api/generate-client-profile";
-      const coreBody = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
-      const r1 = await fetch(coreEndpoint, {
+      const endpoint = entry.source === "assessment" ? "/api/generate-profile" : "/api/generate-client-profile";
+      const body = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(coreBody),
+        body: JSON.stringify(body),
       });
-      if (!r1.ok) {
-        const d = await r1.json().catch(() => ({}));
-        throw new Error(d.error ?? "Core profile generation failed");
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error ?? "Profile generation failed");
       }
-
-      // Step 2: playbook — auto-chains right after, no extra button needed
-      const playbookBody = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
-      const r2 = await fetch("/api/generate-coaching-playbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(playbookBody),
-      });
-      if (!r2.ok) {
-        const d = await r2.json().catch(() => ({}));
-        throw new Error(d.error ?? "Playbook generation failed");
-      }
-
       await load();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Generation failed — try again");
@@ -223,28 +208,8 @@ export default function BehavioralIntelPage() {
     }
   }
 
-  async function generatePlaybook(entry: ClientEntry) {
-    setGeneratingPlaybook(entry.id);
-    try {
-      const body = entry.source === "assessment" ? { assessment_id: entry.id } : { client_id: entry.id };
-      const res = await fetch("/api/generate-coaching-playbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error ?? "Playbook generation failed");
-      }
-      await load();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Playbook generation failed — try again");
-    } finally {
-      setGeneratingPlaybook(null);
-    }
-  }
 
-  async function runBackfill() {
+async function runBackfill() {
     setBackfilling(true);
     setBackfillResult(null);
     const missing = entries.filter((e) => !e.behavioral_profile);
@@ -344,8 +309,8 @@ export default function BehavioralIntelPage() {
               onToggle={() => setExpanded(expanded === entry.id ? null : entry.id)}
               onGenerate={() => generateProfile(entry)}
               generating={generating === entry.id}
-              onGeneratePlaybook={() => generatePlaybook(entry)}
-              generatingPlaybook={generatingPlaybook === entry.id}
+              onGeneratePlaybook={() => generateProfile(entry)}
+              generatingPlaybook={generating === entry.id}
               onRemove={() => removeEntry(entry)}
               removing={removing === entry.id}
               confirmingRemove={confirmRemove === entry.id}
