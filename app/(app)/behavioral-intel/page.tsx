@@ -730,38 +730,36 @@ function AssessmentRow({
         </div>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {p && (
-            <>
-              <button
-                onClick={onToggle}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
-              >
-                {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                {expanded ? "Collapse" : "View Intel"}
-              </button>
-            </>
+            <button
+              onClick={onToggle}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors border border-white/5"
+              title={expanded ? "Collapse" : "View Intel"}
+            >
+              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              <span className="hidden sm:inline">{expanded ? "Collapse" : "View Intel"}</span>
+            </button>
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onGenerate(); }}
             disabled={generating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 disabled:opacity-50"
             style={{ background: "rgba(0,217,192,0.12)", color: BRAND.teal }}
           >
             {generating ? <Loader2 size={11} className="animate-spin" /> : <Brain size={11} />}
-            {generating ? "Generating..." : p ? "Regenerate" : "Generate Profile"}
+            <span className="hidden xs:inline sm:inline">{generating ? "Generating..." : p ? "Regenerate" : "Generate"}</span>
           </button>
           {p && (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-                style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
-              >
-                <CalendarPlus size={11} />
-                Build Session
-              </button>
-            </>
+            <button
+              onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
+              title="Build Session"
+            >
+              <CalendarPlus size={11} />
+              <span className="hidden sm:inline">Build Session</span>
+            </button>
           )}
           {confirmingRemove ? (
             <div className="flex items-center gap-1.5">
@@ -796,7 +794,7 @@ function AssessmentRow({
 
       {/* Expanded profile */}
       {expanded && p && (
-        <div className="border-t border-white/5 px-5 py-5 space-y-6">
+        <div className="border-t border-white/5 px-3 sm:px-5 py-4 sm:py-5 space-y-6">
           {/* Section 1: Needs */}
           <Section icon={<Target size={14} />} title="Needs & Core Driver" color={BRAND.teal}>
             <div className="grid sm:grid-cols-2 gap-4">
