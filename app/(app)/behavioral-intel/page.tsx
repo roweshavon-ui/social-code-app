@@ -18,6 +18,7 @@ import {
   CalendarPlus,
   X,
   Clock,
+  Smartphone,
 } from "lucide-react";
 
 const FRAMEWORKS = [
@@ -138,6 +139,7 @@ export default function BehavioralIntelPage() {
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState<string | null>(null);
   const [sessionBuilderEntry, setSessionBuilderEntry] = useState<ClientEntry | null>(null);
+  const [sessionBriefEntry, setSessionBriefEntry] = useState<ClientEntry | null>(null);
 
   useEffect(() => {
     load();
@@ -324,6 +326,7 @@ async function runBackfill() {
               onConfirmRemove={() => setConfirmRemove(entry.id)}
               onCancelRemove={() => setConfirmRemove(null)}
               onBuildSession={() => setSessionBuilderEntry(entry)}
+              onSessionBrief={() => setSessionBriefEntry(entry)}
             />
           ))}
         </div>
@@ -334,6 +337,14 @@ async function runBackfill() {
         <SessionBuilderModal
           entry={sessionBuilderEntry}
           onClose={() => setSessionBuilderEntry(null)}
+        />
+      )}
+
+      {/* Session Brief Modal */}
+      {sessionBriefEntry && (
+        <SessionBriefModal
+          entry={sessionBriefEntry}
+          onClose={() => setSessionBriefEntry(null)}
         />
       )}
     </div>
@@ -382,6 +393,170 @@ function CoachNotes({ clientId, initial }: { clientId: string; initial: string }
         >
           {saving ? "Saving..." : saved ? "✓ Saved" : "Save Notes"}
         </button>
+      </div>
+    </div>
+  );
+}
+
+type SessionBrief = {
+  focus: string;
+  framework: string;
+  framework_why: string;
+  q1: string;
+  q2: string;
+  q3: string;
+  watch_for: string;
+  resist_script: string;
+};
+
+function SessionBriefModal({ entry, onClose }: { entry: ClientEntry; onClose: () => void }) {
+  const [sessionNumber, setSessionNumber] = useState(1);
+  const [coachNote, setCoachNote] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [brief, setBrief] = useState<SessionBrief | null>(null);
+  const [lastSessionContext, setLastSessionContext] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const clientId = entry.clientId ?? (entry.source === "client" ? entry.id : null);
+
+  async function generate() {
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/generate-session-brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile: entry.behavioral_profile,
+          name: entry.name,
+          jungian_type: entry.jungian_type,
+          client_id: clientId,
+          session_number: sessionNumber,
+          coach_note: coachNote,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setBrief(data.brief);
+      setLastSessionContext(data.lastSessionContext ?? null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 flex flex-col" style={{ background: "#0D1825" }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+          <div>
+            <div className="flex items-center gap-2">
+              <Smartphone size={14} style={{ color: "#fbbf24" }} />
+              <span className="text-sm font-bold text-white">Session Brief</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">{entry.name} · {entry.jungian_type}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        {!brief ? (
+          <div className="px-5 py-5 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session #</label>
+              <input
+                type="number"
+                min={1}
+                value={sessionNumber}
+                onChange={(e) => setSessionNumber(Number(e.target.value))}
+                className="w-20 px-3 py-2 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-yellow-500/50"
+                style={{ background: "#131E2B" }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Quick Note</label>
+              <input
+                type="text"
+                value={coachNote}
+                onChange={(e) => setCoachNote(e.target.value)}
+                placeholder="e.g. missed homework, opened up last week..."
+                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-yellow-500/50"
+                style={{ background: "#131E2B" }}
+              />
+            </div>
+
+            {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
+
+            <button
+              onClick={generate}
+              disabled={generating}
+              className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: "#fbbf24", color: "#0D1825" }}
+            >
+              {generating ? <><Loader2 size={14} className="animate-spin" />Generating...</> : <><Smartphone size={14} />Generate Brief</>}
+            </button>
+          </div>
+        ) : (
+          <div className="px-5 py-5 space-y-4">
+            {/* Header card */}
+            <div className="rounded-xl p-4 border" style={{ background: "rgba(251,191,36,0.06)", borderColor: "rgba(251,191,36,0.2)" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#fbbf24" }}>Session {sessionNumber} · {entry.jungian_type}</p>
+              <p className="text-sm font-bold text-white leading-snug">{brief.focus}</p>
+            </div>
+
+            {/* Last session context */}
+            {lastSessionContext && (
+              <div className="rounded-lg px-3 py-2.5 border border-white/5" style={{ background: "#131E2B" }}>
+                <p className="text-xs text-slate-500 leading-relaxed">{lastSessionContext}</p>
+              </div>
+            )}
+
+            {/* Framework */}
+            {brief.framework !== "None" && (
+              <div className="rounded-lg px-3 py-3 border border-white/5" style={{ background: "#131E2B" }}>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.teal }}>Use This Framework</p>
+                <p className="text-sm font-bold text-white">{brief.framework}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{brief.framework_why}</p>
+              </div>
+            )}
+
+            {/* Unlock questions */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Ask These</p>
+              <div className="space-y-2">
+                {[brief.q1, brief.q2, brief.q3].filter(Boolean).map((q, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-slate-300 rounded-lg px-3 py-2.5 border border-white/5" style={{ background: "#131E2B" }}>
+                    <span className="font-black flex-shrink-0" style={{ color: "#fbbf24" }}>{i + 1}</span>
+                    <span>{q}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Watch for */}
+            <div className="rounded-lg px-3 py-3 border border-white/5" style={{ background: "#131E2B" }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.coral }}>Watch For</p>
+              <p className="text-xs text-slate-300">{brief.watch_for}</p>
+            </div>
+
+            {/* If they resist */}
+            <div className="rounded-lg px-3 py-3 border border-white/5" style={{ background: "#131E2B" }}>
+              <p className="text-xs font-bold text-slate-500 mb-1">If They Go Quiet</p>
+              <p className="text-xs text-slate-300 italic">"{brief.resist_script}"</p>
+            </div>
+
+            <button
+              onClick={() => { setBrief(null); setError(null); }}
+              className="w-full py-2.5 rounded-xl text-xs font-semibold border border-white/10 text-slate-400 hover:text-white transition-colors"
+            >
+              ← Regenerate
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -727,6 +902,7 @@ function AssessmentRow({
   onConfirmRemove,
   onCancelRemove,
   onBuildSession,
+  onSessionBrief,
 }: {
   entry: ClientEntry;
   expanded: boolean;
@@ -741,6 +917,7 @@ function AssessmentRow({
   onConfirmRemove: () => void;
   onCancelRemove: () => void;
   onBuildSession: () => void;
+  onSessionBrief: () => void;
 }) {
   const p = entry.behavioral_profile;
   const scores = entry.scores ?? {};
@@ -805,13 +982,24 @@ function AssessmentRow({
           </button>
           {p && (
             <button
+              onClick={(e) => { e.stopPropagation(); onSessionBrief(); }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24" }}
+              title="Session Brief"
+            >
+              <Smartphone size={11} />
+              <span className="hidden sm:inline">Brief</span>
+            </button>
+          )}
+          {p && (
+            <button
               onClick={(e) => { e.stopPropagation(); onBuildSession(); }}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
               style={{ background: "rgba(167,139,250,0.12)", color: "#a78bfa" }}
               title="Build Session"
             >
               <CalendarPlus size={11} />
-              <span className="hidden sm:inline">Build Session</span>
+              <span className="hidden sm:inline">Plan</span>
             </button>
           )}
           {confirmingRemove ? (
