@@ -134,6 +134,7 @@ type ClientEntry = {
   source: "assessment" | "client";
   scores?: Record<string, number>;
   observations?: string;
+  focus_areas?: string;
 };
 
 export default function BehavioralIntelPage() {
@@ -166,13 +167,13 @@ export default function BehavioralIntelPage() {
       (Array.isArray(assessments) ? assessments : []).map((a) => a.email?.toLowerCase())
     );
     const clientsByEmail = new Map(
-      (Array.isArray(clients) ? clients : []).map((c: { id: string; email?: string; observations?: string }) => [
-        c.email?.toLowerCase() ?? "",
-        { id: c.id, observations: c.observations ?? "" },
+      (Array.isArray(clients) ? clients : []).map((c: { id: string; email?: string; observations?: string; focus_areas?: string }) => [
+        c.email?.trim().toLowerCase() ?? "",
+        { id: c.id, observations: c.observations ?? "", focus_areas: c.focus_areas ?? "" },
       ])
     );
     const assessmentEntries: ClientEntry[] = (Array.isArray(assessments) ? assessments : []).map((a) => {
-      const clientMatch = clientsByEmail.get(a.email?.toLowerCase() ?? "");
+      const clientMatch = clientsByEmail.get(a.email?.trim().toLowerCase() ?? "");
       return {
         id: a.id,
         clientId: clientMatch?.id,
@@ -183,11 +184,12 @@ export default function BehavioralIntelPage() {
         scores: a.scores,
         source: "assessment",
         observations: clientMatch?.observations ?? "",
+        focus_areas: clientMatch?.focus_areas ?? "",
       };
     });
     const clientOnlyEntries: ClientEntry[] = (Array.isArray(clients) ? clients : [])
       .filter((c: { email?: string }) => !assessmentEmails.has(c.email?.toLowerCase() ?? ""))
-      .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null; observations?: string }) => ({
+      .map((c: { id: string; name: string; email: string; jungian_type: string; behavioral_profile: BehavioralProfile | null; observations?: string; focus_areas?: string }) => ({
         id: c.id,
         clientId: c.id,
         name: c.name,
@@ -196,6 +198,7 @@ export default function BehavioralIntelPage() {
         behavioral_profile: c.behavioral_profile,
         source: "client" as const,
         observations: c.observations ?? "",
+        focus_areas: c.focus_areas ?? "",
       }));
 
     setEntries([...assessmentEntries, ...clientOnlyEntries]);
@@ -399,6 +402,53 @@ function CoachNotes({ clientId, initial }: { clientId: string; initial: string }
           style={{ background: saved ? "rgba(0,217,192,0.1)" : "rgba(255,255,255,0.05)", color: saved ? "#00D9C0" : "#64748b" }}
         >
           {saving ? "Saving..." : saved ? "✓ Saved" : "Save Notes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FocusAreas({ clientId, initial }: { clientId: string; initial: string }) {
+  const [text, setText] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    if (text === initial && !saved) return;
+    setSaving(true);
+    await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ focus_areas: text }),
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Things to Work On</p>
+        <p className="text-xs text-slate-600">Coach-only · not shown to client</p>
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => { setText(e.target.value); setSaved(false); }}
+        onBlur={save}
+        rows={3}
+        placeholder="Areas to focus on, skills to develop, patterns to address..."
+        className="w-full px-3 py-2.5 rounded-lg text-xs text-white placeholder-slate-600 border border-white/5 outline-none focus:border-teal-500/40 resize-none transition-colors"
+        style={{ background: "#0D1825" }}
+      />
+      <div className="flex justify-end mt-1.5">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="text-xs px-3 py-1 rounded-lg font-semibold transition-all disabled:opacity-50"
+          style={{ background: saved ? "rgba(0,217,192,0.1)" : "rgba(255,255,255,0.05)", color: saved ? "#00D9C0" : "#64748b" }}
+        >
+          {saving ? "Saving..." : saved ? "✓ Saved" : "Save"}
         </button>
       </div>
     </div>
@@ -1065,6 +1115,11 @@ function AssessmentRow({
           {/* Coach Notes */}
           {entry.clientId && (
             <CoachNotes clientId={entry.clientId} initial={entry.observations ?? ""} />
+          )}
+
+          {/* Things to Work On */}
+          {entry.clientId && (
+            <FocusAreas clientId={entry.clientId} initial={entry.focus_areas ?? ""} />
           )}
 
           {/* Section 1: Needs */}
