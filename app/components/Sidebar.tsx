@@ -18,6 +18,7 @@ import {
   LogOut,
   Newspaper,
   Brain,
+  Layers,
   Menu,
   X,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/sessions", label: "Sessions", icon: CalendarDays },
   { href: "/group-sessions", label: "Group Sessions", icon: Users2 },
   { href: "/cohorts", label: "Cohorts", icon: Users },
+  { href: "/frameworks", label: "Frameworks", icon: Layers },
   { href: "/library", label: "Library", icon: BookOpen },
   { href: "/simulator", label: "Simulator", icon: MessageSquare },
   { href: "/posts", label: "Blog", icon: Newspaper },

@@ -6,9 +6,26 @@ export const maxDuration = 30;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
+const ALL_FRAMEWORKS = [
+  "SPARK",
+  "3-Second Social Scan",
+  "Fearless Approach System",
+  "3-2-1 Send It",
+  "Barista Method",
+  "TALK Check",
+  "DEPTH",
+  "GROUND",
+  "Pre-Game System",
+  "Energy Check",
+  "VOICE",
+  "BRAVE",
+  "SHIELD",
+  "Stop Replaying",
+].join(" | ");
+
 const BRIEF_SCHEMA = `{
   "focus": "max 20 words: what this session is about and what you're building toward",
-  "framework": "one of: SPARK | 3-Second Social Scan | Fearless Approach System | TALK Check | BRAVE | SHIELD | Stop Replaying | None",
+  "framework": "one of: ${ALL_FRAMEWORKS} | None",
   "framework_why": "max 15 words: why this framework fits this person right now",
   "q1": "max 15 words: first unlock question to ask today",
   "q2": "max 15 words: second unlock question",

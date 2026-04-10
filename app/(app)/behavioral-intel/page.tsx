@@ -25,7 +25,14 @@ const FRAMEWORKS = [
   "SPARK",
   "3-Second Social Scan",
   "Fearless Approach System",
+  "3-2-1 Send It",
+  "Barista Method",
   "TALK Check",
+  "DEPTH",
+  "GROUND",
+  "Pre-Game System",
+  "Energy Check",
+  "VOICE",
   "BRAVE",
   "SHIELD",
   "Stop Replaying",
@@ -33,6 +40,8 @@ const FRAMEWORKS = [
 
 type SessionPlan = {
   session_title: string;
+  framework_selected?: string;
+  framework_why?: string;
   opening: string;
   check_in: string;
   todays_focus: string;
@@ -621,7 +630,9 @@ function SessionBriefModal({ entry, onClose }: { entry: ClientEntry; onClose: ()
 
 function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: () => void }) {
   const [sessionNumber, setSessionNumber] = useState(1);
+  const [loadingSessionCount, setLoadingSessionCount] = useState(true);
   const [coachNote, setCoachNote] = useState("");
+  const [showOverride, setShowOverride] = useState(false);
   const [mode, setMode] = useState<"framework" | "custom" | "none">("none");
   const [framework, setFramework] = useState(FRAMEWORKS[0]);
   const [customTopic, setCustomTopic] = useState("");
@@ -634,6 +645,19 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
   const [error, setError] = useState<string | null>(null);
 
   const clientId = entry.clientId ?? (entry.source === "client" ? entry.id : null);
+
+  // Auto-detect session number from history on mount
+  useEffect(() => {
+    if (!clientId) { setLoadingSessionCount(false); return; }
+    fetch(`/api/sessions?clientId=${clientId}`)
+      .then((r) => r.json())
+      .then((data: unknown[]) => {
+        const count = Array.isArray(data) ? data.length : 0;
+        setSessionNumber(count + 1);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingSessionCount(false));
+  }, [clientId]);
 
   async function savePlan() {
     if (!plan) return;
@@ -717,108 +741,169 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
 
         {!plan ? (
           <div className="px-6 py-5 space-y-5">
-            {/* Session number */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session Number</label>
-              <input
-                type="number"
-                min={1}
-                value={sessionNumber}
-                onChange={(e) => setSessionNumber(Number(e.target.value))}
-                className="w-24 px-3 py-2 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-purple-500/50"
-                style={{ background: "#131E2B" }}
-              />
-            </div>
-
-            {/* Coach note */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Where Are They Right Now?</label>
-              <textarea
-                value={coachNote}
-                onChange={(e) => setCoachNote(e.target.value)}
-                placeholder="e.g. skipped homework last week, opened up about a specific situation, seems stuck on approach anxiety..."
-                rows={3}
-                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50 resize-none"
-                style={{ background: "#131E2B" }}
-              />
-            </div>
-
-            {/* Mode */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session Focus</label>
-              <div className="flex flex-wrap gap-2">
-                {(["none", "framework", "custom"] as const).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setMode(m)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
-                    style={{
-                      background: mode === m ? "rgba(167,139,250,0.15)" : "transparent",
-                      borderColor: mode === m ? "rgba(167,139,250,0.4)" : "rgba(255,255,255,0.08)",
-                      color: mode === m ? "#a78bfa" : "#64748b",
-                    }}
-                  >
-                    {m === "none" ? "Let AI decide" : m === "framework" ? "Use a framework" : "Custom topic"}
-                  </button>
-                ))}
+            {loadingSessionCount ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 size={18} className="animate-spin text-slate-500" />
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Session number — read-only display, editable if needed */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Session</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-black text-white">#{sessionNumber}</span>
+                      {sessionNumber === 1 && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,217,192,0.1)", color: "#00D9C0" }}>
+                          Intake
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setSessionNumber((n) => Math.max(1, n - 1))}
+                        className="text-xs px-2 py-1 rounded text-slate-500 hover:text-white border border-white/10 transition-colors"
+                      >
+                        -
+                      </button>
+                      <button
+                        onClick={() => setSessionNumber((n) => n + 1)}
+                        className="text-xs px-2 py-1 rounded text-slate-500 hover:text-white border border-white/10 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Framework picker */}
-            {mode === "framework" && (
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Framework</label>
-                <select
-                  value={framework}
-                  onChange={(e) => setFramework(e.target.value as typeof framework)}
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-purple-500/50"
-                  style={{ background: "#131E2B" }}
+                {/* Intake: short context note */}
+                {sessionNumber === 1 ? (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                      Any notes before the intake? <span className="text-slate-600 normal-case font-normal">(optional)</span>
+                    </label>
+                    <textarea
+                      value={coachNote}
+                      onChange={(e) => setCoachNote(e.target.value)}
+                      placeholder="e.g. referred by a friend, said they struggle with networking, seems anxious based on emails..."
+                      rows={3}
+                      className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50 resize-none"
+                      style={{ background: "#131E2B" }}
+                    />
+                  </div>
+                ) : (
+                  /* Ongoing: continuation note + optional override */
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                        Anything new since last session? <span className="text-slate-600 normal-case font-normal">(optional)</span>
+                      </label>
+                      <textarea
+                        value={coachNote}
+                        onChange={(e) => setCoachNote(e.target.value)}
+                        placeholder="e.g. they texted about skipping homework, had a big moment at work, seem stuck on the same block..."
+                        rows={3}
+                        className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50 resize-none"
+                        style={{ background: "#131E2B" }}
+                      />
+                    </div>
+
+                    {/* Override toggle */}
+                    <div>
+                      <button
+                        onClick={() => {
+                          setShowOverride((v) => !v);
+                          if (showOverride) setMode("none");
+                        }}
+                        className="flex items-center gap-2 text-xs font-semibold transition-colors"
+                        style={{ color: showOverride ? "#a78bfa" : "#475569" }}
+                      >
+                        <span style={{ fontSize: 10 }}>{showOverride ? "▼" : "▶"}</span>
+                        Override — force a specific framework or topic
+                      </button>
+
+                      {showOverride && (
+                        <div className="mt-3 space-y-3 pl-3 border-l-2 border-purple-500/20">
+                          <div className="flex flex-wrap gap-2">
+                            {(["framework", "custom"] as const).map((m) => (
+                              <button
+                                key={m}
+                                onClick={() => setMode(m)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+                                style={{
+                                  background: mode === m ? "rgba(167,139,250,0.15)" : "transparent",
+                                  borderColor: mode === m ? "rgba(167,139,250,0.4)" : "rgba(255,255,255,0.08)",
+                                  color: mode === m ? "#a78bfa" : "#64748b",
+                                }}
+                              >
+                                {m === "framework" ? "Specific framework" : "Custom topic"}
+                              </button>
+                            ))}
+                          </div>
+
+                          {mode === "framework" && (
+                            <select
+                              value={framework}
+                              onChange={(e) => setFramework(e.target.value as typeof framework)}
+                              className="w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 outline-none focus:border-purple-500/50"
+                              style={{ background: "#131E2B" }}
+                            >
+                              {FRAMEWORKS.map((f) => (
+                                <option key={f} value={f}>{f}</option>
+                              ))}
+                            </select>
+                          )}
+
+                          {mode === "custom" && (
+                            <input
+                              type="text"
+                              value={customTopic}
+                              onChange={(e) => setCustomTopic(e.target.value)}
+                              placeholder="e.g. holding eye contact, handling rejection, reconnecting with old friends..."
+                              className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50"
+                              style={{ background: "#131E2B" }}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
+
+                <button
+                  onClick={generate}
+                  disabled={generating || (mode === "custom" && !customTopic.trim())}
+                  className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ background: "#a78bfa", color: "#fff" }}
                 >
-                  {FRAMEWORKS.map((f) => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-              </div>
+                  {generating
+                    ? <><Loader2 size={14} className="animate-spin" />Building session plan...</>
+                    : <><CalendarPlus size={14} />{sessionNumber === 1 ? "Build Intake Plan" : "Build Session Plan"}</>
+                  }
+                </button>
+              </>
             )}
-
-            {/* Custom topic */}
-            {mode === "custom" && (
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">What Do They Need to Work On?</label>
-                <input
-                  type="text"
-                  value={customTopic}
-                  onChange={(e) => setCustomTopic(e.target.value)}
-                  placeholder="e.g. holding eye contact, handling rejection, reconnecting with old friends..."
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 border border-white/10 outline-none focus:border-purple-500/50"
-                  style={{ background: "#131E2B" }}
-                />
-              </div>
-            )}
-
-            {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
-
-            <button
-              onClick={generate}
-              disabled={generating || (mode === "custom" && !customTopic.trim())}
-              className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: "#a78bfa", color: "#fff" }}
-            >
-              {generating ? <><Loader2 size={14} className="animate-spin" />Building session plan...</> : <><CalendarPlus size={14} />Generate Session Plan</>}
-            </button>
           </div>
         ) : (
           <div className="px-6 py-5 space-y-5 overflow-y-auto">
             {/* Plan header */}
             <div className="rounded-xl p-4 border" style={{ background: "rgba(167,139,250,0.06)", borderColor: "rgba(167,139,250,0.2)" }}>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#a78bfa" }}>Session {sessionNumber}</p>
                 {isIntake && (
                   <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,217,192,0.1)", color: "#00D9C0" }}>
                     Intake
                   </span>
                 )}
+                {plan.framework_selected && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(167,139,250,0.15)", color: "#a78bfa" }}>
+                    {plan.framework_selected}
+                  </span>
+                )}
               </div>
+              {plan.framework_why && (
+                <p className="text-xs text-slate-500 mt-1 mb-2 italic">{plan.framework_why}</p>
+              )}
               <p className="text-lg font-black text-white">{plan.session_title}</p>
               <p className="text-xs text-slate-400 mt-1">{plan.todays_focus}</p>
             </div>

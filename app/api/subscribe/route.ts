@@ -1,6 +1,8 @@
+import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/app/lib/supabase";
 import { sendResourceEmail } from "@/app/lib/email";
+import { encrypt } from "@/app/lib/encrypt";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -11,10 +13,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
   }
 
+  // Deterministic hash for dedup (unique constraint); encrypted email for storage
+  const emailHash = createHash("sha256").update(email).digest("hex");
+  const encryptedEmail = encrypt(email);
+
   // Save subscriber
   const { error: insertError } = await getSupabase()
     .from("email_subscribers")
-    .insert({ email, resource_requested: resource })
+    .insert({ email: encryptedEmail, email_hash: emailHash, resource_requested: resource })
     .select()
     .single();
 

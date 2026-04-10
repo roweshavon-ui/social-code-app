@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/app/lib/supabase";
 import { Resend } from "resend";
+import { encryptFields, decryptAll, decrypt } from "@/app/lib/encrypt";
+
+const ASSESSMENT_ENCRYPTED_FIELDS = ["name", "email", "goal", "jungian_type"] as const;
 
 export async function GET() {
   const { data, error } = await getSupabase()
@@ -9,7 +12,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json(decryptAll(data ?? [], ASSESSMENT_ENCRYPTED_FIELDS));
 }
 
 export async function POST(req: NextRequest) {
@@ -22,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from("assessments")
-    .insert({ name, email, goal, jungian_type: type, scores, answer_map })
+    .insert(encryptFields({ name, email, goal, jungian_type: type, scores, answer_map }, ASSESSMENT_ENCRYPTED_FIELDS))
     .select()
     .single();
 
@@ -146,5 +149,5 @@ export async function POST(req: NextRequest) {
     console.error("Results email failed:", JSON.stringify(e));
   }
 
-  return NextResponse.json(data, { status: 201 });
+  return NextResponse.json({ ...data, name, email, goal, jungian_type: type }, { status: 201 });
 }

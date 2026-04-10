@@ -6,49 +6,203 @@ export const maxDuration = 30;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
-const FRAMEWORKS: Record<string, string> = {
+// ─────────────────────────────────────────────────────────────────────────────
+// SOCIAL CODE FRAMEWORK LIBRARY
+// Every framework is grounded in Shavi's personal story, Jungian psychology,
+// and behavioral science. These are not generic tips — they are a system built
+// from 10,000+ door-to-door interactions, Carl Jung's model of the psyche, and
+// the lived experience of someone who had to engineer social competence from
+// scratch after growing up in one of the hardest environments in Kingston, Jamaica.
+//
+// Core philosophy: "You're not broken. You're untrained."
+// Brand truth: "Still awkward. Still weird. Just competent."
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const FRAMEWORKS: Record<string, string> = {
+
+  // ── INITIATION CLUSTER ──────────────────────────────────────────────────
+
   "SPARK": `SPARK — Starting Conversations
-How to use: S-tarter (open with a situational observation about your shared environment), P-erson (shift to a light comment about them specifically), A-sk (one open-ended question to hand them the thread), R-eflect (mirror back what they just said to show you were listening), K-eep going (follow the thread wherever it goes, don't pre-plan).
-Purpose: Eliminates the freeze before approaching. Gives a repeatable structure so the brain stops stalling on "what do I say."
-Common block this solves: Overthinking the opener. Waiting for the "perfect" moment that never comes.
-Key coaching point: The Starter doesn't have to be clever. It just has to be real. Situational observations work because they're shared — both people are in the same room.`,
+Situation it solves: The freeze before approaching. Waiting for the "perfect" opener that never comes.
+How to use:
+S — Smile, Read the Room, Break the Ice: Smile first (genuine, not performative). Scan: body language, eye contact, energy level. Are they open or closed? Then break the ice with a real situational comment about something you both share in the room right now. Not a line. Not a compliment. Just honesty about the shared environment. GREEN read = they mirror your smile, make eye contact, turn toward you. YELLOW = polite acknowledgment, minimal engagement — try one more opener before moving on. RED = no eye contact, body angled away, disengaged — do not push.
+P — Present Yourself: Once the ice is broken, introduce yourself by name. "I'm [name], by the way." Simple, direct, confident. This creates reciprocity — they'll introduce themselves back. GREEN = they give their name + add something ("I'm here with..."). YELLOW = name only, flat affect. RED = very brief, looks away — graceful exit is near.
+A — Ask Open-Ended Questions: Get them talking. Ask about their experience, opinion, or story — not yes/no questions. Use the Echo Question Technique: pick up the last word or phrase they said and reflect it back as a question ("Wait — you've been doing that for 10 years?"). This keeps them talking without effort. GREEN = they expand, ask you a question back, energy rises. YELLOW = short answers, you're doing the work. RED = monosyllabic, phone comes out — prep your exit.
+R — Really Listen: Put down your agenda. Eye contact. Nod. Don't interrupt. Don't wait for your turn to talk. Listen for keywords — the topics they return to, the things they get louder about. Those are the threads. Echo Question Technique: mirror a keyword or phrase back as curiosity, not interrogation. The best listeners are the most interesting people in the room.
+K — Keep Connected or Kindly Exit: GREEN = exchange contact. Be direct: "You seem like someone worth staying in touch with — can I get your info?" YELLOW = graceful close: "I'll let you get back to it — really good talking to you." RED = exit immediately: "I'll let you go — enjoy the rest of your night." Conversation length guide: coffee shop 3-5 min, networking event 5-10 min, social venue 10-15 min. Exit on a high, never overstay.
+Why it works (behavioral science): The situational opener removes identity threat — you're commenting on the environment, not asking to be accepted. The Echo Question Technique triggers reciprocal disclosure. Mirror neurons fire when someone feels genuinely heard, creating instant rapport without performance.
+Jungian grounding: Most people never approach because their Persona (the social mask) hasn't been constructed yet — they don't know who to "be." SPARK bypasses that by giving the brain a structure, which quiets the ego long enough for natural connection to happen. The K step (Keep Connected or Kindly Exit) is the Persona's most powerful tool: graceful presence AND graceful exits.
+Personal grounding (Shavi): Built after knocking 10,000+ doors in door-to-door sales across five states. The openers that worked every single time were never clever — they were real. A comment about the heat, the neighborhood, what was on their porch. The situational opener isn't a trick. It's just honesty.
+Part of the system: SPARK lives inside the Fearless Approach System (FAS) as Step 4 — the conversation framework you use once you've approached. If your client is freezing before they even get to SPARK, start with FAS first.
+Key coaching point: The S step doesn't have to be clever — it has to be real. And the K step matters as much as the S step. How you exit is how you're remembered.`,
 
   "3-Second Social Scan": `3-Second Social Scan — Reading Whether Someone Wants to Be Approached
-How to use: Before approaching, scan for 3 signals in 3 seconds — (1) Eye contact or glance in your direction, (2) Open body language (facing outward, not deep in conversation), (3) Available/unoccupied (not on phone, not mid-task). If 2 of 3 are present, the window is open.
-Purpose: Separates approach anxiety (imagined rejection) from actual social unavailability. Gives permission to act on real signals instead of guessing.
-Common block this solves: Convincing yourself "they don't want to talk" when you haven't actually read the room.
-Key coaching point: The scan is about data, not mind-reading. You're not deciding if they'll like you. You're reading if the window is open.`,
+Situation it solves: Talking yourself out of approaching based on fear, not data.
+How to use: Before approaching, read 3 signals in 3 seconds — (1) Eye contact or a glance in your direction (they noticed you), (2) Open body language (facing outward, not locked into a conversation or task), (3) Available (not on phone, not mid-sentence, not clearly rushing). If 2 of 3 are present, the window is open. Move.
+Part of the system: This is Step 2 of the Fearless Approach System (FAS). If your client is freezing before they even scan, start with FAS first — the 3-Second Social Scan is the targeting tool inside the broader approach framework.
+Why it works (behavioral science): The amygdala processes social threat in milliseconds — it will always default to "danger" without data. The scan gives the prefrontal cortex something real to work with, overriding the fear response with evidence.
+Jungian grounding: Approach anxiety is often the Shadow at work — the part of you that was once rejected and vowed to never risk it again. The Scan makes the decision process objective, which quiets the Shadow's veto power.
+Personal grounding (Shavi): Developed during door-to-door sales when reading prospect energy became a survival skill. A closed door isn't rejection — it's data. A glance away isn't dismissal — it's information. The scan separates what's real from what the brain invents.
+Key coaching point: You're not deciding if they'll like you. You're reading if the window is open. Those are completely different questions.`,
 
-  "Fearless Approach System": `Fearless Approach System (FAS) — Overcoming Approach Anxiety
-How to use: Five-component system run in order — (1) Permission Slip: internal reframe before approaching ("I'm allowed to talk to people, I don't need a reason"), (2) Target Selection: use the 3-Second Social Scan, (3) Approach Window: move within 3 seconds of deciding — hesitation is the enemy, (4) Opening: use SPARK, (5) Exit Strategy: have a graceful out ready ("I'll let you get back to it") so you never feel trapped.
-Purpose: Full end-to-end system for people who freeze, avoid, or overthink before any social initiation.
-Common block this solves: The full cycle of approach anxiety — the physical freeze, the internal narrative, the missed window, the post-event replay.
-Key coaching point: The Permission Slip is the most important piece. Most approach anxiety is a permission problem, not a skill problem.`,
+  "Fearless Approach System": `Fearless Approach System (FAS) — End-to-End Approach Anxiety Elimination
+Situation it solves: The full cycle — freeze, internal narrative, missed window, post-event replay.
+How to use: Five components in order — (1) Permission Slip: internal reframe before approaching ("I'm allowed to talk to people. I don't need a reason."), (2) Target Selection: run the 3-Second Social Scan, (3) Approach Window: move within 3 seconds of deciding — every second of hesitation doubles the anxiety, (4) Opening: use SPARK, (5) Exit Strategy: have a graceful out ready before you approach ("I'll let you get back to it") so you never feel trapped.
+Why it works (behavioral science): Hesitation activates the sympathetic nervous system (fight/flight). The 3-second rule interrupts that cascade before it builds. The exit strategy removes the "escape anxiety" that makes people avoid conversations altogether — when you know you can leave, entering feels safe.
+Jungian grounding: The Permission Slip is Shadow work made practical. Most approach anxiety isn't fear of rejection — it's the unconscious belief that you don't have the right to take up space. That belief was installed by early experiences. The Permission Slip makes it conscious, which is the first step to dismantling it. Jung: "Until you make the unconscious conscious, it will direct your life and you will call it fate."
+Personal grounding (Shavi): Shavi engineered exits around crowds as a child — he would switch sports teams to avoid walking past groups of people. FAS is the system he built to rewire that. Every component came from a real failure first: the missed window because he waited too long, the trapped feeling because he had no exit, the freeze because he never gave himself permission.
+Key coaching point: Most approach anxiety is a permission problem, not a skill problem. Fix the permission, the skills follow.`,
+
+  "3-2-1 Send It": `3-2-1 Send It — Stopping Overthinking and Pulling the Trigger
+Situation it solves: Paralysis before low-stakes social actions — sending a text, walking over, saying hello, raising your hand.
+How to use: When you notice yourself over-analyzing a simple social action — count 3, 2, 1 out loud or in your head and physically move before you finish. No more thinking once you hit 1. The goal isn't to feel ready. The goal is to move before the brain talks you out of it.
+Why it works (behavioral science): Overthinking activates the default mode network (the brain's self-referential loop). The countdown interrupts that loop with a motor command — action short-circuits rumination. Mel Robbins' 5-Second Rule methodology demonstrates that counting backward disrupts the habit of hesitation by triggering a physical response before the brain can talk you out of moving.
+Jungian grounding: The overthinking is the Persona protecting itself — it would rather miss the moment than risk looking foolish. 3-2-1 Send It is a way to act from the Self instead of the Persona. It's not about being fearless. It's about moving anyway.
+Personal grounding (Shavi): The next door was always waiting. In 10,000 doors of sales, the ones he almost didn't knock were often the ones that changed everything. Not because he was ready. Because he moved.
+Key coaching point: You're never going to feel ready. Ready is a feeling your brain manufactured to keep you safe. Move at 1.`,
+
+  "Barista Method": `Barista Method — Building Social Reps in Zero-Stakes Environments
+Situation it solves: Not having enough real-world practice. Treating every interaction like it matters too much to risk.
+How to use: Use service-based interactions (coffee shop, grocery store, rideshare, front desk) as daily low-stakes training grounds. The goal isn't to make a friend — it's to get a rep in. Pick one skill per week to practice (opener, eye contact, asking a follow-up question, using their name). Baristas, cashiers, and front desk staff are the best practice partners because there's a built-in social script, low consequences, and natural exits.
+Why it works (behavioral science): Skill acquisition follows spaced repetition — you need volume of reps to build the neural pathways for social fluency. Most people never practice social skills because every interaction feels high-stakes. The Barista Method creates a daily practice environment with zero identity risk.
+Jungian grounding: The Persona develops through interaction, not intention. You don't build a social identity by thinking about it — you build it by using it. Every Barista rep is a small act of individuation — you're choosing to engage instead of withdraw.
+Personal grounding (Shavi): The door-to-door years were essentially the Barista Method at industrial scale — 20-30 cold interactions per day, every day, until conversation stopped being an event and started being a muscle. You don't need a sales route. You need a coffee order.
+Key coaching point: You're not trying to impress the barista. You're training your nervous system to stop treating conversation as a threat.`,
+
+  // ── DELIVERY & PRESENCE CLUSTER ─────────────────────────────────────────
 
   "TALK Check": `TALK Check — Delivery Layer for Any Interaction
-How to use: T-one (is your tone warm and inviting or flat and monotone?), A-ttention (are you actually present — eye contact, body facing them?), L-anguage (matching their vocabulary, avoiding filler words?), K-inetics (body language, proximity, gestures — open and calibrated?).
-Purpose: Most people focus on what to say. TALK Check fixes how they're saying it. Tone and body language carry 70% of the message.
-Common block this solves: Saying the right words but still not landing. Coming across as nervous, cold, robotic, or low-energy.
-Key coaching point: Tone is the first signal people receive. If the tone is off, nothing else matters. Start there.`,
+Situation it solves: Saying the right words but still not landing. Coming across as flat, robotic, nervous, or low-energy.
+How to use: Run TALK Check before or during any important conversation — T-one (is your tone warm and grounded, or flat and anxious?), A-ttention (are you fully present — real eye contact, body facing them, not scanning the room?), L-anguage (matching their vocabulary, zero filler words, speaking in complete thoughts?), K-inetics (body language, proximity, stillness — open posture, no fidgeting, movement that's intentional).
+Why it works (behavioral science): University of Glasgow research: vocal impressions form in 300-500 milliseconds. The amygdala reads attention cues faster than the brain processes words. Research consistently shows that non-verbal signals — tone, eye contact, body language — carry the majority of emotional meaning in social interactions, far outweighing the words themselves. Most social skills training focuses on content — TALK Check focuses on the delivery layer where most of the signal lives.
+Jungian grounding: Flat delivery is often a Persona problem — the social mask is performing safety ("don't take up too much space") instead of presence. Warmth requires the ego to step back. TALK Check gives people a concrete checklist for what genuine presence looks like when it's constructed intentionally.
+Personal grounding (Shavi): Built through door-to-door sales where a prospect decided if they'd open the door in the first 3 seconds of hearing his voice. Not his pitch — his voice. He learned to lead with tone, not content. The T in TALK comes first for a reason.
+Key coaching point: Tone is the first signal. If the tone is off, nothing else matters. Fix T before anything else.`,
+
+  // ── DEPTH & CONTINUITY CLUSTER ──────────────────────────────────────────
+
+  "DEPTH": `DEPTH — Taking Conversations from Surface to Real
+Situation it solves: Running out of things to say. Conversations that stay shallow or die after small talk. Not knowing how to go deeper without it feeling forced.
+How to use: D-isclose first (before you ask a personal question, give a small piece of yourself — reciprocity pulls them in), E-motion over information (follow the feeling behind what they say, not just the facts — "that sounds like it was a lot" lands deeper than "wow really?"), P-ause with purpose (resist the urge to fill silence — a 2-3 second pause after something meaningful signals you actually heard it), T-hread back (reference something they said earlier — "you mentioned earlier that..." shows you're present, not performing), H-and the ball (add your angle on the topic, then return the question — conversation is tennis, not a press conference). Note: the H step uses the same Echo Question Technique from SPARK — pick up the last keyword they said and reflect it back as curiosity before adding your angle. If they learned SPARK first, they already have this tool.
+The Depth Ladder — four levels of conversation depth (teach clients to recognize which level they're on and how to move up deliberately):
+Level 1 — Facts & Pleasantries: weather, logistics, safe surface talk. Everyone starts here. The goal is to move through it, not stay.
+Level 2 — Opinions & Preferences: what they like, what they think, what they'd choose. "What did you think of that?" opens Level 2.
+Level 3 — Values & Experiences: what shaped them, what they care about, what they've been through. This is where real connection starts.
+Level 4 — Vulnerabilities & Aspirations: what they're afraid of, what they're working toward, what they haven't told many people. Rare. Never forced. Only reached when the other person feels genuinely safe.
+The Bridge Technique — three tools for moving between levels without it feeling like an interview:
+(1) Why Follow-Up: after any Level 2 answer, ask "what made you feel that way?" — pulls them toward Level 3 naturally.
+(2) Vulnerability Match: disclose at the level you want to reach before asking them to go there. You go first, they follow.
+(3) Observation Pivot: instead of a question, name what you noticed. "You light up when you talk about that." This often opens Level 3-4 without a question at all.
+Why it works (behavioral science): Reciprocal self-disclosure is one of the most well-documented drivers of intimacy (Jourard, 1971). People don't open up when asked — they open up when they feel safe enough to match your level. The Depth Ladder gives both coach and client a shared map for where conversations are and where they could go.
+Jungian grounding: Surface conversation is Persona-to-Persona contact — two masks talking. Real connection happens when the Self makes contact with another Self. DEPTH is the path from mask to person. The E step (emotion over information) is the gateway — emotion is where the Self lives. Level 4 of the Depth Ladder is where individuation shows up in relationship — two people choosing to be real instead of performing.
+Personal grounding (Shavi): After his father passed at 16, Shavi realized quality time was his love language — not time in the same room, but time that actually meant something. DEPTH is his answer to conversations that feel like they happened but left nothing behind.
+Key coaching point: You don't go deeper by asking deeper questions. You go deeper by disclosing first. The Depth Ladder shows you the levels. The Bridge Technique gets you there. But Vulnerability Match — going first — is the only move that actually works.`,
+
+  // ── CONFIDENCE & INNER GAME CLUSTER ─────────────────────────────────────
+
+  "GROUND": `GROUND — Social Confidence and Inner Game
+Situation it solves: Feeling like you shrink in social situations. Needing approval. Performing instead of connecting. Confidence that disappears the moment someone seems unimpressed.
+How to use: G-et identity before you enter (before any social situation, name 3 things that are true about you that have nothing to do with how this goes — this is your foundation, not a pre-event ritual; if you need a timed pre-event version, use the Pre-Game System), R-emove the audition (reframe: you're not auditioning to be liked, you're choosing who to spend time with), O-wn the pause (practice one beat of comfortable silence before you respond to anything — it signals confidence that most people never see), U-nderstand the approval loop (your anxiety spikes because your nervous system was trained to read approval as safety — this is not truth, it's conditioning), N-eutralize the story (before you walk in, name the story you're telling about what they'll think, then ask: is this a fact or an assumption?), D-eploy with no agenda (enter with nothing to prove — curiosity, not performance). GROUND is a mindset framework — it builds who you are in social situations. The Pre-Game System is the activation ritual — it uses GROUND as its foundation but adds timing, energy awareness, and a specific intention before high-stakes events.
+Why it works (behavioral science): Confidence is a byproduct of competence, not a prerequisite. The brain reads your own behavior as evidence about who you are (self-perception theory, Bem 1972). The pause, the reframe, the "no agenda" entry — these are behaviors that send your nervous system a different signal.
+Jungian grounding: Approval-seeking is the Persona overextended — so invested in how it looks that the Self can't get through. GROUND is about re-rooting in the Self before entering the social field. The G step (identity before you enter) is individuation in practice: knowing who you are independent of the room's response.
+Personal grounding (Shavi): Grew up without a father from age 16, rebuilt from scratch in a new country, knocked on 30 doors a day getting rejected to his face. Confidence didn't come from affirmations — it came from building competence until the outcomes started changing. "Confidence is the byproduct, not the goal."
+Key coaching point: You don't need to feel confident before you walk in. You need to know who you are before you walk in. Those are completely different things.`,
+
+  "Pre-Game System": `Pre-Game System — Confidence Preparation Before Any Social Situation
+Situation it solves: Showing up to important social situations already anxious, low-energy, or in the wrong headspace.
+How to use: Three-step routine done in the 10-15 minutes before any high-stakes interaction. Built on GROUND as the foundation — if the client hasn't done GROUND yet, teach it first. (1) Energy Audit: check your battery using the Energy Check system — GREEN = present and ready, go deep; YELLOW = functional but running thin, manage your commitments; RED = depleted, do minimum viable engagement or reschedule if possible. Do not enter a high-stakes event in RED without a plan. (2) Identity Lock: activate the G step from GROUND — name 2-3 things that are true about you that have nothing to do with how this goes. Say them out loud, not just in your head. The difference from GROUND is activation: GROUND builds the identity over time; Identity Lock fires it up for right now. (3) Intention Set: decide what you're going for in this interaction — not "make them like me" but something specific and controllable ("ask one good question," "stay present," "make them laugh once"). Walk in with an intention you can actually achieve.
+Why it works (behavioral science): Pre-performance routines (used by athletes, surgeons, and musicians) reduce cortisol and improve execution consistency. Setting an achievable intention shifts the brain from threat-detection mode to goal-pursuit mode — a fundamentally different neurological state.
+Jungian grounding: The Pre-Game System is preparation for conscious Persona use — you're choosing who to be instead of defaulting to whoever fear makes you. Identity Lock is about accessing the Self before the Persona takes over.
+Personal grounding (Shavi): Before the biggest sales days — and later, before coaching client calls — the ritual mattered. Not to feel ready (you never fully feel ready) but to show up intentional instead of reactive.
+Key coaching point: Most people walk into social situations hoping for a good outcome. The Pre-Game System is about deciding what you're going to do, not hoping for how it'll go.`,
+
+  "Energy Check": `Energy Check — Social Energy Management and Strategic Engagement
+Situation it solves: Burning out socially. Dreading interactions you used to enjoy. Over-committing to social situations and arriving depleted. Introvert exhaustion.
+How to use: Two sides to the Energy Check — your battery AND theirs.
+Reading YOUR battery — GREEN: fully present, engaged, can initiate and sustain (this is for depth). YELLOW: functional, can respond well but shouldn't initiate high-effort connection (this is for maintenance). RED: depleted, protect your energy, minimum viable engagement only (this is for recovery). Use your battery level to make strategic decisions: who to engage, for how long, and when to exit without guilt.
+Reading THEIR energy — before or during any interaction, check three signals: (1) Body Orientation: are they turned toward you (open) or angled away (closed)? Open = GREEN, angled but responsive = YELLOW, fully turned away = RED. (2) Facial Expression: engaged and animated = GREEN, neutral and polite = YELLOW, flat or distracted = RED. (3) Situation Context: are they in a natural pause with nowhere to be = GREEN, mid-task but not rushing = YELLOW, clearly busy or in motion = RED. Combine all three to read the room. 2/3 RED signals = don't initiate or wrap up quickly.
+Why it works (behavioral science): Ego depletion research (Baumeister) shows that self-regulation — which social interaction requires — draws from a finite resource that depletes across a day. Introverts especially show cortisol spikes from prolonged social engagement that extroverts don't. The Energy Check is not about avoidance — it's about sustainability.
+Jungian grounding: For introverts, energy flows inward — social engagement is energy expenditure, not energy intake. Jungian introversion means the unconscious needs quiet to process. Ignoring this doesn't make you more social — it makes you more reactive and less genuine when you are social. The Energy Check honors the type instead of fighting it.
+Personal grounding (Shavi): Coaching 20 clients a week while building a brand taught him fast: you cannot show up for everyone if you show up depleted for everyone. The first time he turned down a social event because he knew his battery was RED, it felt like failure. It was actually intelligence. The Energy Check is what makes selective presence a strategy instead of an excuse.
+Key coaching point: You don't build a social life by showing up exhausted everywhere. You build it by being fully present somewhere. And reading THEIR energy is just as important as knowing yours — the scan works both ways.`,
+
+  // ── SPEAKING UP & GROUP DYNAMICS CLUSTER ────────────────────────────────
+
+  "VOICE": `VOICE — Speaking Up in Groups and Claiming Your Space
+Situation it solves: Going quiet in group settings. Having thoughts and not saying them. Speaking up and getting talked over. Feeling invisible at tables where you should be contributing.
+How to use: V-alidate your thought before you speak (internal permission slip — "this is worth saying" — before you open your mouth, not after), O-pen early (in any group setting, speak once in the first 5 minutes — doesn't have to be profound, just real — after one contribution you've claimed your space), I-nsert with intent (cut in without apologizing — "building on that—" or "quick point—" not "sorry, can I just—"), C-laim the space (match your volume to the room, pause before you start, don't trail off — finish your thought like it matters), E-nd strong (complete your point fully before you hand the thread — never trail off mid-thought because someone looks like they want to talk).
+Why it works (behavioral science): Research on group dynamics shows that early contributors are perceived as higher status and more competent — the primacy effect means your first contribution sets your social position at the table. Apology language before speaking ("sorry, can I just—") signals low status before a single word of content lands.
+Jungian grounding: Going quiet in groups is often Shadow material — the assertive, opinionated self that was once silenced or dismissed. VOICE is shadow integration work: reclaiming the part of yourself that was trained to shrink. The V step (validate your thought first) is making the permission conscious instead of waiting for the group to grant it.
+Personal grounding (Shavi): Grew up in a household where the adults dominated the room. Learned that silence was often the safest option. VOICE is the framework for unlearning that — not becoming someone who talks more, but becoming someone who speaks when they have something real to say, and says it like it counts.
+Key coaching point: You're not trying to dominate the room. You're claiming your seat at the table. Those are completely different energy. Validate the thought first — that's the entire system in one step.`,
+
+  // ── DIFFICULT CONVERSATIONS CLUSTER ─────────────────────────────────────
 
   "BRAVE": `BRAVE — Navigating Difficult Conversations
-How to use: B-reak the pattern (acknowledge the tension upfront), R-eason (state why you're bringing it up), A-sk (what they think/feel before stating your position), V-alidate (their perspective before responding), E-nd with action (agree on a concrete next step).
-Purpose: Gives a structure for confrontation-avoidant people to have conversations they've been avoiding.
-Common block this solves: Letting things fester, passive-aggressive patterns, ghosting instead of addressing issues.
-Key coaching point: The Break step is what most people skip. Naming the tension upfront changes the entire dynamic.`,
+Situation it solves: Avoiding conversations that need to happen. Letting things fester. Passive-aggressive patterns. Ghosting instead of addressing issues directly.
+How to use: B-reak the pattern (acknowledge the tension upfront — name it before you explain it — "I want to talk about something that's been sitting with me"), R-eason (state clearly why you're bringing it up — your reason, not an accusation), A-sk first (before stating your position, ask what they think or how they experienced it — their answer changes everything), V-alidate (their perspective before you respond, even if you disagree — "I can see why that landed that way"), E-nd with action (close with a concrete next step — what changes, what you both agree to — don't leave it floating).
+Reading their response mid-conversation — GREEN: they engage, share their perspective, tone softens after the B step — you're in the conversation, keep going. YELLOW: they go quiet, give short answers, or seem guarded — slow down, lean into the A step (ask first), don't push your position yet. RED: they shut down, get defensive, or escalate — pause, validate first ("I'm not here to attack you — I genuinely want to understand"), don't proceed to E until you're back in YELLOW or GREEN.
+Why it works (behavioral science): Confrontation avoidance is maintained by anticipated pain — the brain predicts the conversation will go worse than it does. Naming the tension in the B step (Break) defuses it before it escalates, because the other person's threat response fires on mystery and unspoken conflict far more than on direct acknowledgment.
+Jungian grounding: The confrontation-avoidant person has a dominant Feeling function and an underdeveloped Shadow — the part of them that can hold a boundary. BRAVE gives the Feeling type a structure that lets them have the hard conversation without abandoning empathy. The A step (Ask first) is the Feeling function's power move — it keeps connection alive while still saying what needs to be said.
+Personal grounding (Shavi): Built through watching the damage that unsaid things do over time. The conversations people avoid for months are always the ones that, once had, take 20 minutes. BRAVE is the permission structure for having them.
+Key coaching point: The Break step is what most people skip. Naming the tension upfront changes the entire dynamic — it signals that you're in control of the moment, not the anxiety.`,
 
   "SHIELD": `SHIELD — Handling Difficult People and Energy Drains
-How to use: S-ee it coming (recognize the pattern), H-old your frame (don't react emotionally), I-solate the behavior (name what's happening without attacking), E-xit or engage (conscious choice), L-og it (track patterns), D-etach from outcome (control your response, not theirs).
-Purpose: For clients who consistently find themselves drained, manipulated, or reactive around specific people.
-Common block this solves: Feeling powerless around difficult people, taking the bait, walking away feeling worse every time.
-Key coaching point: The power move is not reacting. The moment you react emotionally, you've handed them control.`,
+Situation it solves: Feeling powerless around difficult people. Taking the bait. Walking away from interactions feeling worse every single time.
+How to use: S-ee it coming (recognize the pattern — once you've named it, you can't unsee it), H-old your frame (your emotional state is yours — don't let their behavior decide how you feel), I-solate the behavior (name what's happening without attacking the person — "when you say it like that, I shut down" not "you always do this"), E-xit or engage (conscious decision using these criteria: engage if the relationship matters AND you have the energy AND it's a pattern worth addressing — use BRAVE for that conversation; exit if the relationship has no leverage, your battery is RED, or engaging will escalate not resolve — "I need to step away from this conversation right now" is a complete sentence), L-og it (track patterns over time — what triggers them, what escalates it, what de-escalates it), D-etach from outcome (control your response, not theirs — their reaction is not your responsibility).
+Reading the situation — GREEN: they're in a pattern but you have capacity and the relationship has value — engage using I step, then move toward BRAVE if it's recurring. YELLOW: tension is elevated, you're losing your frame — use H first, then I, defer E until you've stabilized. RED: you're being pulled into a reaction or the situation is escalating — exit immediately, no explanation needed in the moment.
+Why it works (behavioral science): Reactivity is the result of the amygdala hijack — the emotional brain fires before the rational brain can respond. The H step (Hold your frame) is a pre-committed response pattern that prevents the hijack. Once you've named the pattern (S step), the prefrontal cortex stays online.
+Jungian grounding: Difficult people often activate our own Shadow — the things about them that bother us most are frequently projections of what we haven't integrated in ourselves. SHIELD isn't about winning against them. It's about staying in contact with yourself while they're doing what they do.
+Personal grounding (Shavi): Grew up around people who used volatility as control. Learned early that reacting gave them what they were after. The power move is non-reaction — not coldness, but groundedness. SHIELD was built from that.
+Key coaching point: The moment you react emotionally, you've handed them control. The power move is not reacting. Every time.`,
+
+  // ── RECOVERY & RESET CLUSTER ─────────────────────────────────────────────
 
   "Stop Replaying": `Stop Replaying — Breaking the Post-Social Overthink Loop
-How to use: (1) Interrupt (physical pattern break — stand up, say "stop" out loud, change environments), (2) Reframe (what actually happened vs. the story you're telling), (3) Release (deliberate closure ritual — write it down and close the notebook, then do something requiring present attention).
-Purpose: For clients stuck in post-social analysis paralysis.
-Common block this solves: Replaying conversations for hours or days, finding evidence of embarrassment, pre-living future situations as disasters.
-Key coaching point: The Interrupt has to be physical. You can't think your way out of the loop. Break the pattern with your body first.`,
+Situation it solves: Replaying conversations for hours or days afterward. Finding evidence of embarrassment in things that didn't matter. Pre-living future situations as disasters.
+How to use: Three subsystems working together — (1) Interrupt: physical pattern break the moment you catch yourself replaying — stand up, say "stop" out loud, change rooms, change tasks. You cannot think your way out of the loop. Break it with your body first. (2) Conversation Audit: 5-step forensic breakdown to get the truth — what actually happened (just facts), what story you're telling about it, what evidence contradicts that story, what you'd tell a friend in the same situation, what you can do differently next time. (3) Redirect Protocol: 3-minute emergency stop for the 2AM spiral — write the thing that's looping, write one sentence of what's true, write one thing you're doing tomorrow. Close it. Don't reopen it.
+Why it works (behavioral science): Social rejection activates the same neural pain pathways as physical pain (Eisenberger, 2003). The brain's three-step survival loop — detect rejection, analyze for cause, prevent future occurrence — never fully switches off in people with social anxiety. The Interrupt step physically disrupts this loop before it escalates. The Conversation Audit replaces the emotional story with evidence.
+Jungian grounding: The replay loop is the Ego in crisis — trying to manage its public image retroactively. Stop Replaying is a way to call the Ego off and return to the Self. The Redirect Protocol closes the loop the Ego refuses to close on its own.
+Personal grounding (Shavi): Built this after watching smart, capable people spiral for days over conversations that the other person forgot in 20 minutes. The replay is never about what happened. It's about what it means about you. That's the only question worth answering — and the Conversation Audit answers it directly.
+Key coaching point: The Interrupt has to be physical. You cannot think your way out of the loop. Your body has to move first — then your mind can follow.`,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FRAMEWORK SELECTION GUIDE — for the AI to use when deciding which to teach
+// ─────────────────────────────────────────────────────────────────────────────
+const FRAMEWORK_SELECTION_GUIDE = `
+FRAMEWORK SEQUENCING LOGIC:
+
+Phase 1 (Sessions 1-3) — Foundation & Permission:
+- Fearless Approach System: for anyone with approach anxiety or avoidance patterns
+- 3-Second Social Scan: pairs with FAS, teaches data over fear
+- SPARK: first practical skill, lowest barrier to entry
+- GROUND: if inner game/confidence is the primary block
+
+Phase 2 (Sessions 3-6) — Skill Building:
+- TALK Check: once they're approaching, fix how they're landing
+- DEPTH: once they can start conversations, teach them to deepen
+- VOICE: if they go quiet in groups or struggle to assert themselves
+- 3-2-1 Send It: when overthinking is the main friction
+
+Phase 3 (Sessions 5-8) — Maintenance & Edge Cases:
+- BRAVE: when they have relationships that need hard conversations
+- SHIELD: when difficult people are draining them
+- Stop Replaying: when post-social anxiety is undoing progress
+- Energy Check + Pre-Game System: for sustainability and consistency
+- Barista Method: ongoing — can be assigned as homework at any stage
+
+Framework alteration by Jungian type:
+- Introverts (I types): Energy Check + Pre-Game System earlier, Barista Method as bridge, smaller goals
+- Feelers (F types): BRAVE and DEPTH resonate deeply, lead with emotional logic
+- Perceivers (P types): Flexible frameworks (SPARK, 3-2-1) over rigid systems
+- Thinkers (T types): Lead with the science and mechanics, not the feelings
+- Judgers (J types): Respond well to structured frameworks with clear steps
+- Intuitives (N types): Connect frameworks to patterns and bigger meaning
+
+Never teach a framework that's already been mastered. Always build on what's worked.
+Never skip to advanced frameworks before the foundation is solid.
+`;
 
 export async function POST(req: NextRequest) {
   const { profile, name, jungian_type, client_id, session_number, coach_note, mode, framework, custom_topic } = await req.json();
@@ -57,7 +211,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "profile and name required" }, { status: 400 });
   }
 
-  // Fetch session history if client_id provided
+  // Fetch session history
   let sessionHistory: Record<string, unknown>[] = [];
   let lastSessionBrief: string | null = null;
 
@@ -88,7 +242,7 @@ export async function POST(req: NextRequest) {
         `Session ${last.session_number} (${last.date}):`,
         last.notes ? `Overview: ${last.notes}` : null,
         last.homework_assigned ? `Homework assigned: ${last.homework_assigned}` : null,
-        last.homework_completion !== "none" ? `Homework completion this session: ${last.homework_completion}` : null,
+        last.homework_completion !== "none" ? `Homework completion: ${last.homework_completion}` : null,
         last.client_engagement ? `Engagement: ${last.client_engagement}` : null,
         last.breakthrough_moment ? `Breakthrough: ${last.breakthrough_moment}` : null,
       ].filter(Boolean).join("\n");
@@ -97,17 +251,34 @@ export async function POST(req: NextRequest) {
 
   const isIntake = (session_number ?? 1) === 1 && sessionHistory.length === 0;
 
-  const frameworkSection = mode === "framework" && framework
-    ? `FRAMEWORK TO TEACH THIS SESSION: ${framework}\n\n${FRAMEWORKS[framework] ?? ""}`
-    : mode === "custom" && custom_topic
-    ? `CUSTOM TOPIC FOR THIS SESSION: ${custom_topic}\n\nThis topic is not covered by a specific Social Code framework. Build the session around this specific issue using the client's profile.`
-    : isIntake
-    ? "This is the INTAKE SESSION — no framework or topic. Focus entirely on discovery, relationship building, goal alignment, and setting the coaching foundation."
-    : "No specific framework or topic set — build the session based on where this client is in their arc using their profile and session history.";
+  // Build framework section — for ongoing sessions, always pick a framework
+  let frameworkSection: string;
+  if (isIntake) {
+    frameworkSection = `INTAKE SESSION — no framework teaching yet. Focus on discovery, relationship building, and goal alignment. At the close, plant a seed about what Session 2 will introduce (pick the most relevant framework based on their profile and tease it).`;
+  } else if (mode === "framework" && framework) {
+    frameworkSection = `FRAMEWORK OVERRIDE — teach this specific framework this session:\n\n${framework}\n\n${FRAMEWORKS[framework] ?? ""}`;
+  } else if (mode === "custom" && custom_topic) {
+    frameworkSection = `CUSTOM TOPIC OVERRIDE: ${custom_topic}\n\nThis is coach-directed. Build the session around this topic. If a Social Code framework partially covers it, integrate it. If not, address it directly using the client's profile.`;
+  } else {
+    // AI selects — always picks a framework, never leaves it blank
+    const usedFrameworks = sessionHistory.flatMap((s) => (s.frameworks_used as string[]) ?? []);
+    const unusedFrameworks = Object.keys(FRAMEWORKS).filter((f) => !usedFrameworks.includes(f));
+    frameworkSection = `FRAMEWORK SELECTION (AI-decided): You MUST pick one Social Code framework to anchor this session. Do not leave this blank. Use the sequencing logic and the client's profile to select the most appropriate next framework.
+
+${FRAMEWORK_SELECTION_GUIDE}
+
+ALL FRAMEWORKS AVAILABLE:
+${Object.entries(FRAMEWORKS).map(([name, desc]) => `\n--- ${name} ---\n${desc}`).join("\n")}
+
+Frameworks already covered with this client: ${usedFrameworks.length > 0 ? usedFrameworks.join(", ") : "None yet"}
+Frameworks not yet covered: ${unusedFrameworks.join(", ")}
+
+Select the best framework for where this client is right now. Then explain how you'll personalize the delivery for their specific Jungian type, trust pattern, and compliance style.`;
+  }
 
   const historySection = sessionHistory.length > 0
     ? `\nSESSION HISTORY (${sessionHistory.length} session${sessionHistory.length !== 1 ? "s" : ""} logged):\n${JSON.stringify(sessionHistory, null, 2)}`
-    : "\nSESSION HISTORY: No sessions logged yet — this is the first session.";
+    : "\nSESSION HISTORY: No sessions logged yet.";
 
   const lastSessionSection = lastSessionBrief
     ? `\nSINCE LAST SESSION:\n${lastSessionBrief}`
@@ -119,7 +290,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-6",
       max_tokens: 6000,
       messages: [{ role: "user", content: prompt }],
     });
@@ -141,9 +312,9 @@ export async function POST(req: NextRequest) {
 }
 
 function buildIntakePrompt(name: string, jungianType: string, profile: Record<string, unknown>, frameworkSection: string): string {
-  return `You are an expert session planner for Social Code, a 1:1 social skills coaching practice.
+  return `You are the session planner for Social Code — a 1:1 social skills coaching practice built by Shavi, who grew up in Arnett Gardens, Kingston, Jamaica, knocked on 10,000+ doors in door-to-door sales, discovered Carl Jung, and built a complete system for social competence from scratch. The brand truth: "You're not broken. You're untrained." The approach: frameworks, not feelings. Systems, not personality traits.
 
-Generate a complete INTAKE SESSION plan for the first call with this client. The intake session is about discovery, relationship building, goal alignment, and setting the coaching foundation — not teaching frameworks yet.
+Generate a complete INTAKE SESSION plan for the first call with this client. This session is about discovery, relationship building, goal alignment, and laying the coaching foundation. Do NOT teach a framework yet — but close with a teaser of what Session 2 will introduce.
 
 CLIENT:
 Name: ${name}
@@ -159,31 +330,31 @@ Generate a JSON object with EXACTLY this structure:
 
 {
   "session_title": "Intake — Getting the Full Picture",
-  "opening": "exactly how to open this first call — set the tone, establish safety, what to say in the first 2 minutes",
-  "check_in": "the first question to ask to break the ice and get them talking — warm, not clinical",
-  "todays_focus": "what this intake session accomplishes and why it matters",
+  "opening": "exactly how to open this first call — set the tone, establish safety, what to say in the first 2 minutes. Keep it human, not clinical.",
+  "check_in": "the first question — warm, not clinical, gets them talking immediately",
+  "todays_focus": "what this intake accomplishes and why it matters for their specific goal",
   "agenda": [
-    { "time": "0-5 min", "block": "Opening & rapport", "notes": "what to do" },
+    { "time": "0-5 min", "block": "Opening & safety", "notes": "what to do and say" },
     { "time": "5-15 min", "block": "Their story — why they're here", "notes": "what to ask and explore" },
-    { "time": "15-25 min", "block": "Goal clarification", "notes": "what to nail down" },
-    { "time": "25-35 min", "block": "Baseline assessment", "notes": "what to observe and ask" },
+    { "time": "15-25 min", "block": "Goal clarification", "notes": "what to nail down specifically" },
+    { "time": "25-35 min", "block": "Baseline read", "notes": "what to observe and assess" },
     { "time": "35-45 min", "block": "Expectations + first assignment", "notes": "what to establish" },
-    { "time": "45-50 min", "block": "Close", "notes": "how to end it" }
+    { "time": "45-50 min", "block": "Close + Session 2 teaser", "notes": "how to end and create anticipation" }
   ],
   "framework_or_topic_approach": null,
-  "session_questions": ["8-10 intake questions in order — written out fully. Mix: their story, their goal, their history, what they've tried, what they're afraid of, what success looks like"],
-  "exercise": "one light baseline exercise for this first session — something low-stakes that gives you data on where they actually are",
-  "what_to_watch": ["4-5 specific behavioral signals to notice live in the intake — signs of their trust pattern, compliance style, hidden fear showing up"],
-  "if_they_resist": "what to say if they deflect, keep things surface-level, or seem guarded in the intake",
-  "session_close": "how to close the intake — what to summarize, what to commit to, how to set the tone for the coaching relationship",
-  "homework": "first homework assignment — small, specific, low-stakes. Something that gives you data for session 2 and gets them moving immediately",
-  "next_session_seed": "what to plant at the end of the intake to create anticipation for session 2",
+  "session_questions": ["8-10 intake questions in exact order — their story, goal, history, what they've tried, what they're afraid of, what success looks like. Write them out fully as you would say them."],
+  "exercise": "one light baseline activity — low-stakes, gives you real data on where they are",
+  "what_to_watch": ["4-5 specific behavioral signals to notice live — their trust pattern showing up, compliance style, hidden fear in action"],
+  "if_they_resist": "what to say if they stay surface-level or deflect — specific language",
+  "session_close": "how to close — what to summarize, what to commit to, how to set the relationship tone",
+  "homework": "first assignment — small, specific, observable. Gives you data for Session 2 and gets them moving immediately.",
+  "next_session_seed": "the teaser that creates anticipation for Session 2 — name the framework you're introducing and why it's built for them specifically",
   "sessions_roadmap": {
-    "recommended_total": "a number like 6 or 8 or 12",
-    "rationale": "1-2 sentences: why this many sessions based on their goal, profile, locus of control, and trust pattern",
-    "phase_1": "sessions 1-X: what gets covered and what shifts",
-    "phase_2": "sessions X-Y: what gets covered and what shifts",
-    "phase_3": "sessions Y-end: what gets covered and what the outcome looks like"
+    "recommended_total": "number",
+    "rationale": "1-2 sentences: why this count based on their profile, goal, trust pattern, and compliance style",
+    "phase_1": "sessions 1-X: what foundation gets built",
+    "phase_2": "sessions X-Y: what skills get developed",
+    "phase_3": "sessions Y-end: what transformation looks like"
   }
 }
 
@@ -201,9 +372,9 @@ function buildOngoingPrompt(
   lastSessionSection: string,
 ): string {
   const playbook = profile.coaching_playbook as Record<string, unknown> | undefined;
-  return `You are an expert session planner for Social Code, a 1:1 social skills coaching practice.
+  return `You are the session planner for Social Code — a 1:1 social skills coaching practice built by Shavi, who grew up in Arnett Gardens, Kingston, Jamaica, knocked on 10,000+ doors in door-to-door sales, discovered Carl Jung, and built a complete system for social competence from scratch. Brand truth: "You're not broken. You're untrained." Approach: frameworks not feelings, systems not personality traits. Every session is built around a Social Code framework — not generic coaching advice.
 
-Generate a complete, ready-to-run session plan for this client's upcoming coaching call. Use their full session history to pick up exactly where you left off.
+Generate a complete, ready-to-run session plan. Pick up exactly where this client left off. Every session must anchor to a Social Code framework — that framework is the spine of the session.
 
 CLIENT:
 Name: ${name}
@@ -226,38 +397,40 @@ ${lastSessionSection}
 
 SESSION INFO:
 Session Number: ${sessionNumber ?? 1}
-Coach's Note: ${coachNote || "No note provided."}
+Coach's Note: ${coachNote || "None."}
 
 ${frameworkSection}
 
-Generate a JSON object with EXACTLY this structure:
+Generate a JSON object with EXACTLY this structure. The framework_selected and framework_why fields are REQUIRED — never null for ongoing sessions:
 
 {
-  "session_title": "short punchy title for this session",
-  "opening": "exactly how to open this call — what to say in the first 2 minutes based on where they are now",
-  "check_in": "a specific check-in question — references last session or homework if applicable",
-  "todays_focus": "1-2 sentences on what this session builds toward and why now",
+  "session_title": "short punchy title that references the framework or the shift happening",
+  "framework_selected": "the exact name of the Social Code framework anchoring this session",
+  "framework_why": "2-3 sentences: why this framework is the right one for this person at this point in their arc — reference their profile, session history, and Jungian type",
+  "opening": "exactly how to open this call — specific to where they are now, references last session if applicable",
+  "check_in": "specific check-in question — references homework or last session directly",
+  "todays_focus": "1-2 sentences: what this session builds and why now in their arc",
   "agenda": [
-    { "time": "0-5 min", "block": "Opening & check-in", "notes": "what to do" },
+    { "time": "0-5 min", "block": "Opening & homework debrief", "notes": "what to do" },
     { "time": "5-20 min", "block": "block name", "notes": "what to cover" },
     { "time": "20-35 min", "block": "block name", "notes": "what to cover" },
     { "time": "35-45 min", "block": "block name", "notes": "what to cover" },
     { "time": "45-50 min", "block": "Close & assign", "notes": "what to do" }
   ],
-  "framework_or_topic_approach": "how to introduce and teach this framework or approach this topic for THIS person — or null if AI-decided",
-  "session_questions": ["6-8 questions in exact order — specific to where they are now, referencing session history"],
-  "exercise": "the specific practice exercise or drill — what it is, how to run it, how to frame it for this person",
-  "what_to_watch": ["3-4 behavioral signals to notice live in this session"],
-  "if_they_resist": "what to say and do if they push back or disengage — word-for-word if possible",
-  "session_close": "how to close this session — what to summarize, what to acknowledge",
-  "homework": "exact homework assignment tailored to this person and this session",
-  "next_session_seed": "what to plant at the end to create momentum for the next call",
+  "framework_or_topic_approach": "exactly how to introduce and teach this framework for THIS specific person — tailored to their Jungian type, trust pattern, and where they are emotionally. What language to use, what resistance to expect, what analogy will land for them.",
+  "session_questions": ["6-8 questions in exact order — grounded in the framework being taught, specific to this person's history and block"],
+  "exercise": "the specific drill or practice activity — what it is, how to run it live in the session, how to frame it for this person's compliance style",
+  "what_to_watch": ["3-4 behavioral signals to notice live — specific to this framework and this person's known patterns"],
+  "if_they_resist": "word-for-word script for the most likely resistance this person will have to this framework — based on their trust pattern and hidden fear",
+  "session_close": "how to close — what to acknowledge, what to celebrate, what to name as the shift",
+  "homework": "exact homework tied to the framework — specific, observable, low enough stakes that they'll actually do it",
+  "next_session_seed": "what to plant to create momentum — name what's coming in the next session",
   "sessions_roadmap": {
-    "recommended_total": "a number like 6 or 8 or 12",
-    "rationale": "1-2 sentences: why this many sessions based on their goal, profile, locus of control, and trust pattern",
-    "phase_1": "sessions 1-X: what gets covered and what shifts",
-    "phase_2": "sessions X-Y: what gets covered and what shifts",
-    "phase_3": "sessions Y-end: what gets covered and what the outcome looks like"
+    "recommended_total": "number",
+    "rationale": "1-2 sentences based on their goal, profile, and arc so far",
+    "phase_1": "sessions 1-X: foundation",
+    "phase_2": "sessions X-Y: skill development",
+    "phase_3": "sessions Y-end: outcome"
   }
 }
 
