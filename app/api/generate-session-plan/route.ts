@@ -223,68 +223,70 @@ Never skip to advanced frameworks before the foundation is solid.
 `;
 
 export async function POST(req: NextRequest) {
-  const { profile, name, jungian_type, client_id, session_number, coach_note, mode, framework, custom_topic } = await req.json();
+  try {
+    const body = await req.json();
+    const { profile, name, jungian_type, client_id, session_number, coach_note, mode, framework, custom_topic } = body;
 
-  if (!profile || !name) {
-    return NextResponse.json({ error: "profile and name required" }, { status: 400 });
-  }
-
-  // Fetch session history
-  let sessionHistory: Record<string, unknown>[] = [];
-  let lastSessionBrief: string | null = null;
-
-  if (client_id) {
-    const { data: sessions } = await getSupabase()
-      .from("sessions")
-      .select("*")
-      .eq("client_id", client_id)
-      .order("session_number", { ascending: true });
-
-    if (sessions && sessions.length > 0) {
-      sessionHistory = sessions.map((s) => ({
-        session: s.session_number,
-        type: s.session_type,
-        date: s.date,
-        engagement: s.client_engagement,
-        homework_completion: s.homework_completion,
-        homework_assigned: s.homework_assigned,
-        frameworks_used: s.frameworks_used,
-        overview: s.notes,
-        breakthrough: s.breakthrough_moment,
-        observations: s.coach_observations,
-        rating: s.rating,
-      }));
-
-      const last = sessions[sessions.length - 1];
-      lastSessionBrief = [
-        `Session ${last.session_number} (${last.date}):`,
-        last.notes ? `Overview: ${last.notes}` : null,
-        last.homework_assigned ? `Homework assigned: ${last.homework_assigned}` : null,
-        last.homework_completion !== "none" ? `Homework completion: ${last.homework_completion}` : null,
-        last.client_engagement ? `Engagement: ${last.client_engagement}` : null,
-        last.breakthrough_moment ? `Breakthrough: ${last.breakthrough_moment}` : null,
-      ].filter(Boolean).join("\n");
+    if (!profile || !name) {
+      return NextResponse.json({ error: "profile and name required" }, { status: 400 });
     }
-  }
 
-  const isIntake = (session_number ?? 1) === 1 && sessionHistory.length === 0;
+    // Fetch session history
+    let sessionHistory: Record<string, unknown>[] = [];
+    let lastSessionBrief: string | null = null;
 
-  // Build framework section — for ongoing sessions, always pick a framework
-  let frameworkSection: string;
-  if (isIntake) {
-    frameworkSection = `INTAKE SESSION — no framework teaching yet. Focus on discovery, relationship building, and goal alignment. At the close, plant a seed about what Session 2 will introduce (pick the most relevant framework based on their profile and tease it).`;
-  } else if (mode === "framework" && framework) {
-    frameworkSection = `FRAMEWORK OVERRIDE — teach this specific framework this session:\n\n${framework}\n\n${FRAMEWORKS[framework] ?? ""}`;
-  } else if (mode === "custom" && custom_topic) {
-    frameworkSection = `CUSTOM TOPIC OVERRIDE: ${custom_topic}\n\nThis is coach-directed. Build the session around this topic. If a Social Code framework partially covers it, integrate it. If not, address it directly using the client's profile.`;
-  } else {
-    // AI selects — always picks a framework, never leaves it blank
-    const usedFrameworks = sessionHistory.flatMap((s) => (s.frameworks_used as string[]) ?? []);
-    const unusedFrameworks = Object.keys(FRAMEWORKS).filter((f) => !usedFrameworks.includes(f));
-    const summaryList = Object.entries(FRAMEWORK_SUMMARIES)
-      .map(([name, summary]) => `- ${name}: ${summary}`)
-      .join("\n");
-    frameworkSection = `FRAMEWORK SELECTION (AI-decided): You MUST pick one Social Code framework to anchor this session. Use the sequencing logic and the client's profile to select the best next framework.
+    if (client_id) {
+      const { data: sessions } = await getSupabase()
+        .from("sessions")
+        .select("*")
+        .eq("client_id", client_id)
+        .order("session_number", { ascending: true });
+
+      if (sessions && sessions.length > 0) {
+        sessionHistory = sessions.map((s) => ({
+          session: s.session_number,
+          type: s.session_type,
+          date: s.date,
+          engagement: s.client_engagement,
+          homework_completion: s.homework_completion,
+          homework_assigned: s.homework_assigned,
+          frameworks_used: s.frameworks_used,
+          overview: s.notes,
+          breakthrough: s.breakthrough_moment,
+          observations: s.coach_observations,
+          rating: s.rating,
+        }));
+
+        const last = sessions[sessions.length - 1];
+        lastSessionBrief = [
+          `Session ${last.session_number} (${last.date}):`,
+          last.notes ? `Overview: ${last.notes}` : null,
+          last.homework_assigned ? `Homework assigned: ${last.homework_assigned}` : null,
+          last.homework_completion !== "none" ? `Homework completion: ${last.homework_completion}` : null,
+          last.client_engagement ? `Engagement: ${last.client_engagement}` : null,
+          last.breakthrough_moment ? `Breakthrough: ${last.breakthrough_moment}` : null,
+        ].filter(Boolean).join("\n");
+      }
+    }
+
+    const isIntake = (session_number ?? 1) === 1 && sessionHistory.length === 0;
+
+    // Build framework section — for ongoing sessions, always pick a framework
+    let frameworkSection: string;
+    if (isIntake) {
+      frameworkSection = `INTAKE SESSION — no framework teaching yet. Focus on discovery, relationship building, and goal alignment. At the close, plant a seed about what Session 2 will introduce (pick the most relevant framework based on their profile and tease it).`;
+    } else if (mode === "framework" && framework) {
+      frameworkSection = `FRAMEWORK OVERRIDE — teach this specific framework this session:\n\n${framework}\n\n${FRAMEWORKS[framework] ?? ""}`;
+    } else if (mode === "custom" && custom_topic) {
+      frameworkSection = `CUSTOM TOPIC OVERRIDE: ${custom_topic}\n\nThis is coach-directed. Build the session around this topic. If a Social Code framework partially covers it, integrate it. If not, address it directly using the client's profile.`;
+    } else {
+      // AI selects — always picks a framework, never leaves it blank
+      const usedFrameworks = sessionHistory.flatMap((s) => (s.frameworks_used as string[]) ?? []);
+      const unusedFrameworks = Object.keys(FRAMEWORKS).filter((f) => !usedFrameworks.includes(f));
+      const summaryList = Object.entries(FRAMEWORK_SUMMARIES)
+        .map(([n, summary]) => `- ${n}: ${summary}`)
+        .join("\n");
+      frameworkSection = `FRAMEWORK SELECTION (AI-decided): You MUST pick one Social Code framework to anchor this session. Use the sequencing logic and the client's profile to select the best next framework.
 
 ${FRAMEWORK_SELECTION_GUIDE}
 
@@ -294,41 +296,41 @@ ${summaryList}
 Frameworks already covered: ${usedFrameworks.length > 0 ? usedFrameworks.join(", ") : "None yet"}
 Frameworks not yet covered: ${unusedFrameworks.join(", ")}
 
-Pick the best framework. In framework_selected put the exact name. In framework_why explain why for this person at this point. In framework_or_topic_approach explain exactly how to teach it for their Jungian type and trust pattern. Full framework detail will be available to you — you do not need it to select.`;
-  }
+Pick the best framework. In framework_selected put the exact name. In framework_why explain why for this person at this point. In framework_or_topic_approach explain exactly how to teach it for their Jungian type and trust pattern.`;
+    }
 
-  const historySection = sessionHistory.length > 0
-    ? `\nSESSION HISTORY (${sessionHistory.length} session${sessionHistory.length !== 1 ? "s" : ""} logged):\n${JSON.stringify(sessionHistory, null, 2)}`
-    : "\nSESSION HISTORY: No sessions logged yet.";
+    const historySection = sessionHistory.length > 0
+      ? `\nSESSION HISTORY (${sessionHistory.length} session${sessionHistory.length !== 1 ? "s" : ""} logged):\n${JSON.stringify(sessionHistory, null, 2)}`
+      : "\nSESSION HISTORY: No sessions logged yet.";
 
-  const lastSessionSection = lastSessionBrief
-    ? `\nSINCE LAST SESSION:\n${lastSessionBrief}`
-    : "";
+    const lastSessionSection = lastSessionBrief
+      ? `\nSINCE LAST SESSION:\n${lastSessionBrief}`
+      : "";
 
-  const prompt = isIntake
-    ? buildIntakePrompt(name, jungian_type, profile, frameworkSection)
-    : buildOngoingPrompt(name, jungian_type, profile, session_number, coach_note, frameworkSection, historySection, lastSessionSection);
+    const prompt = isIntake
+      ? buildIntakePrompt(name, jungian_type, profile, frameworkSection)
+      : buildOngoingPrompt(name, jungian_type, profile, session_number, coach_note, frameworkSection, historySection, lastSessionSection);
 
-  try {
     const message = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 6000,
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     });
 
     const content = message.content[0];
-    if (content.type !== "text") throw new Error("Unexpected response type");
+    if (content.type !== "text") throw new Error("Unexpected response type from Anthropic");
 
     const text = content.text;
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1) throw new Error("No JSON found in response");
+    if (start === -1 || end === -1) throw new Error("No JSON in Anthropic response");
 
     const plan = JSON.parse(text.slice(start, end + 1));
     return NextResponse.json({ plan, isIntake, lastSessionBrief });
   } catch (e) {
-    console.error("Session plan generation failed:", e);
-    return NextResponse.json({ error: "Session plan generation failed" }, { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Session plan generation failed:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 

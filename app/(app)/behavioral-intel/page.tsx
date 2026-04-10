@@ -710,8 +710,14 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
           custom_topic: mode === "custom" ? customTopic : null,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed");
+      const raw = await res.text();
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(`Server error: ${raw.slice(0, 200)}`);
+      }
+      if (!res.ok) throw new Error((data.error as string) ?? "Failed");
       setPlan(data.plan);
       setIsIntake(data.isIntake ?? false);
       setLastSessionBrief(data.lastSessionBrief ?? null);
