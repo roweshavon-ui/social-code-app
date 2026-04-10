@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabase } from "@/app/lib/supabase";
 
+export const runtime = "edge";
 export const maxDuration = 60;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
@@ -228,7 +229,10 @@ export async function POST(req: NextRequest) {
     const { profile, name, jungian_type, client_id, session_number, coach_note, mode, framework, custom_topic } = body;
 
     if (!profile || !name) {
-      return NextResponse.json({ error: "profile and name required" }, { status: 400 });
+      return new Response(JSON.stringify({ error: "profile and name required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Fetch session history
@@ -311,26 +315,54 @@ Pick the best framework. In framework_selected put the exact name. In framework_
       ? buildIntakePrompt(name, jungian_type, profile, frameworkSection)
       : buildOngoingPrompt(name, jungian_type, profile, session_number, coach_note, frameworkSection, historySection, lastSessionSection);
 
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 4000,
-      messages: [{ role: "user", content: prompt }],
+    const encoder = new TextEncoder();
+    const stream = new TransformStream<Uint8Array, Uint8Array>();
+    const writer = stream.writable.getWriter();
+
+    (async () => {
+      try {
+        let fullText = "";
+        const anthropicStream = await client.messages.create({
+          model: "claude-sonnet-4-6",
+          max_tokens: 4000,
+          stream: true,
+          messages: [{ role: "user", content: prompt }],
+        });
+
+        for await (const chunk of anthropicStream) {
+          if (
+            chunk.type === "content_block_delta" &&
+            chunk.delta.type === "text_delta"
+          ) {
+            fullText += chunk.delta.text;
+          }
+        }
+
+        const start = fullText.indexOf("{");
+        const end = fullText.lastIndexOf("}");
+        if (start === -1 || end === -1) throw new Error("No JSON in Anthropic response");
+
+        const plan = JSON.parse(fullText.slice(start, end + 1));
+        await writer.write(
+          encoder.encode(JSON.stringify({ plan, isIntake, lastSessionBrief }))
+        );
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        await writer.write(encoder.encode(JSON.stringify({ error: msg })));
+      } finally {
+        await writer.close();
+      }
+    })();
+
+    return new Response(stream.readable, {
+      headers: { "Content-Type": "application/json" },
     });
-
-    const content = message.content[0];
-    if (content.type !== "text") throw new Error("Unexpected response type from Anthropic");
-
-    const text = content.text;
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1) throw new Error("No JSON in Anthropic response");
-
-    const plan = JSON.parse(text.slice(start, end + 1));
-    return NextResponse.json({ plan, isIntake, lastSessionBrief });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error("Session plan generation failed:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
