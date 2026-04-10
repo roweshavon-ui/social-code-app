@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSupabase } from "@/app/lib/supabase";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -167,6 +167,24 @@ Personal grounding (Shavi): Built this after watching smart, capable people spir
 Key coaching point: The Interrupt has to be physical. You cannot think your way out of the loop. Your body has to move first — then your mind can follow.`,
 };
 
+// One-liner summaries — used in AI-selection mode so we don't dump all 14 full texts
+const FRAMEWORK_SUMMARIES: Record<string, string> = {
+  "SPARK": "Starting conversations — situational opener, present yourself, ask open-ended, really listen, keep connected or exit",
+  "3-Second Social Scan": "Reading approach windows — 3 signals in 3 seconds before deciding to approach",
+  "Fearless Approach System": "End-to-end approach anxiety elimination — permission slip, scan, 3-second rule, SPARK, exit strategy",
+  "3-2-1 Send It": "Stopping overthinking for low-stakes social actions — countdown interrupts hesitation loop",
+  "Barista Method": "Building social reps in zero-stakes service interactions — daily training ground",
+  "TALK Check": "Delivery layer — Tone, Attention, Language, Kinetics — how you say it, not what you say",
+  "DEPTH": "Deepening conversations — Dig Deeper, Empathize, Personal Story, Transition, Hook — going from small talk to real connection",
+  "Energy Check": "Reading and managing social energy levels — GREEN/YELLOW/RED battery system",
+  "Pre-Game System": "Preparation ritual before high-stakes social situations — reduces anticipatory anxiety",
+  "VOICE": "Speaking up in groups — Value your input, Own your opening, Include your perspective, Claim the floor, Exit gracefully",
+  "BRAVE": "Navigating difficult conversations — Begin calm, Regulate, Ask their perspective, Validate, Explore solutions",
+  "SHIELD": "Handling difficult people — Stay calm/assess danger, Hold boundary, Gray rock, Prepare exit, Leave, Decompress",
+  "GROUND": "Inner game and confidence foundation — anchoring identity independent of social outcomes",
+  "Stop Replaying": "Breaking post-social overthink loop — physical interrupt, conversation audit, redirect protocol",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FRAMEWORK SELECTION GUIDE — for the AI to use when deciding which to teach
 // ─────────────────────────────────────────────────────────────────────────────
@@ -263,17 +281,20 @@ export async function POST(req: NextRequest) {
     // AI selects — always picks a framework, never leaves it blank
     const usedFrameworks = sessionHistory.flatMap((s) => (s.frameworks_used as string[]) ?? []);
     const unusedFrameworks = Object.keys(FRAMEWORKS).filter((f) => !usedFrameworks.includes(f));
-    frameworkSection = `FRAMEWORK SELECTION (AI-decided): You MUST pick one Social Code framework to anchor this session. Do not leave this blank. Use the sequencing logic and the client's profile to select the most appropriate next framework.
+    const summaryList = Object.entries(FRAMEWORK_SUMMARIES)
+      .map(([name, summary]) => `- ${name}: ${summary}`)
+      .join("\n");
+    frameworkSection = `FRAMEWORK SELECTION (AI-decided): You MUST pick one Social Code framework to anchor this session. Use the sequencing logic and the client's profile to select the best next framework.
 
 ${FRAMEWORK_SELECTION_GUIDE}
 
-ALL FRAMEWORKS AVAILABLE:
-${Object.entries(FRAMEWORKS).map(([name, desc]) => `\n--- ${name} ---\n${desc}`).join("\n")}
+AVAILABLE FRAMEWORKS (name + one-liner):
+${summaryList}
 
-Frameworks already covered with this client: ${usedFrameworks.length > 0 ? usedFrameworks.join(", ") : "None yet"}
+Frameworks already covered: ${usedFrameworks.length > 0 ? usedFrameworks.join(", ") : "None yet"}
 Frameworks not yet covered: ${unusedFrameworks.join(", ")}
 
-Select the best framework for where this client is right now. Then explain how you'll personalize the delivery for their specific Jungian type, trust pattern, and compliance style.`;
+Pick the best framework. In framework_selected put the exact name. In framework_why explain why for this person at this point. In framework_or_topic_approach explain exactly how to teach it for their Jungian type and trust pattern. Full framework detail will be available to you — you do not need it to select.`;
   }
 
   const historySection = sessionHistory.length > 0
