@@ -711,13 +711,14 @@ function SessionBuilderModal({ entry, onClose }: { entry: ClientEntry; onClose: 
         }),
       });
       const raw = await res.text();
-      let data: Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let data: any;
       try {
         data = JSON.parse(raw);
       } catch {
         throw new Error(`Server error: ${raw.slice(0, 200)}`);
       }
-      if (!res.ok) throw new Error((data.error as string) ?? "Failed");
+      if (!res.ok) throw new Error(data.error ?? "Failed");
       setPlan(data.plan);
       setIsIntake(data.isIntake ?? false);
       setLastSessionBrief(data.lastSessionBrief ?? null);
