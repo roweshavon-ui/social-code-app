@@ -16,6 +16,18 @@ const ADMIN_ROUTES = [
   "/comments",
   "/behavioral-intel",
   "/admin",
+  "/api/generate-client-profile",
+  "/api/generate-coaching-playbook",
+  "/api/generate-cohort-outline",
+  "/api/generate-group-session",
+  "/api/generate-profile",
+  "/api/generate-session-brief",
+  "/api/generate-session-curriculum",
+  "/api/generate-session-plan",
+  "/api/clients",
+  "/api/sessions",
+  "/api/leads",
+  "/api/library/upload",
 ];
 
 export function middleware(req: NextRequest) {
@@ -56,5 +68,10 @@ export const config = {
     "/comments/:path*",
     "/behavioral-intel/:path*",
     "/admin/:path*",
+    "/api/generate-:path*",
+    "/api/clients/:path*",
+    "/api/sessions/:path*",
+    "/api/leads/:path*",
+    "/api/library/upload",
   ],
 };

@@ -82,8 +82,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+function sanitize(html: string): string {
+  // Strip any dangerous tags and attributes that could survive renderMarkdown
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/javascript:/gi, "");
+}
+
 function renderMarkdown(md: string): string {
-  return md
+  const rendered = md
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
@@ -98,6 +107,7 @@ function renderMarkdown(md: string): string {
       return `<p>${block.replace(/\n/g, "<br/>")}</p>`;
     })
     .join("\n");
+  return sanitize(rendered);
 }
 
 export const dynamic = "force-dynamic";

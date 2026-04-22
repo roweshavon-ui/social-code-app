@@ -1,8 +1,8 @@
-import { createHmac, pbkdf2Sync, randomBytes } from "crypto";
+import { createHmac, pbkdf2Sync, randomBytes, randomInt, timingSafeEqual } from "crypto";
 
-function getSecret(): string {
-  const s = process.env.ADMIN_TOKEN;
-  if (!s) throw new Error("Missing ADMIN_TOKEN env var");
+function getJwtSecret(): string {
+  const s = process.env.JWT_SECRET ?? process.env.ADMIN_TOKEN;
+  if (!s) throw new Error("Missing JWT_SECRET env var");
   return s;
 }
 
@@ -18,7 +18,8 @@ export function verifyPassword(password: string, stored: string): boolean {
   const [salt, hash] = stored.split(":");
   if (!salt || !hash) return false;
   const attempt = pbkdf2Sync(password, salt, 100_000, 64, "sha512").toString("hex");
-  return attempt === hash;
+  // Both are hex strings of equal length — safe for timingSafeEqual
+  return timingSafeEqual(Buffer.from(attempt, "hex"), Buffer.from(hash, "hex"));
 }
 
 // ─── Session token (HMAC-SHA256 signed, base64url payload) ───────────────────
@@ -29,10 +30,10 @@ export function signToken(clientId: string, email: string): string {
   const payload: Payload = {
     clientId,
     email,
-    exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days
+    exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = createHmac("sha256", getSecret()).update(encoded).digest("hex");
+  const sig = createHmac("sha256", getJwtSecret()).update(encoded).digest("hex");
   return `${encoded}.${sig}`;
 }
 
@@ -42,8 +43,8 @@ export function verifyToken(token: string): Payload | null {
     if (dotIdx === -1) return null;
     const encoded = token.slice(0, dotIdx);
     const sig = token.slice(dotIdx + 1);
-    const expected = createHmac("sha256", getSecret()).update(encoded).digest("hex");
-    if (sig !== expected) return null;
+    const expected = createHmac("sha256", getJwtSecret()).update(encoded).digest("hex");
+    if (!timingSafeEqual(Buffer.from(sig, "hex"), Buffer.from(expected, "hex"))) return null;
     const payload: Payload = JSON.parse(Buffer.from(encoded, "base64url").toString());
     if (payload.exp < Date.now()) return null;
     return payload;
@@ -62,8 +63,5 @@ export function getTokenFromRequest(req: { cookies: { get: (name: string) => { v
 
 export function generateTempPassword(): string {
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  return Array.from(
-    { length: 10 },
-    () => chars[Math.floor(Math.random() * chars.length)]
-  ).join("");
+  return Array.from({ length: 10 }, () => chars[randomInt(0, chars.length)]).join("");
 }

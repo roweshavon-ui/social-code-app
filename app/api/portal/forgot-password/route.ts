@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/app/lib/supabase";
 import { randomBytes } from "crypto";
 import { Resend } from "resend";
+import { decrypt } from "@/app/lib/encrypt";
 
 export async function POST(req: NextRequest) {
   const { email } = await req.json();
@@ -9,19 +10,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
-  const { data: client } = await getSupabase()
+  const normalized = email.trim().toLowerCase();
+
+  // Emails are AES-256-GCM encrypted with random IVs — can't query by value.
+  // Fetch all portal clients and decrypt to find the match.
+  const { data: allClients } = await getSupabase()
     .from("clients")
     .select("id, name, email, portal_access")
-    .eq("email", email.trim().toLowerCase())
-    .single();
+    .eq("portal_access", true);
+
+  const client = (allClients ?? []).find(
+    (c) => decrypt(c.email ?? "").toLowerCase() === normalized
+  );
 
   // Always return ok — don't reveal whether the email exists
-  if (!client?.portal_access) {
+  if (!client) {
     return NextResponse.json({ ok: true });
   }
 
   const token = randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+  const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
   await getSupabase()
     .from("clients")
@@ -30,11 +38,12 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.joinsocialcode.com";
   const resetUrl = `${appUrl}/portal/reset-password?token=${token}`;
+  const clientName = decrypt(client.name ?? "");
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
     from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
-    to: client.email,
+    to: normalized,
     subject: "Reset your Social Code portal password",
     html: `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
@@ -47,7 +56,7 @@ export async function POST(req: NextRequest) {
           <p style="margin:4px 0 0;font-size:12px;color:#00D9C0;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Client Portal</p>
         </td></tr>
         <tr><td style="padding:32px 40px;">
-          <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;">Hey ${client.name},</p>
+          <p style="margin:0 0 16px;font-size:16px;color:#94a3b8;">Hey ${clientName},</p>
           <p style="margin:0 0 24px;font-size:14px;color:#94a3b8;line-height:1.6;">We received a request to reset your portal password. Click the button below — this link expires in 1 hour.</p>
           <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
             <tr><td style="background:#00D9C0;border-radius:10px;">

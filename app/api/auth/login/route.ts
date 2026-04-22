@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
 import { rateLimit, rateLimitResponse } from "@/app/lib/rateLimit";
+
+function checkPassword(submitted: string): boolean {
+  const stored = process.env.ADMIN_PASSWORD ?? "";
+  // HMAC both to equalise length before timingSafeEqual
+  const key = process.env.ADMIN_TOKEN ?? "fallback";
+  const a = createHmac("sha256", key).update(submitted).digest();
+  const b = createHmac("sha256", key).update(stored).digest();
+  return timingSafeEqual(a, b);
+}
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
@@ -8,7 +18,7 @@ export async function POST(req: NextRequest) {
 
   const { password } = await req.json();
 
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  if (!password || !checkPassword(password)) {
     return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
   }
 
