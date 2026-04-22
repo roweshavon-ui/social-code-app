@@ -1,7 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -44,12 +42,6 @@ function daysUntil(str: string | null) {
 }
 
 export default async function DraftsPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("sc_admin")?.value;
-  if (!token || token !== process.env.ADMIN_TOKEN) {
-    redirect("/admin");
-  }
-
   const posts = await getAllPosts();
   const drafts = posts.filter((p) => !p.published);
   const published = posts.filter((p) => p.published);

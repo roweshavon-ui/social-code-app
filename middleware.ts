@@ -15,6 +15,7 @@ const ADMIN_ROUTES = [
   "/posts",
   "/comments",
   "/behavioral-intel",
+  "/admin",
 ];
 
 export function middleware(req: NextRequest) {
@@ -54,5 +55,6 @@ export const config = {
     "/posts/:path*",
     "/comments/:path*",
     "/behavioral-intel/:path*",
+    "/admin/:path*",
   ],
 };
