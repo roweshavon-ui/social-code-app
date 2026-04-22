@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getPost(slug);
   if (!post) return { title: "Post not found" };
 
-  const url = `https://app.joinsocialcode.com/blog/${post.slug}`;
+  const url = `https://joinsocialcode.com/blog/${post.slug}`;
 
   return {
     title: `${post.title} | Social Code`,
@@ -124,7 +124,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
-    url: `https://app.joinsocialcode.com/blog/${post.slug}`,
+    url: `https://joinsocialcode.com/blog/${post.slug}`,
     datePublished: post.published_at,
     author: {
       "@type": "Person",
@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       logo: { "@type": "ImageObject", url: "https://joinsocialcode.com/logo.svg" },
     },
     image: "https://joinsocialcode.com/og-image.png",
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://app.joinsocialcode.com/blog/${post.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://joinsocialcode.com/blog/${post.slug}` },
   };
 
   return (
