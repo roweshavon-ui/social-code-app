@@ -190,37 +190,50 @@ const FRAMEWORK_SUMMARIES: Record<string, string> = {
 // FRAMEWORK SELECTION GUIDE — for the AI to use when deciding which to teach
 // ─────────────────────────────────────────────────────────────────────────────
 const FRAMEWORK_SELECTION_GUIDE = `
-FRAMEWORK SEQUENCING LOGIC:
+8-SESSION ROADMAP — 14 frameworks across 8 sessions:
 
-Phase 1 (Sessions 1-3) — Foundation & Permission:
-- Fearless Approach System: for anyone with approach anxiety or avoidance patterns
-- 3-Second Social Scan: pairs with FAS, teaches data over fear
-- SPARK: first practical skill, lowest barrier to entry
-- GROUND: if inner game/confidence is the primary block
+Session 1 — Foundation Tools: TALK Check + 3-Second Social Scan
+  Both are fast diagnostic tools, immediately applicable in the real world.
+  TALK Check is the delivery foundation — if tone/delivery is off, nothing else lands.
+  3-Second Scan removes decision paralysis before approaching.
+  Teach both in one hour. TALK Check first, Scan second.
 
-Phase 2 (Sessions 3-6) — Skill Building:
-- TALK Check: once they're approaching, fix how they're landing
-- DEPTH: once they can start conversations, teach them to deepen
-- VOICE: if they go quiet in groups or struggle to assert themselves
-- 3-2-1 Send It: when overthinking is the main friction
+Session 2 — The Approach System: Fearless Approach System + 3-2-1 Send It + Barista Method
+  FAS is the full architecture. 3-2-1 Send It and Barista Method are tools inside it.
+  Teach FAS as the system, position 3-2-1 and Barista as its daily-use tools.
+  Barista Method doubles as ongoing homework at any stage of the arc.
 
-Phase 3 (Sessions 5-8) — Maintenance & Edge Cases:
-- BRAVE: when they have relationships that need hard conversations
-- SHIELD: when difficult people are draining them
-- Stop Replaying: when post-social anxiety is undoing progress
-- Energy Check + Pre-Game System: for sustainability and consistency
-- Barista Method: ongoing — can be assigned as homework at any stage
+Session 3 — Starting Conversations: SPARK
+  The core conversation framework. Heavy enough to deserve its own full session.
+  Builds directly on the 3-Second Scan from Session 1 — SPARK is what happens after the window opens.
 
-Framework alteration by Jungian type:
-- Introverts (I types): Energy Check + Pre-Game System earlier, Barista Method as bridge, smaller goals
-- Feelers (F types): BRAVE and DEPTH resonate deeply, lead with emotional logic
-- Perceivers (P types): Flexible frameworks (SPARK, 3-2-1) over rigid systems
-- Thinkers (T types): Lead with the science and mechanics, not the feelings
-- Judgers (J types): Respond well to structured frameworks with clear steps
-- Intuitives (N types): Connect frameworks to patterns and bigger meaning
+Session 4 — Going Deeper: DEPTH
+  Once they can start conversations, teach them to deepen.
+  Full hour — D-E-P-T-H steps, Depth Ladder (4 levels), Bridge Technique (3 tools).
+
+Session 5 — Inner Game: GROUND + Pre-Game System + Energy Check
+  These three are one connected system — GROUND is the foundation, Pre-Game activates it, Energy Check sustains it.
+  Teach all three together. GROUND first, Pre-Game as its practical ritual, Energy Check as the sustainability layer.
+
+Session 6 — Group Dynamics: VOICE
+  Speaking up in groups. Distinct enough to stand alone as a full session.
+
+Session 7 — Difficult Conversations: BRAVE
+  Hard conversations need the full hour. Don't rush this one.
+
+Session 8 — Protection & Recovery: SHIELD + Stop Replaying
+  Both are reactive/protective — handle what goes wrong and recover clean.
+  Natural pairing to close out the arc.
+
+FLEXIBILITY RULES:
+- Follow this sequence as the default arc. Adjust when a client's immediate situation is urgent (e.g., active difficult conversation crisis → bring BRAVE forward).
+- When a session covers multiple frameworks, teach the primary one fully and introduce the secondary as extensions/tools.
+- Barista Method can be assigned as homework at any stage regardless of where you are in the arc.
+- Jungian type adjustments: Introverts benefit from Energy Check + Pre-Game framing earlier even if taught in Session 5. Feelers connect deepest with BRAVE and DEPTH — lean into emotional logic there.
+- Never skip to Sessions 6-8 frameworks before the foundation (Sessions 1-4) is solid.
+- Not every client needs exactly 8 sessions — extend when needed. The roadmap is the default arc, not a hard constraint.
 
 Never teach a framework that's already been mastered. Always build on what's worked.
-Never skip to advanced frameworks before the foundation is solid.
 `;
 
 export async function POST(req: NextRequest) {
@@ -405,11 +418,11 @@ Generate a JSON object with EXACTLY this structure:
   "homework": "first assignment — small, specific, observable. Gives you data for Session 2 and gets them moving immediately.",
   "next_session_seed": "the teaser that creates anticipation for Session 2 — name the framework you're introducing and why it's built for them specifically",
   "sessions_roadmap": {
-    "recommended_total": "number",
+    "recommended_total": "number — default is 8, adjust up if the client needs more depth",
     "rationale": "1-2 sentences: why this count based on their profile, goal, trust pattern, and compliance style",
-    "phase_1": "sessions 1-X: what foundation gets built",
-    "phase_2": "sessions X-Y: what skills get developed",
-    "phase_3": "sessions Y-end: what transformation looks like"
+    "phase_1": "Sessions 1-2: Foundation — TALK Check, 3-Second Scan, FAS, 3-2-1 Send It, Barista Method",
+    "phase_2": "Sessions 3-5: Core Skills — SPARK, DEPTH, GROUND + Pre-Game System + Energy Check",
+    "phase_3": "Sessions 6-8: Advanced — VOICE, BRAVE, SHIELD + Stop Replaying"
   }
 }
 
@@ -481,11 +494,11 @@ Generate a JSON object with EXACTLY this structure. The framework_selected and f
   "homework": "exact homework tied to the framework — specific, observable, low enough stakes that they'll actually do it",
   "next_session_seed": "what to plant to create momentum — name what's coming in the next session",
   "sessions_roadmap": {
-    "recommended_total": "number",
+    "recommended_total": "number — default is 8, adjust up if the client needs more depth",
     "rationale": "1-2 sentences based on their goal, profile, and arc so far",
-    "phase_1": "sessions 1-X: foundation",
-    "phase_2": "sessions X-Y: skill development",
-    "phase_3": "sessions Y-end: outcome"
+    "phase_1": "Sessions 1-2: Foundation — TALK Check, 3-Second Scan, FAS, 3-2-1 Send It, Barista Method",
+    "phase_2": "Sessions 3-5: Core Skills — SPARK, DEPTH, GROUND + Pre-Game System + Energy Check",
+    "phase_3": "Sessions 6-8: Advanced — VOICE, BRAVE, SHIELD + Stop Replaying"
   }
 }
 
