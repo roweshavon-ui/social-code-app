@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit, rateLimitResponse } from "@/app/lib/rateLimit";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +23,10 @@ const TALK_URL = `${BASE_URL}/${encodeURIComponent("TALK Check full.pdf")}`;
 const BUNDLE_KEYS = new Set(["fearless-approach", "talk-check", "bundle"]);
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const { allowed } = rateLimit(`send-framework:${ip}`, 3, 60_000);
+  if (!allowed) return rateLimitResponse();
+
   const body = await req.json();
   const email = body.email?.trim().toLowerCase();
   const name = body.name?.trim() ?? "";
@@ -29,6 +34,56 @@ export async function POST(req: NextRequest) {
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400, headers: CORS });
+  }
+
+  // Handle coaching waitlist separately
+  if (framework === "coaching-waitlist") {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
+      to: "shavi@joinsocialcode.com",
+      replyTo: email,
+      subject: `Coaching waitlist: ${name || email}`,
+      html: `<p><strong>Name:</strong> ${name || "not provided"}</p><p><strong>Email:</strong> ${email}</p>`,
+    });
+    await resend.emails.send({
+      from: "Shavi @ Social Code <shavi@joinsocialcode.com>",
+      to: email,
+      replyTo: "shavi@joinsocialcode.com",
+      subject: "You're on the Social Code coaching waitlist",
+      html: `
+<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1825;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0D1825;padding:40px 20px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#131E2B;border-radius:16px;border:1px solid rgba(0,217,192,0.15);max-width:560px;width:100%;">
+<tr><td style="padding:32px 40px 24px;border-bottom:1px solid rgba(255,255,255,0.05);">
+  <p style="margin:0;font-size:22px;font-weight:900;color:#F7F9FC;">Social Code</p>
+  <p style="margin:4px 0 0;font-size:12px;color:#00D9C0;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Coaching Waitlist</p>
+</td></tr>
+<tr><td style="padding:32px 40px;">
+  <p style="margin:0 0 16px;font-size:16px;color:#F7F9FC;font-weight:700;">You're on the list${name ? `, ${name}` : ""}.</p>
+  <p style="margin:0 0 16px;font-size:14px;color:#94a3b8;line-height:1.7;">When a coaching spot opens up, you'll hear from me directly. I'll send you the details, what we'd work on, and how to book a call if it feels right.</p>
+  <p style="margin:0 0 24px;font-size:14px;color:#94a3b8;line-height:1.7;">In the meantime, grab the free framework bundle if you haven't yet. It'll give you something to work with right now.</p>
+  <table cellpadding="0" cellspacing="0">
+    <tr><td style="background:#00D9C0;border-radius:10px;">
+      <a href="https://joinsocialcode.com" target="_blank" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;color:#0D1825;text-decoration:none;">Get the free bundle →</a>
+    </td></tr>
+  </table>
+  <p style="margin:24px 0 0;font-size:13px;color:#475569;">Shavi, @GetSocialCode</p>
+</td></tr>
+<tr><td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.05);">
+  <p style="margin:0;font-size:11px;color:#334155;text-align:center;">Social Code · joinsocialcode.com</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`,
+    });
+    try {
+      const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+      await db.from("leads").insert({ email, name: name || null, framework: "coaching-waitlist" });
+    } catch {}
+    return NextResponse.json({ success: true }, { headers: CORS });
   }
 
   if (!BUNDLE_KEYS.has(framework)) {

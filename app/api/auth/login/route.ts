@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, rateLimitResponse } from "@/app/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const { allowed } = rateLimit(`login:${ip}`, 5, 60_000);
+  if (!allowed) return rateLimitResponse();
+
   const { password } = await req.json();
 
   if (!password || password !== process.env.ADMIN_PASSWORD) {
