@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { rateLimit, rateLimitResponse } from "@/app/lib/rateLimit";
 import { signUnsubscribeToken } from "@/app/api/unsubscribe/route";
+
+const SendFrameworkSchema = z.object({
+  email: z.string().email(),
+  name: z.string().max(100).optional(),
+  framework: z.string().min(1).max(50),
+});
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -28,14 +35,13 @@ export async function POST(req: NextRequest) {
   const { allowed } = rateLimit(`send-framework:${ip}`, 3, 60_000);
   if (!allowed) return rateLimitResponse();
 
-  const body = await req.json();
-  const email = body.email?.trim().toLowerCase();
-  const name = body.name?.trim() ?? "";
-  const framework = body.framework as string;
-
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "Valid email is required" }, { status: 400, headers: CORS });
+  const parsed = SendFrameworkSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400, headers: CORS });
   }
+  const email = parsed.data.email.trim().toLowerCase();
+  const name = parsed.data.name?.trim() ?? "";
+  const framework = parsed.data.framework;
 
   // Handle coaching waitlist separately
   if (framework === "coaching-waitlist") {

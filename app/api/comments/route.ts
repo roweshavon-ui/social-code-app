@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const CommentSchema = z.object({
+  postId: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  message: z.string().min(1).max(1000),
+});
 
 const CORS = {
   "Access-Control-Allow-Origin": "https://app.joinsocialcode.com",
@@ -58,16 +65,11 @@ export async function GET(req: NextRequest) {
 
 // POST — anyone can submit a comment (goes to pending)
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { postId, name, message } = body;
-
-  if (!postId || !name?.trim() || !message?.trim()) {
-    return NextResponse.json({ error: "postId, name, and message are required" }, { status: 400, headers: CORS });
+  const parsed = CommentSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400, headers: CORS });
   }
-
-  if (message.trim().length > 1000) {
-    return NextResponse.json({ error: "Message too long" }, { status: 400, headers: CORS });
-  }
+  const { postId, name, message } = parsed.data;
 
   const db = supabase();
   const { error } = await db.from("comments").insert({
