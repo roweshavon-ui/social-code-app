@@ -46,16 +46,38 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) return { title: "Post not found" };
+
+  const url = `https://app.joinsocialcode.com/blog/${post.slug}`;
+
   return {
-    title: `${post.title} — Social Code`,
+    title: `${post.title} | Social Code`,
     description: post.excerpt,
     keywords: post.keywords ?? undefined,
+    alternates: { canonical: url },
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      url: `https://app.joinsocialcode.com/blog/${post.slug}`,
+      url,
       siteName: "Social Code",
       type: "article",
+      publishedTime: post.published_at,
+      authors: ["Shavi Anthony"],
+      images: [
+        {
+          url: "https://joinsocialcode.com/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: ["https://joinsocialcode.com/og-image.png"],
+      site: "@GetSocialCode",
+      creator: "@shavirowe",
     },
   };
 }
@@ -87,11 +109,34 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const comments = await getComments(post.id);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    url: `https://app.joinsocialcode.com/blog/${post.slug}`,
+    datePublished: post.published_at,
+    author: {
+      "@type": "Person",
+      name: "Shavi Anthony",
+      url: "https://joinsocialcode.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Social Code",
+      url: "https://joinsocialcode.com",
+      logo: { "@type": "ImageObject", url: "https://joinsocialcode.com/logo.svg" },
+    },
+    image: "https://joinsocialcode.com/og-image.png",
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://app.joinsocialcode.com/blog/${post.slug}` },
+  };
+
   return (
     <div
       className="min-h-screen"
       style={{ background: "#0D1825", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}
     >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="border-b border-white/5 px-6 py-5 flex items-center justify-between max-w-4xl mx-auto">
         <Link href="https://joinsocialcode.com" className="text-sm font-black text-white tracking-tight">
           Social Code
