@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Social Code",
       type: "article",
       publishedTime: post.published_at,
-      authors: ["Shavi Anthony"],
+      authors: ["Shavi Rowe"],
       images: [
         {
           url: "https://joinsocialcode.com/og-image.png",
@@ -118,7 +118,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     datePublished: post.published_at,
     author: {
       "@type": "Person",
-      name: "Shavi Anthony",
+      name: "Shavi Rowe",
       url: "https://joinsocialcode.com",
     },
     publisher: {
